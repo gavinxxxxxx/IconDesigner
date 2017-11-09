@@ -12,6 +12,9 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import me.gavin.icon.material.util.DisplayUtil;
 import me.gavin.icon.material.util.Icon;
 import me.gavin.icon.material.util.L;
@@ -266,6 +269,29 @@ public class PreView extends View {
             float size = Math.min(getWidth(), getHeight()) * 0.8f;
             float scale = Math.min(size / mSvg.width, size / mSvg.height);
             mMatrix.postScale(scale, scale, getWidth() / 2f, getHeight() / 2f);
+
+            float TAN = 45f;
+            float[] pos = new float[2], tan = new float[2];
+            PathMeasure measure = new PathMeasure();
+            measure.setPath(mSvg.paths.get(0), false);
+            L.e(measure.getLength());
+            measure.getPosTan(64, pos, tan);
+            L.e(pos[0] + " " + pos[1] + " - " + tan[0] + " " + tan[1]);
+            float t = (float) (Math.atan2(tan[1], tan[0]) * 180 / Math.PI);
+            L.e("tan: " + t);
+
+//            List<List<Float>> floats = new ArrayList<>();
+//            for (Path path : mSvg.paths) {
+//                List<Float> fs = new ArrayList<>();
+//                measure.setPath(path, false);
+//                while (measure.nextContour()) {
+//                    float length = measure.getLength();
+//                    for (float s = 0f; s <= 1; s += 0.1f) {
+//                        measure.getPosTan(length * s, pos, tan);
+//                        float t = (float) (Math.atan2(tan[1], tan[0]) * 180 / Math.PI);
+//                    }
+//                }
+//            }
         }
     }
 
