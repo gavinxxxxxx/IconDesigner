@@ -1,0 +1,51 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group android:id="@+id/icon">
+
+        <item
+            android:id="@+id/icon_shape"
+            android:title="图标"
+            app:showAsAction="always" />
+        <item
+            android:id="@+id/icon_color"
+            android:title="图标颜色"
+            app:showAsAction="always" />
+        <item
+            android:id="@+id/icon_padding"
+            android:title="图标填料"
+            app:showAsAction="always" />
+
+    </group>
+
+    <group android:id="@+id/shadow">
+
+        <item
+            android:id="@+id/shadow_angle"
+            android:title="阴影角度"
+            app:showAsAction="ifRoom" />
+        <item
+            android:id="@+id/shadow_alpha"
+            android:title="阴影透明度"
+            app:showAsAction="ifRoom" />
+        <item
+            android:id="@+id/shadow_length"
+            android:title="阴影长度"
+            app:showAsAction="ifRoom" />
+
+    </group>
+
+    <group android:id="@+id/bg">
+
+        <item
+            android:id="@+id/bg_shape"
+            android:title="背景形状"
+            app:showAsAction="ifRoom" />
+        <item
+            android:id="@+id/bg_color"
+            android:title="背景颜色"
+            app:showAsAction="ifRoom" />
+
+    </group>
+
+</menu>
