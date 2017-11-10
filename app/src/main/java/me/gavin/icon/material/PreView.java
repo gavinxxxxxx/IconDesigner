@@ -95,13 +95,14 @@ public class PreView extends View {
             }
 
             for (int i = 0; i < mSvg.paths.size(); i++) {
-                canvas.drawPath(mSvg.paths.get(i), mSvg.drawables.get(i).getFillPaint());
-                canvas.drawPath(mSvg.paths.get(i), mSvg.drawables.get(i).getStrokePaint());
+//                canvas.drawPath(mSvg.paths.get(i), mSvg.drawables.get(i).getFillPaint());
+//                canvas.drawPath(mSvg.paths.get(i), mSvg.drawables.get(i).getStrokePaint());
             }
 
 
-            drawRect(canvas, 3);
+//            drawRect(canvas, 3);
 //            drawCircle(canvas, 3);
+            drawNormal(canvas, 3);
         }
     }
 
@@ -117,7 +118,7 @@ public class PreView extends View {
                     for (int c = 0; c < count; c++) {
                         measure.nextContour();
                     }
-                    float length = measure.getLength();
+                    float length = pathMeasure.getLength();
                     L.e(length);
                     measure.getSegment(0, length * 0.125f, dst, true);
 
@@ -168,9 +169,8 @@ public class PreView extends View {
 
 
             Paint paint = new Paint();
-            paint.setStrokeJoin(Paint.Join.ROUND);
             paint.setStyle(Paint.Style.STROKE);
-            paint.setShader(new LinearGradient(0, 0, 23, 23, 0x80000000, 0x00000000, Shader.TileMode.CLAMP));
+            paint.setShader(new LinearGradient(0, 0, 23, 23, 0x30000000, 0x00000000, Shader.TileMode.CLAMP));
             paint.setStrokeWidth(0.2f);
             canvas.drawPath(dst, paint);
         }
@@ -239,8 +239,51 @@ public class PreView extends View {
 
 
             Paint paint = new Paint();
-            paint.setStrokeJoin(Paint.Join.ROUND);
-//            paint.setStyle(Paint.Style.STROKE);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setShader(new LinearGradient(0, 0, 23, 23, 0x30000000, 0x00000000, Shader.TileMode.CLAMP));
+            paint.setStrokeWidth(0.2f);
+            canvas.drawPath(dst, paint);
+        }
+    }
+
+    private void drawNormal(Canvas canvas, int diff) {
+        for (int i = 0; i < mSvg.paths.size(); i++) {
+            Path path = mSvg.paths.get(i);
+            PathMeasure pathMeasure = new PathMeasure(path, false);
+            PathMeasure measure = new PathMeasure();
+            Path dst = new Path();
+            for (int j = 0; pathMeasure.nextContour(); j++) {
+                if (j > 0) break;
+                Segment segment = svgPathSegmentList.get(i).get(j);
+                float length = pathMeasure.getLength();
+                if (segment.startWithOffset) {
+                    dst.rMoveTo(diff, diff);
+                    path.offset(diff, diff);
+                    measure.setPath(path, true);
+                } else {
+                    measure.setPath(path, false);
+                }
+                for (int c = 0; c <= j; c++) {
+                    measure.nextContour();
+                }
+                measure.getSegment(0, segment.tanPosList.get(0).distance, dst, true);
+                float startD = segment.tanPosList.get(0).distance;
+                for (int k = 0; k < segment.tanPosList.size(); k++) {
+                    if (k >= 0) break;
+                    float d = segment.tanPosList.get(k).offset ? diff : -diff;
+                    dst.rLineTo(d, d);
+                    path.offset(d, d);
+                    measure.setPath(path, false);
+                    for (int c = 0; c <= j; c++) {
+                        measure.nextContour();
+                    }
+                    float stopD = k + 1 < segment.tanPosList.size() ? segment.tanPosList.get(k + 1).distance : length;
+                    measure.getSegment(startD, stopD, dst, false);
+                    startD = stopD;
+                }
+            }
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.STROKE);
             paint.setShader(new LinearGradient(0, 0, 23, 23, 0x30000000, 0x00000000, Shader.TileMode.CLAMP));
             paint.setStrokeWidth(0.2f);
             canvas.drawPath(dst, paint);
@@ -270,30 +313,19 @@ public class PreView extends View {
             float scale = Math.min(size / mSvg.width, size / mSvg.height);
             mMatrix.postScale(scale, scale, getWidth() / 2f, getHeight() / 2f);
 
+            // 45：平移 -135：恢复
             float TAN = 45f;
-            float[] pos = new float[2], tan = new float[2];
-            PathMeasure measure = new PathMeasure();
-            measure.setPath(mSvg.paths.get(0), false);
-            L.e(measure.getLength());
-            measure.getPosTan(64, pos, tan);
-            L.e(pos[0] + " " + pos[1] + " - " + tan[0] + " " + tan[1]);
-            float t = (float) (Math.atan2(tan[1], tan[0]) * 180 / Math.PI);
-            L.e("tan: " + t);
 
-//            List<List<Float>> floats = new ArrayList<>();
-//            for (Path path : mSvg.paths) {
-//                List<Float> fs = new ArrayList<>();
-//                measure.setPath(path, false);
-//                while (measure.nextContour()) {
-//                    float length = measure.getLength();
-//                    for (float s = 0f; s <= 1; s += 0.1f) {
-//                        measure.getPosTan(length * s, pos, tan);
-//                        float t = (float) (Math.atan2(tan[1], tan[0]) * 180 / Math.PI);
-//                    }
-//                }
-//            }
+            svgPathSegmentList.clear();
+            for (Path path : mSvg.paths) {
+                svgPathSegmentList.add(Utils.getTanPos(path, TAN));
+            }
+            L.e(svgPathSegmentList);
+
         }
     }
+
+    List<List<Segment>> svgPathSegmentList = new ArrayList<>();
 
     public void setSVG(SVG svg) {
         this.mSvg = svg;
