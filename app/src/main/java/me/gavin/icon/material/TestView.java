@@ -22,7 +22,7 @@ public class TestView extends View {
     public TestView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         mPaint = new Paint();
-        mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setColor(Color.YELLOW);
         mPaint.setStrokeWidth(5);
 
@@ -44,9 +44,9 @@ public class TestView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         Path path = new Path(mRectPath);
-        for (int i = 0; i < 20; i+=1) {
+        for (int i = 0; i < 600; i+=1) {
             Path path1 = new Path(mRectPath);
-            path1.offset(20, 20);
+            path1.offset(i, i);
             path.op(path1, Path.Op.UNION);
         }
         mPaint.setColor(Color.RED);
