@@ -22,8 +22,9 @@ public class MainActivity extends AppCompatActivity {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         // Observable.just("", "size", "action")
-        Observable.just("gavin/rect.svg")
+//        Observable.just("gavin/rect.svg")
 //        Observable.just("gavin/circle.svg")
+        Observable.just("gavin/setting.svg")
 //        Observable.just("action")
 //                .flatMap(path -> Observable.just(path)
 //                        .map(getAssets()::list)

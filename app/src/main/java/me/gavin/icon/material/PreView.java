@@ -253,7 +253,7 @@ public class PreView extends View {
             PathMeasure measure = new PathMeasure();
             Path dst = new Path();
             for (int j = 0; pathMeasure.nextContour(); j++) {
-                if (j > 0) break;
+//                if (j > 0) break;
                 Segment segment = svgPathSegmentList.get(i).get(j);
                 float length = pathMeasure.getLength();
                 if (segment.startWithOffset) {
@@ -269,7 +269,7 @@ public class PreView extends View {
                 measure.getSegment(0, segment.tanPosList.get(0).distance, dst, true);
                 float startD = segment.tanPosList.get(0).distance;
                 for (int k = 0; k < segment.tanPosList.size(); k++) {
-                    if (k >= 0) break;
+//                    if (k >= 0) break;
                     float d = segment.tanPosList.get(k).offset ? diff : -diff;
                     dst.rLineTo(d, d);
                     path.offset(d, d);
