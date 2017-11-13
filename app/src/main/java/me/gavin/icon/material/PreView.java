@@ -1,23 +1,23 @@
 package me.gavin.icon.material;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PathMeasure;
 import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.OutputStream;
 
 import me.gavin.icon.material.util.DisplayUtil;
 import me.gavin.icon.material.util.Icon;
-import me.gavin.icon.material.util.L;
+import me.gavin.svg.model.Drawable;
 import me.gavin.svg.model.SVG;
 
 /**
@@ -27,20 +27,25 @@ import me.gavin.svg.model.SVG;
  */
 public class PreView extends View {
 
-    private int mSize;
+    private final float BG_CIRCLE_RA = 176f / 192f;
+    private final float BG_RECT_RA = 152f / 192f;
 
-    private Icon mIcon;
+    private int mSize;
 
     private final Paint mBgPaintLight, mBgPaintDark;
 
+    private Icon mIcon;
+
+    private Path mBgPath = new Path();
+
     private Paint mBgPaint;
 
+    private Paint mPaint;
 
     public SVG mSvg;
     private boolean newTag;
 
     private final Matrix mMatrix = new Matrix();
-
 
     public PreView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -51,7 +56,9 @@ public class PreView extends View {
         mBgPaintDark.setColor(0xff555555);
 
         mIcon = new Icon();
+        mIcon.bgShape = 1;
         mBgPaint = new Paint();
+        // mBgPaint.setStyle(Paint.Style.STROKE);
         mBgPaint.setAntiAlias(true);
         mBgPaint.setColor(mIcon.bgColor);
         mBgPaint.setShadowLayer(5, 0, 2, 0x55555555);
@@ -67,6 +74,17 @@ public class PreView extends View {
                         ? MeasureSpec.getSize(heightMeasureSpec)
                         : DisplayUtil.getScreenHeight());
         setMeasuredDimension(mSize, mSize);
+        initBgPath();
+    }
+
+    private void initBgPath() {
+        mBgPath.reset();
+        if (mIcon.bgShape == 0) {
+            float padding = mSize / 2 - mSize * BG_RECT_RA / 2;
+            mBgPath.addRoundRect(padding, padding, mSize - padding, mSize - padding, mSize / 20, mSize / 20, Path.Direction.CCW);
+        } else {
+            mBgPath.addCircle(mSize / 2, mSize / 2, mSize / 2 * BG_CIRCLE_RA, Path.Direction.CCW);
+        }
     }
 
     // TODO: 2017/11/8 canvas -> bitmap -> png
@@ -75,14 +93,13 @@ public class PreView extends View {
         // canvas.drawColor(0xffffffff);
         drawBackground(canvas);
 
-        if (mIcon.bgShape == 0) {
-            canvas.drawRoundRect(120, 120, mSize - 120, mSize - 120, 30, 30, mBgPaint);
-        } else {
-            canvas.drawCircle(mSize / 2, mSize / 2, mSize / 2 - 120, mBgPaint);
-        }
+        canvas.drawPath(mBgPath, mBgPaint);
 
         if (mSvg != null) {
             drawBefore();
+
+            // 0.4 - 1.0
+            // mMatrix.postScale(1f, 1f, mSize / 2, mSize / 2);
 
             canvas.setMatrix(mMatrix);
 
@@ -95,199 +112,32 @@ public class PreView extends View {
             }
 
             for (int i = 0; i < mSvg.paths.size(); i++) {
-//                canvas.drawPath(mSvg.paths.get(i), mSvg.drawables.get(i).getFillPaint());
-//                canvas.drawPath(mSvg.paths.get(i), mSvg.drawables.get(i).getStrokePaint());
+                Drawable drawable = mSvg.drawables.get(i);
+                if (drawable.getFillPaint().getColor() != 0) {
+                    draw(canvas, mSvg.paths.get(i));
+                    canvas.drawPath(mSvg.paths.get(i), mPaint != null ? mPaint : drawable.getFillPaint());
+                }
+                // canvas.drawPath(mSvg.paths.get(i), drawable.getStrokePaint());
             }
-
-
-//            drawRect(canvas, 3);
-//            drawCircle(canvas, 3);
-            drawNormal(canvas, 3);
         }
     }
 
-    private void drawCircle(Canvas canvas, int diff) {
-        for (int i = 0; i < mSvg.paths.size(); i++) {
-            Path path = mSvg.paths.get(i);
-            PathMeasure pathMeasure = new PathMeasure(path, false);
-            PathMeasure measure = new PathMeasure();
-            Path dst = new Path();
-            for (int count = 1; pathMeasure.nextContour(); count++) {
-                if (count == 1) {
-                    measure.setPath(path, false);
-                    for (int c = 0; c < count; c++) {
-                        measure.nextContour();
-                    }
-                    float length = pathMeasure.getLength();
-                    L.e(length);
-                    measure.getSegment(0, length * 0.125f, dst, true);
-
-                    dst.rLineTo(diff, diff);
-                    path.offset(diff, diff);
-                    measure.setPath(path, false);
-
-                    measure.getSegment(length * 0.125f, length * 0.625f, dst, false);
-
-                    dst.rLineTo(-diff, -diff);
-                    path.offset(-diff, -diff);
-                    measure.setPath(path, false);
-
-                    measure.getSegment(length * 0.625f, length, dst, false);
-                } else if (count == 2) {
-                    dst.rMoveTo(diff, diff);
-                    path.offset(diff, diff);
-
-                    measure.setPath(path, true);
-                    for (int c = 0; c < count; c++) {
-                        measure.nextContour();
-                    }
-
-                    float length = measure.getLength();
-                    L.e(length);
-
-                    measure.getSegment(0, length * 0.375f, dst, true);
-
-                    dst.rLineTo(-diff, -diff);
-                    path.offset(-diff, -diff);
-                    measure.setPath(path, false);
-                    for (int c = 0; c < count; c++) {
-                        measure.nextContour();
-                    }
-
-                    measure.getSegment(length * 0.375f, length * 0.875f, dst, false);
-
-                    dst.rLineTo(diff, diff);
-                    path.offset(diff, diff);
-                    measure.setPath(path, false);
-                    for (int c = 0; c < count; c++) {
-                        measure.nextContour();
-                    }
-
-                    measure.getSegment(length * 0.875f, length, dst, false);
-                }
-            }
-
-
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setShader(new LinearGradient(0, 0, 23, 23, 0x30000000, 0x00000000, Shader.TileMode.CLAMP));
-            paint.setStrokeWidth(0.2f);
-            canvas.drawPath(dst, paint);
+    private void draw(Canvas canvas, Path src) {
+        Path path = new Path(src);
+        for (float i = 0; i < 25; i += 0.5) {
+            Path path1 = new Path(src);
+            path1.offset(i, i);
+            path.op(path1, Path.Op.UNION);
         }
-    }
+        // path.op(mBgPath, Path.Op.INTERSECT);
 
-    private void drawRect(Canvas canvas, int diff) {
-        for (int i = 0; i < mSvg.paths.size(); i++) {
-            Path path = mSvg.paths.get(i);
-            PathMeasure pathMeasure = new PathMeasure(path, false);
-            PathMeasure measure = new PathMeasure();
-            Path dst = new Path();
-            for (int count = 1; pathMeasure.nextContour(); count++) {
-                if (count == 1) {
-                    measure.setPath(path, false);
-                    for (int c = 0; c < count; c++) {
-                        measure.nextContour();
-                    }
-                    float length = measure.getLength();
-                    L.e(length);
-                    measure.getSegment(0, length * 0.25f, dst, true);
-
-                    dst.rLineTo(diff, diff);
-                    path.offset(diff, diff);
-                    measure.setPath(path, false);
-
-                    measure.getSegment(length * 0.25f, length * 0.75f, dst, false);
-
-                    dst.rLineTo(-diff, -diff);
-                    path.offset(-diff, -diff);
-                    measure.setPath(path, false);
-
-                    measure.getSegment(length * 0.75f, length, dst, false);
-                } else if (count == 2) {
-                    dst.rMoveTo(diff, diff);
-                    path.offset(diff, diff);
-
-                    measure.setPath(path, true);
-                    for (int c = 0; c < count; c++) {
-                        measure.nextContour();
-                    }
-
-                    float length = measure.getLength();
-                    L.e(length);
-
-                    measure.getSegment(0, length * 0.25f, dst, true);
-
-                    dst.rLineTo(-diff, -diff);
-                    path.offset(-diff, -diff);
-                    measure.setPath(path, false);
-                    for (int c = 0; c < count; c++) {
-                        measure.nextContour();
-                    }
-
-                    measure.getSegment(length * 0.25f, length * 0.75f, dst, false);
-
-                    dst.rLineTo(diff, diff);
-                    path.offset(diff, diff);
-                    measure.setPath(path, false);
-                    for (int c = 0; c < count; c++) {
-                        measure.nextContour();
-                    }
-
-                    measure.getSegment(length * 0.75f, length, dst, false);
-                }
-            }
-
-
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setShader(new LinearGradient(0, 0, 23, 23, 0x30000000, 0x00000000, Shader.TileMode.CLAMP));
-            paint.setStrokeWidth(0.2f);
-            canvas.drawPath(dst, paint);
-        }
-    }
-
-    private void drawNormal(Canvas canvas, int diff) {
-        for (int i = 0; i < mSvg.paths.size(); i++) {
-            Path path = mSvg.paths.get(i);
-            PathMeasure pathMeasure = new PathMeasure(path, false);
-            PathMeasure measure = new PathMeasure();
-            Path dst = new Path();
-            for (int j = 0; pathMeasure.nextContour(); j++) {
-//                if (j > 0) break;
-                Segment segment = svgPathSegmentList.get(i).get(j);
-                float length = pathMeasure.getLength();
-                if (segment.startWithOffset) {
-                    dst.rMoveTo(diff, diff);
-                    path.offset(diff, diff);
-                    measure.setPath(path, true);
-                } else {
-                    measure.setPath(path, false);
-                }
-                for (int c = 0; c <= j; c++) {
-                    measure.nextContour();
-                }
-                measure.getSegment(0, segment.tanPosList.get(0).distance, dst, true);
-                float startD = segment.tanPosList.get(0).distance;
-                for (int k = 0; k < segment.tanPosList.size(); k++) {
-//                    if (k >= 0) break;
-                    float d = segment.tanPosList.get(k).offset ? diff : -diff;
-                    dst.rLineTo(d, d);
-                    path.offset(d, d);
-                    measure.setPath(path, false);
-                    for (int c = 0; c <= j; c++) {
-                        measure.nextContour();
-                    }
-                    float stopD = k + 1 < segment.tanPosList.size() ? segment.tanPosList.get(k + 1).distance : length;
-                    measure.getSegment(startD, stopD, dst, false);
-                    startD = stopD;
-                }
-            }
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setShader(new LinearGradient(0, 0, 23, 23, 0x30000000, 0x00000000, Shader.TileMode.CLAMP));
-            paint.setStrokeWidth(0.2f);
-            canvas.drawPath(dst, paint);
-        }
+        Paint mPaint = new Paint();
+        mPaint.setAntiAlias(true);
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setShader(new LinearGradient(0, 0, 23, 23, 0x30000000, 0x00000000, Shader.TileMode.CLAMP));
+        mPaint.setStrokeWidth(0.2f);
+        mPaint.setColor(Color.YELLOW);
+        canvas.drawPath(path, mPaint);
     }
 
     private void drawBackground(Canvas canvas) {
@@ -312,26 +162,36 @@ public class PreView extends View {
             float size = Math.min(getWidth(), getHeight()) * 0.8f;
             float scale = Math.min(size / mSvg.width, size / mSvg.height);
             mMatrix.postScale(scale, scale, getWidth() / 2f, getHeight() / 2f);
-
-            // 45：平移 -135：恢复
-            float TAN = 45f;
-
-            svgPathSegmentList.clear();
-            for (Path path : mSvg.paths) {
-                svgPathSegmentList.add(Utils.getTanPos(path, TAN));
-            }
-            L.e(svgPathSegmentList);
-
         }
     }
-
-    List<List<Segment>> svgPathSegmentList = new ArrayList<>();
 
     public void setSVG(SVG svg) {
         this.mSvg = svg;
         newTag = true;
-        // requestLayout();
         invalidate();
+    }
+
+    public void setIconColor(Integer color) {
+        if (color == null) {
+            mPaint = null;
+        } else {
+            mPaint = new Paint();
+            mPaint.setAntiAlias(true);
+            mPaint.setColor(color);
+        }
+        invalidate();
+    }
+
+    public void save(OutputStream outputStream) {
+        Bitmap bitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        draw(canvas);
+//        try (fos) {
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            L.e(e);
+//        }
     }
 
 }

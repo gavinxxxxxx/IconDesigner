@@ -18,7 +18,7 @@ import android.view.View;
 public class TestView extends View {
 
     private final Paint mPaint;
-    private final Path mRectPath, mCirclePath, mZPath;
+    private final Path mBgPath, mRectPath, mCirclePath, mZPath;
 
     public TestView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -27,6 +27,9 @@ public class TestView extends View {
 //        mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setColor(Color.YELLOW);
         mPaint.setStrokeWidth(5);
+
+        mBgPath = new Path();
+        mBgPath.addCircle(600, 600, 600, Path.Direction.CCW);
 
         mRectPath = new Path();
         mRectPath.moveTo(50, 20);
@@ -100,12 +103,14 @@ public class TestView extends View {
 
     private void draw(Canvas canvas, Path path) {
         Path copy = new Path(path);
-        for (int i = 0; i < 250; i += 10) {
+        for (int i = 0; i < 250; i += 1) {
             Path path1 = new Path(path);
             path1.offset(i, i);
             copy.op(path1, Path.Op.UNION);
         }
-        mPaint.setColor(Color.RED);
+        copy.op(mBgPath, Path.Op.INTERSECT);
+
+        mPaint.setColor(0x30ffffff);
         canvas.drawPath(copy, mPaint);
 
         mPaint.setColor(Color.YELLOW);
