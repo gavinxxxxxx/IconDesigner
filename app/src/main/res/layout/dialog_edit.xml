@@ -10,7 +10,8 @@
         android:layout_height="wrap_content"
         android:hint="输入单例格数，如 50"
         android:imeOptions="actionDone"
-        android:inputType="number"
+        android:inputType="textEmailAddress|textCapCharacters"
+        android:digits="0123456789abcdefABCDEF"
         android:maxLength="8"
         android:textSize="14sp" />
 

@@ -134,7 +134,7 @@ public class PreView extends View {
         Paint mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setShader(new LinearGradient(0, 0, 23, 23, 0x30000000, 0x00000000, Shader.TileMode.CLAMP));
+        mPaint.setShader(new LinearGradient(0, 0, 23, 23, 0x80000000, 0x30000000, Shader.TileMode.CLAMP));
         mPaint.setStrokeWidth(0.2f);
         mPaint.setColor(Color.YELLOW);
         canvas.drawPath(path, mPaint);
@@ -179,6 +179,18 @@ public class PreView extends View {
             mPaint.setAntiAlias(true);
             mPaint.setColor(color);
         }
+        invalidate();
+    }
+
+    public void setBgColor(Integer color) {
+        if (color != null) {
+            mBgPaint.setColor(color);
+            invalidate();
+        }
+    }
+
+    public void setScale(int progress) {
+        mMatrix.postScale(progress / 50f, progress / 50f, mSize / 2f, mSize / 2f);
         invalidate();
     }
 

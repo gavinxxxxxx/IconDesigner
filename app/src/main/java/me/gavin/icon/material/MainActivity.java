@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.UUID;
 import io.reactivex.Observable;
 import me.gavin.icon.material.databinding.ActivityMainBinding;
 import me.gavin.icon.material.util.InputUtil;
+import me.gavin.icon.material.util.L;
 import me.gavin.svg.parser.SVGParser;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,6 +49,24 @@ public class MainActivity extends AppCompatActivity {
                 .map(SVGParser::parse)
                 .subscribe(mBinding.pre::setSVG);
 //                .subscribe(L::e);
+
+        mBinding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                L.e(progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mBinding.pre.setScale(seekBar.getProgress());
+            }
+        });
     }
 
     @Override
@@ -64,31 +84,40 @@ public class MainActivity extends AppCompatActivity {
                 }).show();
                 return true;
             case R.id.icon_color:
-                showEditDialog();
+                showEditDialog(false);
                 return true;
-            case R.id.bg_shape:
-                showEditDialog();
+            case R.id.bg_color:
+                showEditDialog(true);
                 return true;
             default:
                 return false;
         }
     }
 
-    private void showEditDialog() {
+    private void showEditDialog(boolean isBg) {
         View view = getLayoutInflater().inflate(R.layout.dialog_edit, null);
         EditText editText = view.findViewById(R.id.editText);
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setTitle("图标颜色")
                 .setView(view)
-                .setPositiveButton("确定", (dialog, which)
-                        -> setIconColor(editText.getText().toString()))
+                .setPositiveButton("确定", (dialog, which) -> {
+                    if (isBg) {
+                        setBgColor(editText.getText().toString());
+                    } else {
+                        setIconColor(editText.getText().toString());
+                    }
+                })
                 .setNegativeButton("取消", null)
                 .show();
         editText.postDelayed(() -> InputUtil.show(this, editText), 100);
         editText.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 alertDialog.dismiss();
-                setIconColor(editText.getText().toString());
+                if (isBg) {
+                    setBgColor(editText.getText().toString());
+                } else {
+                    setIconColor(editText.getText().toString());
+                }
             }
             return true;
         });
@@ -99,14 +128,20 @@ public class MainActivity extends AppCompatActivity {
             if (TextUtils.isEmpty(colorStr)) {
                 mBinding.pre.setIconColor(null);
             } else {
-                try {
-                    mBinding.pre.setIconColor(Color.parseColor("#" + colorStr));
-                } catch (Exception e) {
-                    Toast.makeText(this, "格式错误", Toast.LENGTH_SHORT).show();
-                }
+                mBinding.pre.setIconColor(Color.parseColor("#" + colorStr));
             }
-        } catch (NumberFormatException e) {
-            Toast.makeText(this, "请输入大于 1 小于等于 200 的整数", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "格式错误", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void setBgColor(String colorStr) {
+        try {
+            if (!TextUtils.isEmpty(colorStr)) {
+                mBinding.pre.setBgColor(Color.parseColor("#" + colorStr));
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "格式错误", Toast.LENGTH_LONG).show();
         }
     }
 
