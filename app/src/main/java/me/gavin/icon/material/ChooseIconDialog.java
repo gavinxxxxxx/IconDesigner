@@ -41,7 +41,7 @@ public class ChooseIconDialog extends BottomSheetDialog {
         getWindow().getAttributes().height = WindowManager.LayoutParams.MATCH_PARENT;
         getWindow().setDimAmount(0.4f);
 
-        Observable.just("action")
+        Observable.just("gavin", "action")
                 .flatMap(path -> Observable.just(path)
                         .map(getContext().getAssets()::list)
                         .flatMap(Observable::fromArray)
