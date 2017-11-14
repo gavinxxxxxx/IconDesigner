@@ -25,10 +25,11 @@ import me.gavin.util.InputUtil;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int TYPE_SEEK_ICON_PADDING = 0x10;
+    private final int TYPE_SEEK_ICON_SIZE = 0x10;
     private final int TYPE_SEEK_SHADOW_ANGLE = 0x20;
-    private final int TYPE_SEEK_SHADOW_ALPHA = 0x21;
-    private final int TYPE_SEEK_SHADOW_LENGTH = 0x22;
+    private final int TYPE_SEEK_SHADOW_LENGTH = 0x21;
+    private final int TYPE_SEEK_SHADOW_GRADIENT = 0x22;
+    private final int TYPE_SEEK_SHADOW_ALPHA = 0x23;
 
     ActivityMainBinding mBinding;
 
@@ -61,17 +62,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 switch (mSeekBarType) {
-                    case TYPE_SEEK_ICON_PADDING:
-                        mBinding.pre.setScale(progress);
+                    case TYPE_SEEK_ICON_SIZE:
+                        mBinding.pre.setIconSize(progress);
                         break;
                     case TYPE_SEEK_SHADOW_ANGLE:
-
-                        break;
-                    case TYPE_SEEK_SHADOW_ALPHA:
-
                         break;
                     case TYPE_SEEK_SHADOW_LENGTH:
-
+                        break;
+                    case TYPE_SEEK_SHADOW_GRADIENT:
+                        break;
+                    case TYPE_SEEK_SHADOW_ALPHA:
                         break;
                 }
             }
@@ -107,17 +107,21 @@ public class MainActivity extends AppCompatActivity {
             case R.id.icon_color:
                 showEditDialog(false);
                 return true;
-            case R.id.icon_padding:
-                mSeekBarType = TYPE_SEEK_ICON_PADDING;
+            case R.id.icon_size:
+                mSeekBarType = TYPE_SEEK_ICON_SIZE;
                 mBinding.seekBar.setVisibility(View.VISIBLE);
                 return true;
             case R.id.shadow_angle:
                 return true;
+            case R.id.shadow_length:
+                return true;
+            case R.id.shadow_gradient:
+                mSeekBarType = TYPE_SEEK_SHADOW_GRADIENT;
+                mBinding.seekBar.setVisibility(View.VISIBLE);
+                return true;
             case R.id.shadow_alpha:
                 mSeekBarType = TYPE_SEEK_SHADOW_ALPHA;
                 mBinding.seekBar.setVisibility(View.VISIBLE);
-                return true;
-            case R.id.shadow_length:
                 return true;
             case R.id.bg_shape:
                 return true;

@@ -12,8 +12,8 @@
             android:title="图标颜色"
             app:showAsAction="always" />
         <item
-            android:id="@+id/icon_padding"
-            android:title="图标填料"
+            android:id="@+id/icon_size"
+            android:title="图标大小"
             app:showAsAction="always"/>
 
     </group>
@@ -26,13 +26,17 @@
             android:visible="false"
             app:showAsAction="ifRoom" />
         <item
-            android:id="@+id/shadow_alpha"
-            android:title="阴影透明度"
-            app:showAsAction="ifRoom" />
-        <item
             android:id="@+id/shadow_length"
             android:title="阴影长度"
             android:visible="false"
+            app:showAsAction="ifRoom" />
+        <item
+            android:id="@+id/shadow_gradient"
+            android:title="阴影梯度"
+            app:showAsAction="ifRoom" />
+        <item
+            android:id="@+id/shadow_alpha"
+            android:title="阴影透明度"
             app:showAsAction="ifRoom" />
 
     </group>

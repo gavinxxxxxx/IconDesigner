@@ -69,8 +69,12 @@ public class PreView extends View {
         mShadowPaint.setAntiAlias(true);
         mShadowPaint.setStyle(Paint.Style.FILL);
         // mShadowPaint.setShader(new LinearGradient(0, 0, 23, 23, 0x50000000, 0x10000000, Shader.TileMode.CLAMP));
-        mShadowPaint.setShader(new LinearGradient(0, 0, 23, 23, 0xFFFFFF00, 0x20FFFF00, Shader.TileMode.CLAMP));
+//        Matrix matrix = new Matrix();
+//        matrix.postScale(0.5f, 0.5f);
+//        matrix.postTranslate(-100, -100);
+//        shader.setLocalMatrix(matrix);
     }
+    Shader shader;
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -163,6 +167,10 @@ public class PreView extends View {
                 }
             }
             // mShadowPath.op(mBgPath, Path.Op.INTERSECT);
+
+            shader = mShadowPaint.setShader(new LinearGradient(
+                    0, 0, mSvg.viewBox.width * 2, mSvg.viewBox.height * 2,
+                    0xFF000000, 0x00000000, Shader.TileMode.REPEAT));
         }
     }
 
@@ -191,8 +199,7 @@ public class PreView extends View {
         }
     }
 
-    public void setScale(int progress) {
-        L.e(progress);
+    public void setIconSize(int progress) {
         float aimScale = 0.3f + progress / 100f * 0.7f;
         mMatrix.postScale(aimScale / scaleNow, aimScale / scaleNow, mSize / 2f, mSize / 2f);
         mBgMatrix.reset();
@@ -200,6 +207,10 @@ public class PreView extends View {
         mBgPath.transform(mBgMatrix);
         invalidate();
         scaleNow = aimScale;
+
+        // Matrix matrix = new Matrix(mBgMatrix);
+        // matrix.postScale(2f, 2f, mSvg.viewBox.width / 2f, mSvg.viewBox.width / 2f);
+        // shader.setLocalMatrix(matrix);
     }
 
     public void save(OutputStream outputStream) {
