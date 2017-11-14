@@ -20,13 +20,19 @@ import java.util.UUID;
 
 import io.reactivex.Observable;
 import me.gavin.icon.material.databinding.ActivityMainBinding;
-import me.gavin.icon.material.util.InputUtil;
-import me.gavin.icon.material.util.L;
 import me.gavin.svg.parser.SVGParser;
+import me.gavin.util.InputUtil;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final int TYPE_SEEK_ICON_PADDING = 0x10;
+    private final int TYPE_SEEK_SHADOW_ANGLE = 0x20;
+    private final int TYPE_SEEK_SHADOW_ALPHA = 0x21;
+    private final int TYPE_SEEK_SHADOW_LENGTH = 0x22;
+
     ActivityMainBinding mBinding;
+
+    int mSeekBarType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +60,20 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                L.e(progress);
+                switch (mSeekBarType) {
+                    case TYPE_SEEK_ICON_PADDING:
+                        mBinding.pre.setScale(progress);
+                        break;
+                    case TYPE_SEEK_SHADOW_ANGLE:
+
+                        break;
+                    case TYPE_SEEK_SHADOW_ALPHA:
+
+                        break;
+                    case TYPE_SEEK_SHADOW_LENGTH:
+
+                        break;
+                }
             }
 
             @Override
@@ -64,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                mBinding.pre.setScale(seekBar.getProgress());
+
             }
         });
     }
@@ -77,14 +96,30 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        mSeekBarType = 0;
+        mBinding.seekBar.setVisibility(View.GONE);
         switch (item.getItemId()) {
             case R.id.icon_shape:
-                new Bottom(this, svg -> {
+                new ChooseIconDialog(this, svg -> {
                     mBinding.pre.setSVG(svg);
                 }).show();
                 return true;
             case R.id.icon_color:
                 showEditDialog(false);
+                return true;
+            case R.id.icon_padding:
+                mSeekBarType = TYPE_SEEK_ICON_PADDING;
+                mBinding.seekBar.setVisibility(View.VISIBLE);
+                return true;
+            case R.id.shadow_angle:
+                return true;
+            case R.id.shadow_alpha:
+                mSeekBarType = TYPE_SEEK_SHADOW_ALPHA;
+                mBinding.seekBar.setVisibility(View.VISIBLE);
+                return true;
+            case R.id.shadow_length:
+                return true;
+            case R.id.bg_shape:
                 return true;
             case R.id.bg_color:
                 showEditDialog(true);

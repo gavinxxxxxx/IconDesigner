@@ -3,7 +3,6 @@ package me.gavin.icon.material;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -15,10 +14,8 @@ import android.view.View;
 
 import java.io.OutputStream;
 
-import me.gavin.icon.material.util.DisplayUtil;
-import me.gavin.icon.material.util.Icon;
-import me.gavin.svg.model.Drawable;
 import me.gavin.svg.model.SVG;
+import me.gavin.util.DisplayUtil;
 
 /**
  * 预览
@@ -36,16 +33,16 @@ public class PreView extends View {
 
     private Icon mIcon;
 
-    private Path mBgPath = new Path();
+    private Path mBgPath = new Path(), mShadowPath;
 
-    private Paint mBgPaint;
-
-    private Paint mPaint;
+    private Paint mBgPaint, mShadowPaint, mIconPaint;
 
     public SVG mSvg;
     private boolean newTag;
 
     private final Matrix mMatrix = new Matrix();
+
+    private float scaleNow = 0.65f;
 
     public PreView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -62,6 +59,13 @@ public class PreView extends View {
         mBgPaint.setAntiAlias(true);
         mBgPaint.setColor(mIcon.bgColor);
         mBgPaint.setShadowLayer(5, 0, 2, 0x55555555);
+
+        mShadowPaint = new Paint();
+        mShadowPaint.setAntiAlias(true);
+        mShadowPaint.setStyle(Paint.Style.FILL);
+        // mShadowPaint.setStrokeWidth(0.2f);
+        // mShadowPaint.setColor(Color.YELLOW);
+        mShadowPaint.setShader(new LinearGradient(0, 0, 23, 23, 0x50000000, 0x10000000, Shader.TileMode.CLAMP));
     }
 
     @Override
@@ -98,9 +102,6 @@ public class PreView extends View {
         if (mSvg != null) {
             drawBefore();
 
-            // 0.4 - 1.0
-            // mMatrix.postScale(1f, 1f, mSize / 2, mSize / 2);
-
             canvas.setMatrix(mMatrix);
 
             if (mSvg.width / mSvg.height != mSvg.viewBox.width / mSvg.viewBox.height) {
@@ -111,41 +112,19 @@ public class PreView extends View {
                                 ? 0 : (mSvg.height - mSvg.viewBox.height / mSvg.viewBox.width * mSvg.width) / 2 / mInherentScale);
             }
 
+            canvas.drawPath(mShadowPath, mShadowPaint);
             for (int i = 0; i < mSvg.paths.size(); i++) {
-                Drawable drawable = mSvg.drawables.get(i);
-                if (drawable.getFillPaint().getColor() != 0) {
-                    draw(canvas, mSvg.paths.get(i));
-                    canvas.drawPath(mSvg.paths.get(i), mPaint != null ? mPaint : drawable.getFillPaint());
-                }
-                // canvas.drawPath(mSvg.paths.get(i), drawable.getStrokePaint());
+                canvas.drawPath(mSvg.paths.get(i), mIconPaint != null ? mIconPaint : mSvg.drawables.get(i).getFillPaint());
+                // canvas.drawPath(mSvg.paths.get(i), mSvg.drawables.get(i).getStrokePaint());
             }
         }
-    }
-
-    private void draw(Canvas canvas, Path src) {
-        Path path = new Path(src);
-        for (float i = 0; i < 25; i += 0.5) {
-            Path path1 = new Path(src);
-            path1.offset(i, i);
-            path.op(path1, Path.Op.UNION);
-        }
-        // path.op(mBgPath, Path.Op.INTERSECT);
-
-        Paint mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setShader(new LinearGradient(0, 0, 23, 23, 0x80000000, 0x30000000, Shader.TileMode.CLAMP));
-        mPaint.setStrokeWidth(0.2f);
-        mPaint.setColor(Color.YELLOW);
-        canvas.drawPath(path, mPaint);
     }
 
     private void drawBackground(Canvas canvas) {
         int cw = 33;
         for (int x = 0; x < mSize; x += cw) {
             for (int y = 0; y < mSize; y += cw) {
-                canvas.drawRect(x, y, x + cw, y + cw,
-                        ((x ^ y) & 1) == 1 ? mBgPaintDark : mBgPaintLight);
+                canvas.drawRect(x, y, x + cw, y + cw, ((x ^ y) & 1) == 1 ? mBgPaintDark : mBgPaintLight);
             }
         }
     }
@@ -162,6 +141,21 @@ public class PreView extends View {
             float size = Math.min(getWidth(), getHeight()) * 0.8f;
             float scale = Math.min(size / mSvg.width, size / mSvg.height);
             mMatrix.postScale(scale, scale, getWidth() / 2f, getHeight() / 2f);
+
+            // 当前缩放比
+            mMatrix.postScale(scaleNow, scaleNow, mSize / 2f, mSize / 2f);
+            // 阴影初始化
+            mShadowPath = new Path();
+            for (int i = 0; i < mSvg.paths.size(); i++) {
+                if (mSvg.drawables.get(i).getFillPaint().getColor() != 0) {
+                    for (float j = 0; j < 40; j += 0.1) {
+                        Path path = new Path(mSvg.paths.get(i));
+                        path.offset(j, j);
+                        mShadowPath.op(path, Path.Op.UNION);
+                    }
+                }
+            }
+            // mShadowPath.op(mBgPath, Path.Op.INTERSECT);
         }
     }
 
@@ -173,11 +167,11 @@ public class PreView extends View {
 
     public void setIconColor(Integer color) {
         if (color == null) {
-            mPaint = null;
+            mIconPaint = null;
         } else {
-            mPaint = new Paint();
-            mPaint.setAntiAlias(true);
-            mPaint.setColor(color);
+            mIconPaint = new Paint();
+            mIconPaint.setAntiAlias(true);
+            mIconPaint.setColor(color);
         }
         invalidate();
     }
@@ -190,8 +184,10 @@ public class PreView extends View {
     }
 
     public void setScale(int progress) {
-        mMatrix.postScale(progress / 50f, progress / 50f, mSize / 2f, mSize / 2f);
+        float aimScale = 0.3f + progress / 100f * 0.7f;
+        mMatrix.postScale(aimScale / scaleNow, aimScale / scaleNow, mSize / 2f, mSize / 2f);
         invalidate();
+        scaleNow = aimScale;
     }
 
     public void save(OutputStream outputStream) {

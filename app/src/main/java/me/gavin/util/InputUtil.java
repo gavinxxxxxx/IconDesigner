@@ -1,4 +1,4 @@
-package me.gavin.icon.material.util;
+package me.gavin.util;
 
 import android.content.Context;
 import android.view.View;

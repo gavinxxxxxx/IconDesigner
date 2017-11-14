@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialog;
-import android.support.v7.widget.GridLayoutManager;
 import android.text.TextUtils;
 import android.view.WindowManager;
 
@@ -13,22 +12,22 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import me.gavin.base.function.Consumer;
 import me.gavin.icon.material.databinding.PopChooseIconBinding;
-import me.gavin.icon.material.util.L;
 import me.gavin.svg.model.SVG;
 import me.gavin.svg.parser.SVGParser;
+import me.gavin.util.L;
 
 /**
  * 这里是萌萌哒注释君
  *
  * @author gavin.xiong 2017/11/13
  */
-public class Bottom extends BottomSheetDialog {
+public class ChooseIconDialog extends BottomSheetDialog {
 
     private PopChooseIconBinding mBinding;
 
     private Consumer<SVG> callback;
 
-    public Bottom(@NonNull Context context, Consumer<SVG> callback) {
+    public ChooseIconDialog(@NonNull Context context, Consumer<SVG> callback) {
         super(context);
         this.callback = callback;
     }
@@ -42,7 +41,7 @@ public class Bottom extends BottomSheetDialog {
         getWindow().getAttributes().height = WindowManager.LayoutParams.MATCH_PARENT;
         getWindow().setDimAmount(0.4f);
 
-        Observable.just("", "size", "action")
+        Observable.just("action")
                 .flatMap(path -> Observable.just(path)
                         .map(getContext().getAssets()::list)
                         .flatMap(Observable::fromArray)

@@ -14,7 +14,7 @@
         <item
             android:id="@+id/icon_padding"
             android:title="图标填料"
-            app:showAsAction="always" />
+            app:showAsAction="always"/>
 
     </group>
 
@@ -23,6 +23,7 @@
         <item
             android:id="@+id/shadow_angle"
             android:title="阴影角度"
+            android:visible="false"
             app:showAsAction="ifRoom" />
         <item
             android:id="@+id/shadow_alpha"
@@ -31,6 +32,7 @@
         <item
             android:id="@+id/shadow_length"
             android:title="阴影长度"
+            android:visible="false"
             app:showAsAction="ifRoom" />
 
     </group>

@@ -15,9 +15,8 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.gavin.icon.material.util.DisplayUtil;
-import me.gavin.icon.material.util.Icon;
-import me.gavin.icon.material.util.L;
+import me.gavin.util.DisplayUtil;
+import me.gavin.util.L;
 import me.gavin.svg.model.SVG;
 
 /**

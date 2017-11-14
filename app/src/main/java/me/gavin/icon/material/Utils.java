@@ -9,8 +9,6 @@ import android.graphics.Region;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.gavin.icon.material.util.L;
-
 /**
  * 工具
  *
