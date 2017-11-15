@@ -70,8 +70,10 @@ public class MainActivity extends AppCompatActivity {
                     case TYPE_SEEK_SHADOW_LENGTH:
                         break;
                     case TYPE_SEEK_SHADOW_GRADIENT:
+                        mBinding.pre.setShadowGradient(progress);
                         break;
                     case TYPE_SEEK_SHADOW_ALPHA:
+                        mBinding.pre.setShadowAlpha(progress);
                         break;
                 }
             }

@@ -3,7 +3,6 @@ package me.gavin.icon.material;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -22,6 +21,7 @@ import me.gavin.util.L;
 /**
  * 预览
  *
+ * gavin.xxx.xxx@gmail.com
  * @author gavin.xiong 2017/11/8
  */
 public class PreView extends View {
@@ -74,6 +74,7 @@ public class PreView extends View {
 //        matrix.postTranslate(-100, -100);
 //        shader.setLocalMatrix(matrix);
     }
+
     Shader shader;
 
     @Override
@@ -159,7 +160,7 @@ public class PreView extends View {
             mShadowPath = new Path();
             for (int i = 0; i < mSvg.paths.size(); i++) {
                 if (mSvg.drawables.get(i).getFillPaint().getColor() != 0) {
-                    for (float j = 0; j < 40; j += 1.1) {
+                    for (float j = 0; j < 40; j += 0.1) {
                         Path path = new Path(mSvg.paths.get(i));
                         path.offset(j, j);
                         mShadowPath.op(path, Path.Op.UNION);
@@ -170,7 +171,7 @@ public class PreView extends View {
 
             shader = mShadowPaint.setShader(new LinearGradient(
                     0, 0, mSvg.viewBox.width * 2, mSvg.viewBox.height * 2,
-                    0xFF000000, 0x00000000, Shader.TileMode.REPEAT));
+                    0xFF000000, 0x00000000, Shader.TileMode.CLAMP));
         }
     }
 
@@ -211,6 +212,27 @@ public class PreView extends View {
         // Matrix matrix = new Matrix(mBgMatrix);
         // matrix.postScale(2f, 2f, mSvg.viewBox.width / 2f, mSvg.viewBox.width / 2f);
         // shader.setLocalMatrix(matrix);
+    }
+
+    float gs;
+    float as;
+
+    public void setShadowGradient(int progress) {
+        gs = 1 / (0.2f + progress / 20f);
+        Matrix matrix = new Matrix();
+        matrix.postScale(gs, gs, 0, 0);
+        matrix.postTranslate(as, as);
+        shader.setLocalMatrix(matrix);
+        invalidate();
+    }
+
+    public void setShadowAlpha(int progress) {
+        as = progress * 5f - 500;
+        Matrix matrix = new Matrix();
+        matrix.postScale(gs, gs, 0, 0);
+        matrix.postTranslate(as, as);
+        shader.setLocalMatrix(matrix);
+        invalidate();
     }
 
     public void save(OutputStream outputStream) {
