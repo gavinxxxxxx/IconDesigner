@@ -13,7 +13,7 @@ android {
     compileSdkVersion 26
 
     defaultConfig {
-        applicationId "me.gavin.icon.material"
+        applicationId "me.gavin.icon.designer"
         minSdkVersion 21
         targetSdkVersion 26
         versionCode autoVersionCode()

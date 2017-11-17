@@ -1,4 +1,4 @@
-package me.gavin.icon.material;
+package me.gavin.app;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -19,7 +19,8 @@ import java.io.IOException;
 import java.util.UUID;
 
 import io.reactivex.Observable;
-import me.gavin.icon.material.databinding.ActivityMainBinding;
+import me.gavin.icon.designer.R;
+import me.gavin.icon.designer.databinding.ActivityMainBinding;
 import me.gavin.svg.parser.SVGParser;
 import me.gavin.util.InputUtil;
 
@@ -40,10 +41,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
+        mBinding.fab.setOnClickListener(v -> createFile());
+
+        afterCreate();
+    }
+
+    private void afterCreate() {
         // Observable.just("", "size", "action")
 //        Observable.just("gavin/rect.svg")
 //        Observable.just("gavin/circle.svg")
-        Observable.just("gavin/setting.svg")
+        Observable.just("gavin/adb.svg")
 //        Observable.just("action")
 //                .flatMap(path -> Observable.just(path)
 //                        .map(getAssets()::list)
@@ -58,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
 //                .subscribe(L::e);
 
         mBinding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 switch (mSeekBarType) {
@@ -70,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                     case TYPE_SEEK_SHADOW_LENGTH:
                         break;
                     case TYPE_SEEK_SHADOW_GRADIENT:
-                        mBinding.pre.setShadowGradient(progress);
+                        // mBinding.pre.setShadowGradient(progress);
                         break;
                     case TYPE_SEEK_SHADOW_ALPHA:
                         mBinding.pre.setShadowAlpha(progress);
@@ -92,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
 
@@ -125,9 +131,9 @@ public class MainActivity extends AppCompatActivity {
                 mSeekBarType = TYPE_SEEK_SHADOW_ALPHA;
                 mBinding.seekBar.setVisibility(View.VISIBLE);
                 return true;
-            case R.id.bg_shape:
+            case R.id.background_shape:
                 return true;
-            case R.id.bg_color:
+            case R.id.background_color:
                 showEditDialog(true);
                 return true;
             default:
@@ -199,10 +205,11 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 99 && data != null && data.getData() != null) {
             try {
-                mBinding.pre.save(getContentResolver().openOutputStream(data.getData()));
+                mBinding.pre.save(getContentResolver().openOutputStream(data.getData()), 192);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
+
 }

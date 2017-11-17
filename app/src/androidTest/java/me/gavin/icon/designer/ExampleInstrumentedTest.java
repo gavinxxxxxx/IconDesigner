@@ -1,4 +1,4 @@
-package me.gavin.icon.material;
+package me.gavin.icon.designer;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("me.gavin.icon.material", appContext.getPackageName());
+        assertEquals("me.gavin.icon.designer", appContext.getPackageName());
     }
 }

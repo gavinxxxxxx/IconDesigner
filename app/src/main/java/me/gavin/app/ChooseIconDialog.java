@@ -1,4 +1,4 @@
-package me.gavin.icon.material;
+package me.gavin.app;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,7 +11,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import me.gavin.base.function.Consumer;
-import me.gavin.icon.material.databinding.PopChooseIconBinding;
+import me.gavin.icon.designer.databinding.DialogChooseIconBinding;
 import me.gavin.svg.model.SVG;
 import me.gavin.svg.parser.SVGParser;
 import me.gavin.util.L;
@@ -23,7 +23,7 @@ import me.gavin.util.L;
  */
 public class ChooseIconDialog extends BottomSheetDialog {
 
-    private PopChooseIconBinding mBinding;
+    private DialogChooseIconBinding mBinding;
 
     private Consumer<SVG> callback;
 
@@ -35,7 +35,7 @@ public class ChooseIconDialog extends BottomSheetDialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = PopChooseIconBinding.inflate(getLayoutInflater());
+        mBinding = DialogChooseIconBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
         getWindow().getAttributes().width = WindowManager.LayoutParams.MATCH_PARENT;
         getWindow().getAttributes().height = WindowManager.LayoutParams.MATCH_PARENT;

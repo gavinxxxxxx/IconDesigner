@@ -1,13 +1,14 @@
-package me.gavin.icon.material;
+package me.gavin.app;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Shader;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -20,8 +21,9 @@ import me.gavin.util.L;
 
 /**
  * 预览
- *
+ * <p>
  * gavin.xxx.xxx@gmail.com
+ *
  * @author gavin.xiong 2017/11/8
  */
 public class PreView extends View {
@@ -31,8 +33,6 @@ public class PreView extends View {
 
     private int mSize;
 
-    private final Paint mBgPaintLight, mBgPaintDark;
-
     public SVG mSvg;
     private boolean newTag;
     private final Matrix mMatrix = new Matrix();
@@ -41,41 +41,52 @@ public class PreView extends View {
 
     private Icon mIcon;
 
-    private Path mBgPath = new Path(), mShadowPath, mShadowPath2 = new Path();
+    private Path mBgPath = new Path(), mShadowPath, mShadowPathTemp = new Path(), mScorePath;
 
     private Matrix mBgMatrix = new Matrix();
 
-    private Paint mBgPaint, mShadowPaint, mIconPaint;
+    private Paint mBgPaint, mShadowPaint, mIconPaint, mScorePaint;
 
     private float scaleNow = 0.65f;
 
     public PreView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setLayerType(LAYER_TYPE_SOFTWARE, null);
-        mBgPaintLight = new Paint();
-        mBgPaintLight.setColor(0xff888888);
-        mBgPaintDark = new Paint();
-        mBgPaintDark.setColor(0xff555555);
 
         mIcon = new Icon();
-        mIcon.bgShape = 1;
+        mIcon.bgShape = 0;
         mBgPaint = new Paint();
         // mBgPaint.setStyle(Paint.Style.STROKE);
         mBgPaint.setAntiAlias(true);
         mBgPaint.setColor(mIcon.bgColor);
-        mBgPaint.setShadowLayer(5, 0, 2, 0x55555555);
+        mBgPaint.setShadowLayer(0.5f, 0, 0.4f, 0x55555555);
 
         mShadowPaint = new Paint();
         mShadowPaint.setAntiAlias(true);
         mShadowPaint.setStyle(Paint.Style.FILL);
-        // mShadowPaint.setShader(new LinearGradient(0, 0, 23, 23, 0x50000000, 0x10000000, Shader.TileMode.CLAMP));
-//        Matrix matrix = new Matrix();
-//        matrix.postScale(0.5f, 0.5f);
-//        matrix.postTranslate(-100, -100);
-//        shader.setLocalMatrix(matrix);
+        mShadowPaint.setColor(0x11 << 24);
+
+        mScorePaint = new Paint();
+        mScorePaint.setAntiAlias(true);
+        mScorePaint.setColor(0x20202020);
+
+        setBackground(buildBackground());
     }
 
-    Shader shader;
+    private Drawable buildBackground() {
+        return new ShapeDrawable(new RectShape() {
+            @Override
+            public void draw(Canvas canvas, Paint paint) {
+                int cw = 31;
+                for (int x = 0; x < rect().width(); x += cw) {
+                    for (int y = 0; y < rect().height(); y += cw) {
+                        paint.setColor(((x ^ y) & 1) == 1 ? 0xff555555 : 0xff888888);
+                        canvas.drawRect(x, y, x + cw, y + cw, paint);
+                    }
+                }
+            }
+        });
+    }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -87,30 +98,20 @@ public class PreView extends View {
                         ? MeasureSpec.getSize(heightMeasureSpec)
                         : DisplayUtil.getScreenHeight());
         setMeasuredDimension(mSize, mSize);
-//        initBgPath();
-    }
-
-    private void initBgPath() {
-        mBgPath.reset();
-        if (mIcon.bgShape == 0) {
-            float padding = mSize / 2 - mSize * BG_RECT_RA / 2;
-            mBgPath.addRoundRect(padding, padding, mSize - padding, mSize - padding, mSize / 20, mSize / 20, Path.Direction.CCW);
-        } else {
-            mBgPath.addCircle(mSize / 2, mSize / 2, mSize / 2 * BG_CIRCLE_RA, Path.Direction.CCW);
-        }
     }
 
     // TODO: 2017/11/8 canvas -> bitmap -> png
     @Override
     protected void onDraw(Canvas canvas) {
-        // canvas.drawColor(0xffffffff);
-        drawBackground(canvas);
+        onDraw2(canvas, mMatrix);
+    }
 
+    private void onDraw2(Canvas canvas, Matrix matrix) {
         if (mSvg == null) return;
 
         drawBefore();
 
-        canvas.setMatrix(mMatrix);
+        canvas.setMatrix(matrix);
 
         if (mSvg.width / mSvg.height != mSvg.viewBox.width / mSvg.viewBox.height) {
             canvas.translate(
@@ -122,23 +123,15 @@ public class PreView extends View {
 
         canvas.drawPath(mBgPath, mBgPaint);
 
-        mShadowPath2.set(mShadowPath);
-        mShadowPath2.op(mBgPath, Path.Op.INTERSECT);
-        canvas.drawPath(mShadowPath2, mShadowPaint);
+        mShadowPathTemp.set(mShadowPath);
+        mShadowPathTemp.op(mBgPath, Path.Op.INTERSECT);
+        canvas.drawPath(mShadowPathTemp, mShadowPaint);
 
         for (int i = 0; i < mSvg.paths.size(); i++) {
             canvas.drawPath(mSvg.paths.get(i), mIconPaint != null ? mIconPaint : mSvg.drawables.get(i).getFillPaint());
-            // canvas.drawPath(mSvg.paths.get(i), mSvg.drawables.get(i).getStrokePaint());
         }
-    }
 
-    private void drawBackground(Canvas canvas) {
-        int cw = 33;
-        for (int x = 0; x < mSize; x += cw) {
-            for (int y = 0; y < mSize; y += cw) {
-                canvas.drawRect(x, y, x + cw, y + cw, ((x ^ y) & 1) == 1 ? mBgPaintDark : mBgPaintLight);
-            }
-        }
+        canvas.drawPath(mScorePath, mScorePaint);
     }
 
     private void drawBefore() {
@@ -152,26 +145,66 @@ public class PreView extends View {
             float scale = Math.min(size / mSvg.width, size / mSvg.height);
             mMatrix.postScale(scale, scale, mSize / 2f, mSize / 2f);
 
-            mBgPath.reset();
-            mBgPath.addCircle(mSvg.viewBox.width / 2f, mSvg.viewBox.height / 2f, mSvg.viewBox.width / 2f / 0.8f * BG_CIRCLE_RA / scaleNow, Path.Direction.CCW);
+            // 背景
+            buildBgPath();
+
+            // 折痕
+            float w = mSvg.viewBox.width / 0.8f / scaleNow / 2f;
+            float h = mSvg.viewBox.height / 0.8f / scaleNow / 2f;
+            mScorePath = new Path();
+            mScorePath.addRect(mSvg.viewBox.width / 2f - w,
+                    mSvg.viewBox.height / 2f - h,
+                    mSvg.viewBox.width / 2f + w,
+                    mSvg.viewBox.height / 2f,
+                    Path.Direction.CCW);
+            mScorePath.op(mBgPath, Path.Op.INTERSECT);
+
             // 当前缩放比
             mMatrix.postScale(scaleNow, scaleNow, mSize / 2f, mSize / 2f);
             // 阴影初始化
-            mShadowPath = new Path();
-            for (int i = 0; i < mSvg.paths.size(); i++) {
-                if (mSvg.drawables.get(i).getFillPaint().getColor() != 0) {
-                    for (float j = 0; j < 40; j += 0.1) {
-                        Path path = new Path(mSvg.paths.get(i));
-                        path.offset(j, j);
-                        mShadowPath.op(path, Path.Op.UNION);
-                    }
-                }
-            }
-            // mShadowPath.op(mBgPath, Path.Op.INTERSECT);
+            initShadowPath(40f, 0.1f);
+        }
+    }
 
-            shader = mShadowPaint.setShader(new LinearGradient(
-                    0, 0, mSvg.viewBox.width * 2, mSvg.viewBox.height * 2,
-                    0xFF000000, 0x00000000, Shader.TileMode.CLAMP));
+    private void buildBgPath() {
+        if (mIcon.bgShape == 0) {
+            mBgPath.reset();
+            float size = mSvg.viewBox.width / 2f / 0.8f * BG_RECT_RA / scaleNow;
+            mBgPath.addRoundRect(mSvg.viewBox.width / 2f - size,
+                    mSvg.viewBox.height / 2f - size,
+                    mSvg.viewBox.width / 2f + size,
+                    mSvg.viewBox.height / 2f + size,
+                    2.6f,
+                    2.6f,
+                    Path.Direction.CCW);
+        } else if (mIcon.bgShape == 1) {
+            mBgPath.reset();
+            mBgPath.addCircle(mSvg.viewBox.width / 2f,
+                    mSvg.viewBox.height / 2f,
+                    mSvg.viewBox.width / 2f / 0.8f * BG_CIRCLE_RA / scaleNow,
+                    Path.Direction.CCW);
+        }
+    }
+
+    /**
+     * 阴影初始化
+     *
+     * @param length
+     * @param diff
+     */
+    private void initShadowPath(float length, float diff) {
+        mShadowPath = new Path();
+        for (int i = 0; i < mSvg.paths.size(); i++) {
+            if (mSvg.drawables.get(i).getFillPaint().getColor() != 0) {
+                mShadowPath.op(mSvg.paths.get(i), Path.Op.UNION);
+            }
+        }
+        float d = length;
+        while (d >= diff) {
+            d /= 2f;
+            mShadowPathTemp.set(mShadowPath);
+            mShadowPathTemp.offset(d, d);
+            mShadowPath.op(mShadowPathTemp, Path.Op.UNION);
         }
     }
 
@@ -203,42 +236,29 @@ public class PreView extends View {
     public void setIconSize(int progress) {
         float aimScale = 0.3f + progress / 100f * 0.7f;
         mMatrix.postScale(aimScale / scaleNow, aimScale / scaleNow, mSize / 2f, mSize / 2f);
+
         mBgMatrix.reset();
         mBgMatrix.postScale(scaleNow / aimScale, scaleNow / aimScale, mSvg.viewBox.width / 2f, mSvg.viewBox.width / 2f);
         mBgPath.transform(mBgMatrix);
+
+        mScorePath.transform(mBgMatrix);
+
         invalidate();
         scaleNow = aimScale;
-
-        // Matrix matrix = new Matrix(mBgMatrix);
-        // matrix.postScale(2f, 2f, mSvg.viewBox.width / 2f, mSvg.viewBox.width / 2f);
-        // shader.setLocalMatrix(matrix);
-    }
-
-    float gs;
-    float as;
-
-    public void setShadowGradient(int progress) {
-        gs = 1 / (0.2f + progress / 20f);
-        Matrix matrix = new Matrix();
-        matrix.postScale(gs, gs, 0, 0);
-        matrix.postTranslate(as, as);
-        shader.setLocalMatrix(matrix);
-        invalidate();
     }
 
     public void setShadowAlpha(int progress) {
-        as = progress * 5f - 500;
-        Matrix matrix = new Matrix();
-        matrix.postScale(gs, gs, 0, 0);
-        matrix.postTranslate(as, as);
-        shader.setLocalMatrix(matrix);
+        int alpha = (int) (progress / 200f * 0xFF);
+        mShadowPaint.setColor(alpha << 24);
         invalidate();
     }
 
-    public void save(OutputStream outputStream) {
-        Bitmap bitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
+    public void save(OutputStream outputStream, int size) {
+        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        draw(canvas);
+        Matrix matrix = new Matrix(mMatrix);
+        matrix.postScale(size * 1f / mSize, size * 1f / mSize, 0, 0);
+        onDraw2(canvas, matrix);
 //        try (fos) {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
 //        } catch (IOException e) {

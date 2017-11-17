@@ -1,4 +1,4 @@
-package me.gavin.icon.material;
+package me.gavin.app;
 
 import android.content.Context;
 
@@ -7,7 +7,8 @@ import java.util.List;
 import me.gavin.base.function.Consumer;
 import me.gavin.base.recycler.RecyclerAdapter;
 import me.gavin.base.recycler.RecyclerHolder;
-import me.gavin.icon.material.databinding.ItemIconBinding;
+import me.gavin.icon.designer.R;
+import me.gavin.icon.designer.databinding.ItemIconBinding;
 import me.gavin.svg.model.SVG;
 
 /**

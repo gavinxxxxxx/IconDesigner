@@ -2,7 +2,7 @@ package me.gavin.util;
 
 import android.util.Log;
 
-import me.gavin.icon.material.BuildConfig;
+import me.gavin.icon.designer.BuildConfig;
 
 /**
  * 日志（log）工具类

@@ -1,4 +1,4 @@
-package me.gavin.icon.material;
+package me.gavin.icon.designer;
 
 import org.junit.Test;
 

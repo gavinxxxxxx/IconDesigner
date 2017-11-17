@@ -7,8 +7,8 @@ import android.support.annotation.LayoutRes;
 import java.util.List;
 
 import me.gavin.base.function.IntConsumer;
-import me.gavin.icon.material.BR;
-import me.gavin.icon.material.R;
+import me.gavin.icon.designer.BR;
+import me.gavin.icon.designer.R;
 
 /**
  * DataBinding 基类适配器

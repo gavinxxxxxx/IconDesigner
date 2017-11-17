@@ -1,4 +1,4 @@
-package me.gavin.icon.material;
+package me.gavin.app;
 
 /**
  * 图标
@@ -7,7 +7,7 @@ package me.gavin.icon.material;
  */
 public class Icon {
 
-    public int bgColor = 0xFF4480FF;
+    public int bgColor = 0xFF0098E2;
     public int bgShape = 0; // 0:圆角矩形 1:圆形
 
     public int iconShape;
