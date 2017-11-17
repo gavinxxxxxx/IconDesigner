@@ -128,7 +128,9 @@ public class PreView extends View {
         canvas.drawPath(mShadowPathTemp, mShadowPaint);
 
         for (int i = 0; i < mSvg.paths.size(); i++) {
-            canvas.drawPath(mSvg.paths.get(i), mIconPaint != null ? mIconPaint : mSvg.drawables.get(i).getFillPaint());
+            if (mSvg.drawables.get(i).getFillPaint().getColor() != 0) {
+                canvas.drawPath(mSvg.paths.get(i), mIconPaint != null ? mIconPaint : mSvg.drawables.get(i).getFillPaint());
+            }
         }
 
         canvas.drawPath(mScorePath, mScorePaint);
@@ -149,15 +151,7 @@ public class PreView extends View {
             buildBgPath();
 
             // 折痕
-            float w = mSvg.viewBox.width / 0.8f / scaleNow / 2f;
-            float h = mSvg.viewBox.height / 0.8f / scaleNow / 2f;
-            mScorePath = new Path();
-            mScorePath.addRect(mSvg.viewBox.width / 2f - w,
-                    mSvg.viewBox.height / 2f - h,
-                    mSvg.viewBox.width / 2f + w,
-                    mSvg.viewBox.height / 2f,
-                    Path.Direction.CCW);
-            mScorePath.op(mBgPath, Path.Op.INTERSECT);
+            buildScorePath();
 
             // 当前缩放比
             mMatrix.postScale(scaleNow, scaleNow, mSize / 2f, mSize / 2f);
@@ -184,6 +178,18 @@ public class PreView extends View {
                     mSvg.viewBox.width / 2f / 0.8f * BG_CIRCLE_RA / scaleNow,
                     Path.Direction.CCW);
         }
+    }
+
+    private void buildScorePath() {
+        float w = mSvg.viewBox.width / 0.8f / scaleNow / 2f;
+        float h = mSvg.viewBox.height / 0.8f / scaleNow / 2f;
+        mScorePath = new Path();
+        mScorePath.addRect(mSvg.viewBox.width / 2f - w,
+                mSvg.viewBox.height / 2f - h,
+                mSvg.viewBox.width / 2f + w,
+                mSvg.viewBox.height / 2f,
+                Path.Direction.CCW);
+        mScorePath.op(mBgPath, Path.Op.INTERSECT);
     }
 
     /**
@@ -250,6 +256,13 @@ public class PreView extends View {
     public void setShadowAlpha(int progress) {
         int alpha = (int) (progress / 200f * 0xFF);
         mShadowPaint.setColor(alpha << 24);
+        invalidate();
+    }
+
+    public void setBgShape(int shape) {
+        mIcon.bgShape = shape;
+        buildBgPath();
+        buildScorePath();
         invalidate();
     }
 

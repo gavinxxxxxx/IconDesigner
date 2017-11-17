@@ -132,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
                 mBinding.seekBar.setVisibility(View.VISIBLE);
                 return true;
             case R.id.background_shape:
+                mBinding.pre.setBgShape(1);
                 return true;
             case R.id.background_color:
                 showEditDialog(true);
