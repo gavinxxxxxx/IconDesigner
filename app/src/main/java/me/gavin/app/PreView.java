@@ -70,7 +70,7 @@ public class PreView extends View {
         mScorePaint.setAntiAlias(true);
         mScorePaint.setColor(0x20202020);
 
-        setBackground(buildBackground());
+        // setBackground(buildBackground());
     }
 
     private Drawable buildBackground() {

@@ -15,6 +15,9 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.flask.colorpicker.ColorPickerView;
+import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+
 import java.io.IOException;
 import java.util.UUID;
 
@@ -42,27 +45,16 @@ public class MainActivity extends AppCompatActivity {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         mBinding.fab.setOnClickListener(v -> createFile());
-
         afterCreate();
     }
 
     private void afterCreate() {
-        // Observable.just("", "size", "action")
 //        Observable.just("gavin/rect.svg")
 //        Observable.just("gavin/circle.svg")
         Observable.just("gavin/adb.svg")
-//        Observable.just("action")
-//                .flatMap(path -> Observable.just(path)
-//                        .map(getAssets()::list)
-//                        .flatMap(Observable::fromArray)
-//                        .filter(s -> s.endsWith(".svg"))
-//                        .map(s -> String.format("%s%s",
-//                                TextUtils.isEmpty(path) ? "" : path + "/", s)))
-//                .take(1)
                 .map(getAssets()::open)
                 .map(SVGParser::parse)
                 .subscribe(mBinding.pre::setSVG);
-//                .subscribe(L::e);
 
         mBinding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -113,7 +105,8 @@ public class MainActivity extends AppCompatActivity {
                 }).show();
                 return true;
             case R.id.icon_color:
-                showEditDialog(false);
+                showColorPicker(false);
+                // showEditDialog(false);
                 return true;
             case R.id.icon_size:
                 mSeekBarType = TYPE_SEEK_ICON_SIZE;
@@ -135,7 +128,8 @@ public class MainActivity extends AppCompatActivity {
                 mBinding.pre.setBgShape(1);
                 return true;
             case R.id.background_color:
-                showEditDialog(true);
+                showColorPicker(true);
+                // showEditDialog(true);
                 return true;
             default:
                 return false;
@@ -169,6 +163,25 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         });
+    }
+
+    private void showColorPicker(boolean isBg) {
+        ColorPickerDialogBuilder
+                .with(this)
+                .setTitle(isBg ? "背景颜色" : "图标颜色")
+                // .initialColor(currentBackgroundColor)
+                .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                .density(12)
+                .setPositiveButton("确定", (dialog, color, allColors) -> {
+                    if (isBg) {
+                        mBinding.pre.setBgColor(color);
+                    } else {
+                        mBinding.pre.setIconColor(color);
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .build()
+                .show();
     }
 
     private void setIconColor(String colorStr) {

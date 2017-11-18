@@ -5,6 +5,15 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowBackground">@color/colorPrimary</item>
+        <!-- for android.support.v7.app.AlertDialog -->
+        <item name="alertDialogTheme">@style/Theme.AppCompat.Dialog.Alert.Custom</item>
+        <!-- for android.app.AlertDialog -->
+        <item name="android:alertDialogTheme">@style/Theme.AppCompat.Dialog.Alert.Custom</item>
+    </style>
+
+    <!--<style name="ThemeOverlay.AppCompat.Dialog.Alert.Custom">-->
+    <style name="Theme.AppCompat.Dialog.Alert.Custom">
+        <item name="android:background">@color/colorPrimary</item>
     </style>
 
 </resources>

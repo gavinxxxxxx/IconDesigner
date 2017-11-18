@@ -20,18 +20,32 @@
             android:id="@+id/seekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="256dp" />
+            android:layout_marginTop="256dp"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
+            android:layout_gravity="bottom|start"
             android:layout_margin="16dp"
             android:tint="@android:color/white"
             app:backgroundTint="@color/colorPrimaryLight"
             app:fabSize="normal"
             app:srcCompat="@drawable/ic_apps_black_24dp" />
+
+        <me.gavin.widget.MultilevelMenu
+            android:id="@+id/menu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom|end"
+            android:elevation="6dp"
+            app:mlMenu_floatIcon="@drawable/ic_apps_black_24dp"
+            tools:mlMenu_floatBackgroundColor="@color/colorAccent"
+            tools:mlMenu_floatIconColor="@color/colorPrimary"
+            tools:mlMenu_floatIconPadding="12dp"
+            tools:mlMenu_floatRadius="20dp" />
 
     </FrameLayout>
 

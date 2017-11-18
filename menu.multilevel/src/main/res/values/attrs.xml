@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="MultilevelMenu">
+        <attr name="mlMenu_floatRadius" format="dimension" />
+        <attr name="mlMenu_floatBackgroundColor" format="color" />
+        <attr name="mlMenu_floatIcon" format="reference" />
+        <attr name="mlMenu_floatIconColor" format="color" />
+        <attr name="mlMenu_floatIconPadding" format="dimension" />
+    </declare-styleable>
+
+</resources>
