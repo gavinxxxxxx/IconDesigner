@@ -215,7 +215,6 @@ public class PreView extends View {
     }
 
     public void setSVG(SVG svg) {
-        L.e(scaleNow);
         this.mSvg = svg;
         newTag = true;
         invalidate();

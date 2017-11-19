@@ -13,10 +13,16 @@ import android.graphics.drawable.shapes.RectShape;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 
 import me.gavin.util.DisplayUtil;
+import me.gavin.util.L;
 import me.gavin.widget.menu.multilevel.R;
 
 /**
@@ -35,6 +41,9 @@ public class MultilevelMenu extends ViewGroup {
     private int mFloatBackgroundColor;
     private Drawable mFloatIcon;
     private int mFloatIconPadding;
+
+    // menu
+    private Menu mMenu;
 
     public MultilevelMenu(Context context) {
         this(context, null);
@@ -63,27 +72,20 @@ public class MultilevelMenu extends ViewGroup {
         }
         int floatIconColor = ta.getColor(R.styleable.MultilevelMenu_mlMenu_floatIconColor, 0xFFFFFFFF);
         mFloatIcon.setColorFilter(floatIconColor, PorterDuff.Mode.SRC_IN);
-        // mIcon.setTint(floatIconColor);
-        // mIcon.setTintMode(PorterDuff.Mode.SRC_IN);
+        // mFloatIcon.setTint(floatIconColor);
+        // mFloatIcon.setTintMode(PorterDuff.Mode.SRC_IN);
         mFloatIconPadding = ta.getDimensionPixelSize(R.styleable.MultilevelMenu_mlMenu_floatIconPadding,
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics()));
+
+        int menuRes = ta.getResourceId(R.styleable.MultilevelMenu_mlMenu_menu, 0);
+        fromMenu(menuRes);
+
         ta.recycle();
     }
 
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new MarginLayoutParams(getContext(), attrs);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(
-                MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY
-                        ? MeasureSpec.getSize(widthMeasureSpec)
-                        : DisplayUtil.getScreenWidth(),
-                MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY
-                        ? MeasureSpec.getSize(heightMeasureSpec)
-                        : DisplayUtil.getScreenHeight());
     }
 
     @Override
@@ -98,20 +100,21 @@ public class MultilevelMenu extends ViewGroup {
                 mWidth - mPadding,
                 mHeight - mPadding);
 
-        mFloatIcon.setBounds(mFloatOutlineRect.left + mFloatIconPadding,
+        mFloatIcon.setBounds(
+                mFloatOutlineRect.left + mFloatIconPadding,
                 mFloatOutlineRect.top + mFloatIconPadding,
                 mFloatOutlineRect.right - mFloatIconPadding,
                 mFloatOutlineRect.bottom - mFloatIconPadding);
 
         setBackground(buildBackground());
-    }
 
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-//        for (int i = 0; i < getChildCount(); i++) {
-//            View child = getChildAt(i);
-//            child.layout(0, 0, 200, 200);
-//        }
+        ItemView itemView = new ItemView(getContext(), mMenu.getItem(0));
+        addView(itemView);
+        itemView.layout(
+                mFloatOutlineRect.left,
+                mFloatOutlineRect.top - DisplayUtil.dp2px(84),
+                mFloatOutlineRect.right,
+                mFloatOutlineRect.bottom - DisplayUtil.dp2px(84));
     }
 
     private Drawable buildBackground() {
@@ -127,6 +130,26 @@ public class MultilevelMenu extends ViewGroup {
                 outline.setOval(mFloatOutlineRect);
             }
         });
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+//        for (int i = 0; i < getChildCount(); i++) {
+//            View child = getChildAt(i);
+//            child.layout(0, 0, 200, 200);
+//        }
+    }
+
+    private void fromMenu(int menuRes) {
+        mMenu = new PopupMenu(getContext(), null).getMenu();
+        MenuInflater inflater = new MenuInflater(getContext());
+        inflater.inflate(menuRes, mMenu);
+        for (int i = 0; i < mMenu.size(); i++) {
+            MenuItem item = mMenu.getItem(i);
+            if (item.getIcon() == null || item.getTitle() == null || item.getItemId() == 0) {
+                throw new IllegalArgumentException("menu resource must have an icon, title, and id.");
+            }
+        }
     }
 
     @Override
