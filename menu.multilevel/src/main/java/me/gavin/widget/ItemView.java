@@ -79,7 +79,7 @@ public class ItemView extends ViewGroup {
         imageView.setBackground(new ShapeDrawable(new RectShape() {
             @Override
             public void draw(Canvas canvas, Paint paint) {
-                paint.setColor(0xFFFF0000);
+                paint.setColor(mFloatBackgroundColor);
                 canvas.drawCircle(rect().centerX(), rect().centerY(), rect().width() / 2f, paint);
             }
 
@@ -179,7 +179,7 @@ public class ItemView extends ViewGroup {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawColor(0x20800000);
+//        canvas.drawColor(0x20800000);
 
 //        mFloatIcon.draw(canvas);
 //
