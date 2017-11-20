@@ -49,6 +49,8 @@ public class MultilevelMenu extends ViewGroup {
     // menu
     private Menu mMenu;
 
+    private int mItemPadding;
+
     public MultilevelMenu(Context context) {
         this(context, null);
     }
@@ -62,6 +64,7 @@ public class MultilevelMenu extends ViewGroup {
         setWillNotDraw(false);
         mPadding = DisplayUtil.dp2px(16);
 
+        mItemPadding = DisplayUtil.dp2px(8);
         init(context, attrs);
     }
 
@@ -87,6 +90,7 @@ public class MultilevelMenu extends ViewGroup {
             MenuItem menuItem = mMenu.getItem(i);
             if (menuItem.isVisible()) {
                 ItemView itemView = new ItemView(getContext(), menuItem);
+                itemView.setPadding(mItemPadding);
                 itemView.setVisibility(isInEditMode() ? VISIBLE : GONE);
                 addView(itemView);
 //                if (menuItem.getSubMenu() != null && menuItem.getSubMenu().size() > 0) {
@@ -145,7 +149,7 @@ public class MultilevelMenu extends ViewGroup {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         L.e("Multilevel.onLayout");
         int diff = DisplayUtil.dp2px(8);
-        int dis = DisplayUtil.dp2px(64);
+        int dis = DisplayUtil.dp2px(8);
 //        for (int i = 0; i < getChildCount(); i++) {
 //            View child = getChildAt(i);
 //            if (child instanceof ItemView) {
@@ -164,10 +168,10 @@ public class MultilevelMenu extends ViewGroup {
                 itemView.setCenterPoint(cx, cy);
                 measureChild(itemView, 0, 0);
                 itemView.layout(
-                        mFloatOutlineRect.right - diff - child.getMeasuredWidth(),
-                        mFloatOutlineRect.top - dis * i - dis,
-                        mFloatOutlineRect.right - diff,
-                        mFloatOutlineRect.bottom - dis * i - dis - diff * 2);
+                        mFloatOutlineRect.right - diff - child.getMeasuredWidth() + mItemPadding,
+                        mFloatOutlineRect.top - dis * i - dis - child.getMeasuredHeight() * i - child.getMeasuredHeight() - mItemPadding,
+                        mFloatOutlineRect.right - diff + mItemPadding,
+                        mFloatOutlineRect.top - dis * i - dis - child.getMeasuredHeight() * i - mItemPadding);
             }
         }
     }

@@ -47,6 +47,8 @@ public class ItemView extends ViewGroup {
     private int mTitleVPadding;
     private int mTitleMargin;
 
+    private int mPadding;
+
     public ItemView(Context context, MenuItem menuItem) {
         super(context);
         setWillNotDraw(false);
@@ -116,20 +118,25 @@ public class ItemView extends ViewGroup {
     ImageView imageView;
     TextView textView;
 
+    public void setPadding(int padding) {
+        this.mPadding = padding;
+    }
+
     public void setCenterPoint(int x, int y) {
         this.mX = x;
         this.mY = y;
-        imageView.layout(mWidth - mFloatRadius * 2, 0, mWidth, mHeight);
+        imageView.layout(mWidth - mFloatRadius * 2 - mPadding, mPadding, mWidth - mPadding, mHeight - mPadding);
         measureChild(textView, 0, 0);
-        textView.layout(0, mHeight / 2 - textView.getMeasuredHeight() / 2,
-                textView.getMeasuredWidth(), mHeight / 2 + textView.getMeasuredHeight() / 2);
+        textView.layout(mPadding, mHeight / 2 - textView.getMeasuredHeight() / 2,
+                textView.getMeasuredWidth() + mPadding, mHeight / 2 + textView.getMeasuredHeight() / 2);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         L.e("Item.onMeasure");
-        int width = mTitleBound.width() + mTitleHPadding * 2 + mTitleMargin + mFloatRadius * 2;
-        int height = Math.max(mTitleBound.height() + mTitleVPadding * 2, mFloatRadius * 2);
+        measureChild(textView, 0, 0);
+        int width = textView.getMeasuredWidth() + mTitleMargin + mFloatRadius * 2 + mPadding * 2;
+        int height = Math.max(textView.getMeasuredHeight(), mFloatRadius * 2) + mPadding * 2;
         setMeasuredDimension(width, height);
     }
 
