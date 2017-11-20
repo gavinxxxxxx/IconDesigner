@@ -89,21 +89,21 @@ public class MultilevelMenu extends ViewGroup {
                 ItemView itemView = new ItemView(getContext(), menuItem);
                 itemView.setVisibility(isInEditMode() ? VISIBLE : GONE);
                 addView(itemView);
-                if (menuItem.getSubMenu() != null && menuItem.getSubMenu().size() > 0) {
-                    for (int j = 0; j < menuItem.getSubMenu().size(); j++) {
-                        // TODO: 2017/11/20
-                    }
-                }
+//                if (menuItem.getSubMenu() != null && menuItem.getSubMenu().size() > 0) {
+//                    for (int j = 0; j < menuItem.getSubMenu().size(); j++) {
+//                        // TODO: 2017/11/20
+//                    }
+//                }
             }
         }
 
         ta.recycle();
     }
 
-    @Override
-    public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new MarginLayoutParams(getContext(), attrs);
-    }
+//    @Override
+//    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+//        return new MarginLayoutParams(getContext(), attrs);
+//    }
 
     @Override
     protected void onSizeChanged(int w, int h, int ow, int oh) {
@@ -143,16 +143,32 @@ public class MultilevelMenu extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        L.e("Multilevel.onLayout");
         int diff = DisplayUtil.dp2px(8);
         int dis = DisplayUtil.dp2px(64);
+//        for (int i = 0; i < getChildCount(); i++) {
+//            View child = getChildAt(i);
+//            if (child instanceof ItemView) {
+//                ItemView itemView = (ItemView) child;
+//                itemView.setCenterPoint(mFloatOutlineRect.right - mFloatRadius,
+//                        mFloatOutlineRect.bottom - mFloatRadius - dis * i - dis - diff);
+//                itemView.layout(l, t, r, b);
+//            }
+//        }
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            measureChild(child, 0, 0);
-            child.layout(
-                    mFloatOutlineRect.right - diff - child.getMeasuredWidth(),
-                    mFloatOutlineRect.top - dis * (i + 1),
-                    mFloatOutlineRect.right - diff,
-                    mFloatOutlineRect.bottom - dis * (i + 1) - diff * 2);
+            if (child instanceof ItemView) {
+                ItemView itemView = (ItemView) child;
+                int cx = mFloatOutlineRect.right - mFloatRadius;
+                int cy = mFloatOutlineRect.bottom - mFloatRadius - dis * i - dis - diff;
+                itemView.setCenterPoint(cx, cy);
+                measureChild(itemView, 0, 0);
+                itemView.layout(
+                        mFloatOutlineRect.right - diff - child.getMeasuredWidth(),
+                        mFloatOutlineRect.top - dis * i - dis,
+                        mFloatOutlineRect.right - diff,
+                        mFloatOutlineRect.bottom - dis * i - dis - diff * 2);
+            }
         }
     }
 
