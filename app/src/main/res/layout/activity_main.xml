@@ -32,7 +32,7 @@
             android:layout_margin="16dp"
             android:tint="@android:color/white"
             app:backgroundTint="@color/colorPrimaryLight"
-            app:fabSize="mini"
+            app:fabSize="normal"
             app:srcCompat="@drawable/ic_apps_black_24dp" />
 
         <me.gavin.widget.MultilevelMenu
@@ -41,12 +41,12 @@
             android:layout_height="match_parent"
             android:layout_gravity="bottom|end"
             android:elevation="6dp"
+            app:mlMenu_floatBackgroundColor="@color/colorPrimaryLight"
             app:mlMenu_floatIcon="@drawable/ic_apps_black_24dp"
-            app:mlMenu_menu="@menu/menu"
-            tools:mlMenu_floatBackgroundColor="@color/colorAccent"
-            tools:mlMenu_floatIconColor="@color/colorPrimary"
-            tools:mlMenu_floatIconPadding="12dp"
-            tools:mlMenu_floatRadius="20dp" />
+            app:mlMenu_floatIconColor="@android:color/white"
+            app:mlMenu_floatIconPadding="16dp"
+            app:mlMenu_floatRadius="28dp"
+            app:mlMenu_menu="@menu/menu" />
 
     </FrameLayout>
 

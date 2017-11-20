@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/icon"
-        android:icon="@drawable/ic_apps_black_24dp"
+        android:icon="@drawable/ic_adb_black_24dp"
         android:title="图标">
 
         <menu>
@@ -27,7 +27,7 @@
 
     <item
         android:id="@+id/shadow"
-        android:icon="@drawable/ic_apps_black_24dp"
+        android:icon="@drawable/ic_adb_black_24dp"
         android:title="阴影">
 
         <menu>
@@ -58,7 +58,7 @@
 
     <item
         android:id="@+id/background"
-        android:icon="@drawable/ic_apps_black_24dp"
+        android:icon="@drawable/ic_adb_black_24dp"
         android:title="背景">
 
         <menu>
@@ -78,7 +78,7 @@
 
     <item
         android:id="@+id/effect"
-        android:icon="@drawable/ic_apps_black_24dp"
+        android:icon="@drawable/ic_adb_black_24dp"
         android:title="效果">
 
         <menu>

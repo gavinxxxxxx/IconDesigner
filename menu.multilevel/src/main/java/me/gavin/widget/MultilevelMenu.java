@@ -1,5 +1,6 @@
 package me.gavin.widget;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -10,8 +11,10 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.DragEvent;
 import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.PopupMenu;
 
 import me.gavin.util.DisplayUtil;
+import me.gavin.util.DragUtils;
 import me.gavin.util.L;
 import me.gavin.widget.menu.multilevel.R;
 
@@ -79,6 +83,19 @@ public class MultilevelMenu extends ViewGroup {
 
         int menuRes = ta.getResourceId(R.styleable.MultilevelMenu_mlMenu_menu, 0);
         fromMenu(menuRes);
+        for (int i = 0; i < mMenu.size(); i++) {
+            MenuItem menuItem = mMenu.getItem(i);
+            if (menuItem.isVisible()) {
+                ItemView itemView = new ItemView(getContext(), menuItem);
+                itemView.setVisibility(isInEditMode() ? VISIBLE : GONE);
+                addView(itemView);
+                if (menuItem.getSubMenu() != null && menuItem.getSubMenu().size() > 0) {
+                    for (int j = 0; j < menuItem.getSubMenu().size(); j++) {
+                        // TODO: 2017/11/20
+                    }
+                }
+            }
+        }
 
         ta.recycle();
     }
@@ -107,14 +124,6 @@ public class MultilevelMenu extends ViewGroup {
                 mFloatOutlineRect.bottom - mFloatIconPadding);
 
         setBackground(buildBackground());
-
-        ItemView itemView = new ItemView(getContext(), mMenu.getItem(0));
-        addView(itemView);
-        itemView.layout(
-                mFloatOutlineRect.left,
-                mFloatOutlineRect.top - DisplayUtil.dp2px(84),
-                mFloatOutlineRect.right,
-                mFloatOutlineRect.bottom - DisplayUtil.dp2px(84));
     }
 
     private Drawable buildBackground() {
@@ -134,10 +143,17 @@ public class MultilevelMenu extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-//        for (int i = 0; i < getChildCount(); i++) {
-//            View child = getChildAt(i);
-//            child.layout(0, 0, 200, 200);
-//        }
+        int diff = DisplayUtil.dp2px(8);
+        int dis = DisplayUtil.dp2px(64);
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            measureChild(child, 0, 0);
+            child.layout(
+                    mFloatOutlineRect.right - diff - child.getMeasuredWidth(),
+                    mFloatOutlineRect.top - dis * (i + 1),
+                    mFloatOutlineRect.right - diff,
+                    mFloatOutlineRect.bottom - dis * (i + 1) - diff * 2);
+        }
     }
 
     private void fromMenu(int menuRes) {
@@ -159,20 +175,43 @@ public class MultilevelMenu extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                double distance = Math.sqrt(Math.pow(mWidth - mPadding - mFloatRadius - event.getX(), 2)
-                        + Math.pow(mHeight - mPadding - mFloatRadius - event.getY(), 2));
-                if (distance <= mFloatRadius) {
-                    // 忽略系统设置 强制震动反馈
-                    performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-                }
-                break;
-            case MotionEvent.ACTION_MOVE:
-                break;
-            case MotionEvent.ACTION_UP:
-                break;
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            DragShadowBuilder dragShadowBuilder = new DragShadowBuilder();
+            ClipData dragData = DragUtils.getClipData();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                startDragAndDrop(dragData, dragShadowBuilder, null, 0);
+            } else {
+                startDrag(dragData, dragShadowBuilder, null, 0);
+            }
         }
-        return false;
+        return true;
+    }
+
+    @Override
+    public boolean onDragEvent(DragEvent event) {
+        L.e("MultilevelMenu: onDragEvent - " + event);
+        switch (event.getAction()) {
+            case DragEvent.ACTION_DRAG_STARTED:
+                if (DragUtils.isDragForMe(event.getClipDescription().getLabel())) {
+                    double distance = Math.sqrt(Math.pow(mWidth - mPadding - mFloatRadius - event.getX(), 2)
+                            + Math.pow(mHeight - mPadding - mFloatRadius - event.getY(), 2));
+                    if (distance <= mFloatRadius) {
+                        // 忽略系统设置 强制震动反馈
+                        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                        for (int i = 0; i < getChildCount(); i++) {
+                            getChildAt(i).setVisibility(VISIBLE);
+                        }
+                    }
+                    return true;
+                } else {
+                    return false;
+                }
+            case DragEvent.ACTION_DRAG_ENDED:
+                for (int i = 0; i < getChildCount(); i++) {
+                    getChildAt(i).setVisibility(GONE);
+                }
+                return true;
+        }
+        return true;
     }
 }
