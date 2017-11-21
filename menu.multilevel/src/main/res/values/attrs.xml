@@ -10,6 +10,7 @@
         <attr name="mlm_menuItemMargin" format="dimension" />
         <attr name="mlm_menuItemRadius" format="dimension" />
         <attr name="mlm_menuItemBgColor" format="color" />
+        <attr name="mlm_menuItemElevation" format="dimension" />
         <attr name="mlm_menuItemPadding" format="dimension" />
         <attr name="mlm_menuItemIconColor" format="color" />
         <attr name="mlm_menuVertical" format="reference" />
