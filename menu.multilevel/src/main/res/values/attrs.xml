@@ -2,12 +2,18 @@
 <resources>
 
     <declare-styleable name="MultilevelMenu">
-        <attr name="mlMenu_floatRadius" format="dimension" />
-        <attr name="mlMenu_floatBackgroundColor" format="color" />
-        <attr name="mlMenu_floatIcon" format="reference" />
-        <attr name="mlMenu_floatIconColor" format="color" />
-        <attr name="mlMenu_floatIconPadding" format="dimension" />
-        <attr name="mlMenu_menu" format="reference" />
+        <attr name="mlm_originRadius" format="dimension" />
+        <attr name="mlm_originBgColor" format="color" />
+        <attr name="mlm_originPadding" format="dimension" />
+        <attr name="mlm_originIcon" format="reference" />
+        <attr name="mlm_originIconColor" format="color" />
+        <attr name="mlm_menuVertical" format="reference" />
+        <attr name="mlm_menuHorizontal" format="reference" />
+        <attr name="mlm_menuItemMargin" format="dimension" />
+        <attr name="mlm_menuItemRadius" format="dimension" />
+        <attr name="mlm_menuItemBgColor" format="color" />
+        <attr name="mlm_menuItemPadding" format="dimension" />
+        <attr name="mlm_menuItemIconColor" format="color" />
     </declare-styleable>
 
 </resources>

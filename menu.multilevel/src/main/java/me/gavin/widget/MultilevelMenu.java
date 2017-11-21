@@ -13,6 +13,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.DragEvent;
 import android.view.HapticFeedbackConstants;
@@ -20,9 +21,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.View;
+import android.view.SubMenu;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import me.gavin.util.DisplayUtil;
 import me.gavin.util.DragUtils;
@@ -39,17 +43,23 @@ public class MultilevelMenu extends ViewGroup {
     private int mWidth, mHeight;
     private int mPadding;
 
-    // float
-    private Rect mFloatOutlineRect;
-    private int mFloatRadius;
-    private int mFloatBackgroundColor;
-    private Drawable mFloatIcon;
-    private int mFloatIconPadding;
+    // 原点
+    private Rect mOriginOutlineRect;
+    private int mOriginRadius;
+    private int mOriginBackgroundColor;
+    private Drawable mOriginIcon;
+    private int mOriginPadding;
+
+    private int mMenuItemMargin;
+
+    private int mFloatDiff;
 
     // menu
     private Menu mMenu;
 
-    private int mItemPadding;
+    SparseArray<List<ItemView>> menuArray;
+
+    private Consumer<MenuItem> onMenuItemSelectedListener;
 
     public MultilevelMenu(Context context) {
         this(context, null);
@@ -64,50 +74,96 @@ public class MultilevelMenu extends ViewGroup {
         setWillNotDraw(false);
         mPadding = DisplayUtil.dp2px(16);
 
-        mItemPadding = DisplayUtil.dp2px(8);
         init(context, attrs);
     }
 
     private void init(Context context, AttributeSet attrs) {
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.MultilevelMenu);
-        mFloatRadius = ta.getDimensionPixelOffset(R.styleable.MultilevelMenu_mlMenu_floatRadius,
+        mOriginRadius = ta.getDimensionPixelOffset(R.styleable.MultilevelMenu_mlm_originRadius,
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 28, getResources().getDisplayMetrics()));
-        mFloatBackgroundColor = ta.getColor(R.styleable.MultilevelMenu_mlMenu_floatBackgroundColor, 0xFF303030);
-        mFloatIcon = ta.getDrawable(R.styleable.MultilevelMenu_mlMenu_floatIcon);
-        if (mFloatIcon == null) {
-            mFloatIcon = getResources().getDrawable(R.drawable.ic_apps_black_24dp);
+        mOriginBackgroundColor = ta.getColor(R.styleable.MultilevelMenu_mlm_originBgColor, 0xFF303030);
+        mOriginIcon = ta.getDrawable(R.styleable.MultilevelMenu_mlm_originIcon);
+        if (mOriginIcon == null) {
+            mOriginIcon = getResources().getDrawable(R.drawable.ic_apps_black_24dp);
         }
-        int floatIconColor = ta.getColor(R.styleable.MultilevelMenu_mlMenu_floatIconColor, 0xFFFFFFFF);
-        mFloatIcon.setColorFilter(floatIconColor, PorterDuff.Mode.SRC_IN);
+        int floatIconColor = ta.getColor(R.styleable.MultilevelMenu_mlm_originIconColor, 0xFFFFFFFF);
+        mOriginIcon.setColorFilter(floatIconColor, PorterDuff.Mode.SRC_IN);
         // mFloatIcon.setTint(floatIconColor);
         // mFloatIcon.setTintMode(PorterDuff.Mode.SRC_IN);
-        mFloatIconPadding = ta.getDimensionPixelSize(R.styleable.MultilevelMenu_mlMenu_floatIconPadding,
+        mOriginPadding = ta.getDimensionPixelSize(R.styleable.MultilevelMenu_mlm_originPadding,
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics()));
 
-        int menuRes = ta.getResourceId(R.styleable.MultilevelMenu_mlMenu_menu, 0);
+        mFloatDiff = DisplayUtil.dp2px(8);
+
+        mMenuItemMargin = ta.getDimensionPixelSize(R.styleable.MultilevelMenu_mlm_menuItemMargin,
+                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics()));
+
+        int menuRes = ta.getResourceId(R.styleable.MultilevelMenu_mlm_menuVertical, 0);
         fromMenu(menuRes);
-        for (int i = 0; i < mMenu.size(); i++) {
-            MenuItem menuItem = mMenu.getItem(i);
-            if (menuItem.isVisible()) {
-                ItemView itemView = new ItemView(getContext(), menuItem);
-                itemView.setPadding(mItemPadding);
-                itemView.setVisibility(isInEditMode() ? VISIBLE : GONE);
-                addView(itemView);
-//                if (menuItem.getSubMenu() != null && menuItem.getSubMenu().size() > 0) {
-//                    for (int j = 0; j < menuItem.getSubMenu().size(); j++) {
-//                        // TODO: 2017/11/20
-//                    }
-//                }
-            }
-        }
 
         ta.recycle();
     }
 
-//    @Override
-//    public LayoutParams generateLayoutParams(AttributeSet attrs) {
-//        return new MarginLayoutParams(getContext(), attrs);
-//    }
+    public void setOnMenuItemSelectedListener(Consumer<MenuItem> listener) {
+        onMenuItemSelectedListener = listener;
+    }
+
+    private int mCurrLevel = 0;
+
+    private ItemView.Callback onItemCallback = new ItemView.Callback() {
+        @Override
+        public void onEntered(ItemView v, MenuItem item) {
+            L.e(item.getTitle() + " - enter - " + v.getCenterPoint());
+
+            for (int i = v.getLevel() + 1; i <= mCurrLevel; i++) {
+                List<ItemView> itemViews = menuArray.get(i);
+                if (itemViews != null && !itemViews.isEmpty()) {
+                    for (ItemView itemView : itemViews) {
+                        removeView(itemView);
+                    }
+                }
+                menuArray.delete(i);
+            }
+
+
+            SubMenu subMenu = item.getSubMenu();
+            if (subMenu != null && subMenu.size() > 0) {
+                mCurrLevel = v.getLevel() + 1;
+                List<ItemView> sub = new ArrayList<>();
+                int position = 0;
+                for (int i = 0; i < subMenu.size(); i++) {
+                    MenuItem menuItem = subMenu.getItem(i);
+                    if (menuItem.isVisible()) {
+                        ItemView itemView = new ItemView(getContext(), menuItem,
+                                mCurrLevel, v.getOrientation() ^ ItemView.VERTICAL);
+                        itemView.setVisibility(VISIBLE);
+                        itemView.setCallback(onItemCallback);
+                        addView(itemView);
+                        sub.add(itemView);
+
+                        layout(itemView, v.getCenterPoint().x, v.getCenterPoint().y, position);
+                        position++;
+                    }
+                }
+                menuArray.append(mCurrLevel, sub);
+            }
+        }
+
+        @Override
+        public void onExited(ItemView v, MenuItem item) {
+            L.e(item.getTitle() + " - exit");
+            if (item.getSubMenu() != null && item.getSubMenu().size() > 0) {
+                // TODO: 2017/11/21
+            }
+        }
+
+        @Override
+        public void onDrop(ItemView v, MenuItem item) {
+            if (onMenuItemSelectedListener != null) {
+                onMenuItemSelectedListener.accept(item);
+            }
+        }
+    };
 
     @Override
     protected void onSizeChanged(int w, int h, int ow, int oh) {
@@ -115,17 +171,17 @@ public class MultilevelMenu extends ViewGroup {
         this.mHeight = h;
 
         // outline
-        mFloatOutlineRect = new Rect(
-                mWidth - mPadding - mFloatRadius * 2,
-                mHeight - mPadding - mFloatRadius * 2,
+        mOriginOutlineRect = new Rect(
+                mWidth - mPadding - mOriginRadius * 2,
+                mHeight - mPadding - mOriginRadius * 2,
                 mWidth - mPadding,
                 mHeight - mPadding);
 
-        mFloatIcon.setBounds(
-                mFloatOutlineRect.left + mFloatIconPadding,
-                mFloatOutlineRect.top + mFloatIconPadding,
-                mFloatOutlineRect.right - mFloatIconPadding,
-                mFloatOutlineRect.bottom - mFloatIconPadding);
+        mOriginIcon.setBounds(
+                mOriginOutlineRect.left + mOriginPadding,
+                mOriginOutlineRect.top + mOriginPadding,
+                mOriginOutlineRect.right - mOriginPadding,
+                mOriginOutlineRect.bottom - mOriginPadding);
 
         setBackground(buildBackground());
     }
@@ -134,46 +190,20 @@ public class MultilevelMenu extends ViewGroup {
         return new ShapeDrawable(new RectShape() {
             @Override
             public void draw(Canvas canvas, Paint paint) {
-                paint.setColor(mFloatBackgroundColor);
-                canvas.drawOval(mFloatOutlineRect.left, mFloatOutlineRect.top, mFloatOutlineRect.right, mFloatOutlineRect.bottom, paint);
+                paint.setColor(mOriginBackgroundColor);
+                canvas.drawOval(mOriginOutlineRect.left, mOriginOutlineRect.top, mOriginOutlineRect.right, mOriginOutlineRect.bottom, paint);
             }
 
             @Override
             public void getOutline(Outline outline) {
-                outline.setOval(mFloatOutlineRect);
+                outline.setOval(mOriginOutlineRect);
             }
         });
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        L.e("Multilevel.onLayout");
-        int diff = DisplayUtil.dp2px(8);
-        int dis = DisplayUtil.dp2px(8);
-//        for (int i = 0; i < getChildCount(); i++) {
-//            View child = getChildAt(i);
-//            if (child instanceof ItemView) {
-//                ItemView itemView = (ItemView) child;
-//                itemView.setCenterPoint(mFloatOutlineRect.right - mFloatRadius,
-//                        mFloatOutlineRect.bottom - mFloatRadius - dis * i - dis - diff);
-//                itemView.layout(l, t, r, b);
-//            }
-//        }
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            if (child instanceof ItemView) {
-                ItemView itemView = (ItemView) child;
-                int cx = mFloatOutlineRect.right - mFloatRadius;
-                int cy = mFloatOutlineRect.bottom - mFloatRadius - dis * i - dis - diff;
-                itemView.setCenterPoint(cx, cy);
-                measureChild(itemView, 0, 0);
-                itemView.layout(
-                        mFloatOutlineRect.right - diff - child.getMeasuredWidth() + mItemPadding,
-                        mFloatOutlineRect.top - dis * i - dis - child.getMeasuredHeight() * i - child.getMeasuredHeight() - mItemPadding,
-                        mFloatOutlineRect.right - diff + mItemPadding,
-                        mFloatOutlineRect.top - dis * i - dis - child.getMeasuredHeight() * i - mItemPadding);
-            }
-        }
+        // do nothing
     }
 
     private void fromMenu(int menuRes) {
@@ -190,38 +220,56 @@ public class MultilevelMenu extends ViewGroup {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        mFloatIcon.draw(canvas);
+        mOriginIcon.draw(canvas);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            DragShadowBuilder dragShadowBuilder = new DragShadowBuilder();
-            ClipData dragData = DragUtils.getClipData();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                startDragAndDrop(dragData, dragShadowBuilder, null, 0);
-            } else {
-                startDrag(dragData, dragShadowBuilder, null, 0);
+            double distance = Math.sqrt(Math.pow(mWidth - mPadding - mOriginRadius - event.getX(), 2)
+                    + Math.pow(mHeight - mPadding - mOriginRadius - event.getY(), 2));
+            if (distance <= mOriginRadius) {
+                DragShadowBuilder dragShadowBuilder = new DragShadowBuilder();
+                ClipData dragData = DragUtils.getClipData();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    startDragAndDrop(dragData, dragShadowBuilder, null, 0);
+                } else {
+                    startDrag(dragData, dragShadowBuilder, null, 0);
+                }
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     @Override
     public boolean onDragEvent(DragEvent event) {
-        L.e("MultilevelMenu: onDragEvent - " + event);
+        // L.e("MultilevelMenu: onDragEvent - " + event);
         switch (event.getAction()) {
             case DragEvent.ACTION_DRAG_STARTED:
                 if (DragUtils.isDragForMe(event.getClipDescription().getLabel())) {
-                    double distance = Math.sqrt(Math.pow(mWidth - mPadding - mFloatRadius - event.getX(), 2)
-                            + Math.pow(mHeight - mPadding - mFloatRadius - event.getY(), 2));
-                    if (distance <= mFloatRadius) {
-                        // 忽略系统设置 强制震动反馈
-                        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-                        for (int i = 0; i < getChildCount(); i++) {
-                            getChildAt(i).setVisibility(VISIBLE);
+                    // 忽略系统设置 强制震动反馈
+                    performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+
+                    removeAllViews();
+                    menuArray = new SparseArray<>();
+                    List<ItemView> root = new ArrayList<>();
+                    int position = 0;
+                    for (int i = 0; i < mMenu.size(); i++) {
+                        MenuItem menuItem = mMenu.getItem(i);
+                        if (menuItem.isVisible()) {
+                            ItemView itemView = new ItemView(getContext(), menuItem, 0, ItemView.VERTICAL);
+                            itemView.setVisibility(VISIBLE);
+                            itemView.setCallback(onItemCallback);
+                            addView(itemView);
+                            root.add(itemView);
+
+                            layout(itemView, mWidth - mPadding - mOriginRadius,
+                                    mHeight - mPadding - mOriginRadius - mFloatDiff, position);
+                            position++;
                         }
                     }
+                    menuArray.append(0, root);
                     return true;
                 } else {
                     return false;
@@ -233,5 +281,24 @@ public class MultilevelMenu extends ViewGroup {
                 return true;
         }
         return true;
+    }
+
+    private void layout(ItemView itemView, int originX, int originY, int position) {
+        L.e("layout - " + originX + " - " + originY + " - " + itemView.getOrientation());
+        int itemR = DisplayUtil.dp2px(20);
+        measureChild(itemView, 0, 0);
+        if (itemView.getOrientation() == ItemView.HORIZONTAL) {
+            itemView.layout(
+                    originX - itemR - mMenuItemMargin * (position + 1) - itemView.getMeasuredWidth() * (position + 1) - itemView.getPadding(),
+                    originY + itemR + itemView.getPadding() - itemView.getMeasuredHeight(),
+                    originX - itemR - mMenuItemMargin * (position + 1) - itemView.getMeasuredWidth() * position - itemView.getPadding(),
+                    originY + itemR + itemView.getPadding());
+        } else if (itemView.getOrientation() == ItemView.VERTICAL) {
+            itemView.layout(
+                    originX + itemR + itemView.getPadding() - itemView.getMeasuredWidth(),
+                    originY - itemR - mMenuItemMargin * (position + 1) - itemView.getMeasuredHeight() * (position + 1) - itemView.getPadding(),
+                    originX + itemR + itemView.getPadding(),
+                    originY - itemR - mMenuItemMargin * (position + 1) - itemView.getMeasuredHeight() * position - itemView.getPadding());
+        }
     }
 }

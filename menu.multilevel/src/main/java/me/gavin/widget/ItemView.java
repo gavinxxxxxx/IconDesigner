@@ -4,9 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
+import android.graphics.Point;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.util.TypedValue;
@@ -16,72 +14,54 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import me.gavin.util.DisplayUtil;
 import me.gavin.util.DragUtils;
-import me.gavin.util.L;
 
 public class ItemView extends ViewGroup {
 
-    private MenuItem mMenuItem;
+    public static final int HORIZONTAL = 0;
+    public static final int VERTICAL = 1;
 
-    private int mX, mY;
+    private MenuItem mMenuItem;
+    private int mLevel;
+    private int mOrientation;
+    private Callback mCallback;
 
     // float
     private int mWidth, mHeight;
-    private Rect mFloatOutlineRect;
+    private int mPadding;
+    private int mMargin;
 
     // icon
-    private int mFloatRadius;
-    private int mFloatBackgroundColor;
-    private Drawable mFloatIcon;
-    private int mFloatIconPadding;
+    private ImageView mImageView;
+    private int mIconRadius;
+    private int mIconBackgroundColor;
 
-    // text;
-    private Rect mTitleRect;
-    private Paint mTitleBgPaint;
-    private Paint mTitlePaint;
-    private Rect mTitleBound = new Rect();
-    private int mTitleHPadding;
-    private int mTitleVPadding;
-    private int mTitleMargin;
+    // title;
+    private TextView mTextView;
 
-    private int mPadding;
-
-    public ItemView(Context context, MenuItem menuItem) {
+    public ItemView(Context context, MenuItem menuItem, int level, int orientation) {
         super(context);
-        setWillNotDraw(false);
         this.mMenuItem = menuItem;
-        mFloatIcon = mMenuItem.getIcon();
-        mFloatIcon.setColorFilter(0xFFFFFFFF, PorterDuff.Mode.SRC_IN);
-        setElevation(DisplayUtil.dp2px(6));
+        this.mLevel = level;
+        this.mOrientation = orientation;
 
-        mFloatRadius = DisplayUtil.dp2px(20);
-        mFloatBackgroundColor = 0xFF303030;
-        mFloatIconPadding = DisplayUtil.dp2px(8);
+        mIconRadius = DisplayUtil.dp2px(20);
+        mIconBackgroundColor = 0xFF303030;
 
-        mTitleBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mTitleBgPaint.setColor(0xFF303030);
-        mTitleBgPaint.setShadowLayer(5, 1, 3, 0xFFFF0000);
-        mTitlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mTitlePaint.setTextAlign(Paint.Align.CENTER);
-        mTitlePaint.setColor(0xFFFFFFFF);
-        mTitlePaint.setTextSize(TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_SP, 14f, getResources().getDisplayMetrics()));
-        mTitlePaint.getTextBounds(mMenuItem.getTitle().toString(), 0, mMenuItem.getTitle().length(), mTitleBound);
-        mTitleHPadding = DisplayUtil.dp2px(8);
-        mTitleVPadding = DisplayUtil.dp2px(6);
-        mTitleMargin = DisplayUtil.dp2px(16);
+        mMargin = DisplayUtil.dp2px(16);
+        mPadding = DisplayUtil.dp2px(8);
 
-        imageView = new ImageView(context);
-        imageView.setImageDrawable(mFloatIcon);
-        imageView.setPadding(mFloatIconPadding, mFloatIconPadding, mFloatIconPadding, mFloatIconPadding);
-        imageView.setElevation(DisplayUtil.dp2px(6));
-        imageView.setBackground(new ShapeDrawable(new RectShape() {
+        mImageView = new ImageView(context);
+        mImageView.setImageDrawable(mMenuItem.getIcon());
+        int iconPadding = DisplayUtil.dp2px(8);
+        mImageView.setPadding(iconPadding, iconPadding, iconPadding, iconPadding);
+        mImageView.setElevation(DisplayUtil.dp2px(6));
+        mImageView.setBackground(new ShapeDrawable(new RectShape() {
             @Override
             public void draw(Canvas canvas, Paint paint) {
-                paint.setColor(mFloatBackgroundColor);
+                paint.setColor(mIconBackgroundColor);
                 canvas.drawCircle(rect().centerX(), rect().centerY(), rect().width() / 2f, paint);
             }
 
@@ -90,20 +70,22 @@ public class ItemView extends ViewGroup {
                 outline.setOval((int) rect().left, (int) rect().top, (int) rect().right, (int) rect().bottom);
             }
         }));
-        imageView.setOnDragListener(onDragListener);
-        addView(imageView);
-        textView = new TextView(context);
-        textView.setPadding(mTitleHPadding, mTitleVPadding, mTitleHPadding, mTitleVPadding);
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
-        textView.setTextColor(0xFFFFFFFF);
-        textView.setText(mMenuItem.getTitle());
-        textView.setElevation(DisplayUtil.dp2px(4));
-        textView.setBackground(new ShapeDrawable(new RectShape() {
-            private final int radius = DisplayUtil.dp2px(4);
+        mImageView.setOnDragListener(onDragListener);
+        addView(mImageView);
+        mTextView = new TextView(context);
+        int hPadding = DisplayUtil.dp2px(8);
+        int vPadding = DisplayUtil.dp2px(5);
+//        mTextView.setPadding(hPadding, vPadding, hPadding, vPadding);
+        mTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
+        mTextView.setTextColor(0xFFFFFFFF);
+//        mTextView.setText(mMenuItem.getTitle());
+        mTextView.setElevation(DisplayUtil.dp2px(4));
+        mTextView.setBackground(new ShapeDrawable(new RectShape() {
+            private final int radius = DisplayUtil.dp2px(2);
 
             @Override
             public void draw(Canvas canvas, Paint paint) {
-                paint.setColor(mFloatBackgroundColor);
+                paint.setColor(mIconBackgroundColor);
                 canvas.drawRoundRect(rect(), radius, radius, paint);
             }
 
@@ -112,146 +94,102 @@ public class ItemView extends ViewGroup {
                 outline.setRoundRect((int) rect().left, (int) rect().top, (int) rect().right, (int) rect().bottom, radius);
             }
         }));
-        addView(textView);
+        addView(mTextView);
     }
 
-    ImageView imageView;
-    TextView textView;
-
-    public void setPadding(int padding) {
-        this.mPadding = padding;
+    public void setCallback(Callback callback) {
+        mCallback = callback;
     }
 
-    public void setCenterPoint(int x, int y) {
-        this.mX = x;
-        this.mY = y;
-        imageView.layout(mWidth - mFloatRadius * 2 - mPadding, mPadding, mWidth - mPadding, mHeight - mPadding);
-        measureChild(textView, 0, 0);
-        textView.layout(mPadding, mHeight / 2 - textView.getMeasuredHeight() / 2,
-                textView.getMeasuredWidth() + mPadding, mHeight / 2 + textView.getMeasuredHeight() / 2);
+    public int getPadding() {
+        return mPadding;
+    }
+
+    public Point getCenterPoint() {
+        return new Point(getRight() - mPadding - mIconRadius, getBottom() - mPadding - mIconRadius);
+    }
+
+    public int getLevel() {
+        return mLevel;
+    }
+
+    public int getOrientation() {
+        return mOrientation;
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        L.e("Item.onMeasure");
-        measureChild(textView, 0, 0);
-        int width = textView.getMeasuredWidth() + mTitleMargin + mFloatRadius * 2 + mPadding * 2;
-        int height = Math.max(textView.getMeasuredHeight(), mFloatRadius * 2) + mPadding * 2;
+        measureChild(mTextView, widthMeasureSpec, heightMeasureSpec);
+        int width = mTextView.getMeasuredWidth() + mMargin + mIconRadius * 2 + mPadding * 2;
+        int height = Math.max(mTextView.getMeasuredHeight(), mIconRadius * 2) + mPadding * 2;
         setMeasuredDimension(width, height);
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int ow, int oh) {
-        L.e("Item.onSizeChanged");
         this.mWidth = w;
         this.mHeight = h;
-
-        // outline
-        mFloatOutlineRect = new Rect(mX - mFloatRadius, mY - mFloatRadius, mX + mFloatRadius, mY + mFloatRadius);
-
-        mFloatIcon.setBounds(
-                mX - mFloatRadius + mFloatIconPadding,
-                mY - mFloatRadius + mFloatIconPadding,
-                mX + mFloatRadius - mFloatIconPadding,
-                mY + mFloatRadius - mFloatIconPadding);
-
-        mTitleRect = new Rect(
-                mX - mFloatRadius - mTitleMargin - mTitleBound.width() - mTitleHPadding * 2,
-                mY - mTitleBound.height() / 2 - mTitleVPadding,
-                mX - mFloatRadius - mTitleMargin,
-                mY + mTitleBound.height() / 2 + mTitleVPadding);
-
-//        setBackground(buildBackground());
-    }
-
-    private Drawable buildBackground() {
-        return new ShapeDrawable(new RectShape() {
-            @Override
-            public void draw(Canvas canvas, Paint paint) {
-                paint.setColor(mFloatBackgroundColor);
-                canvas.drawOval(mFloatOutlineRect.left, mFloatOutlineRect.top, mFloatOutlineRect.right, mFloatOutlineRect.bottom, paint);
-            }
-
-            @Override
-            public void getOutline(Outline outline) {
-                outline.setOval(mFloatOutlineRect);
-            }
-        });
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-
+        mImageView.layout(mWidth - mIconRadius * 2 - mPadding, mPadding, mWidth - mPadding, mHeight - mPadding);
+        mTextView.layout(mPadding, mHeight / 2 - mTextView.getMeasuredHeight() / 2,
+                mTextView.getMeasuredWidth() + mPadding, mHeight / 2 + mTextView.getMeasuredHeight() / 2);
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-//        canvas.drawColor(0x20800000);
-
-//        mFloatIcon.draw(canvas);
-//
-//        canvas.drawRoundRect(mTitleRect.left, mTitleRect.top, mTitleRect.right, mTitleRect.bottom, 10, 10, mTitleBgPaint);
-//
+//    @Override
+//    protected void onDraw(Canvas canvas) {
 //        Paint.FontMetricsInt fmi = mTitlePaint.getFontMetricsInt();
 //        int baseline = (mTitleRect.bottom + mTitleRect.top - fmi.bottom - fmi.top) / 2;
 //        canvas.drawText(mMenuItem.getTitle().toString(), mTitleRect.centerX(), baseline, mTitlePaint);
-    }
+//    }
 
     private OnDragListener onDragListener = (v, event) -> {
-        L.e(mMenuItem.getTitle() + ": onDragEvent - " + event);
+        // L.e(mMenuItem.getTitle() + ": onDragEvent - " + event);
         switch (event.getAction()) {
             case DragEvent.ACTION_DRAG_STARTED:
                 return DragUtils.isDragForMe(event.getClipDescription().getLabel());
             case DragEvent.ACTION_DRAG_ENDED:
                 // unselected
-                mTitlePaint.setColor(0xFFFFFFFF);
+                mTextView.setVisibility(VISIBLE);
+                mTextView.setTextColor(0xFFFFFFFF);
                 return true;
             case DragEvent.ACTION_DRAG_ENTERED:
                 // selected
-                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-                mTitlePaint.setColor(0xFFFF0000);
-                invalidate();
+                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                if (mMenuItem.getSubMenu() != null && mMenuItem.getSubMenu().size() > 0) {
+                    mTextView.setVisibility(GONE);
+                } else {
+                    mTextView.setTextColor(0xFFFF0000);
+                }
+                if (mCallback != null) {
+                    mCallback.onEntered(this, mMenuItem);
+                }
                 return true;
             case DragEvent.ACTION_DRAG_EXITED:
                 // unselected
-                mTitlePaint.setColor(0xFFFFFFFF);
-                invalidate();
+                mTextView.setVisibility(VISIBLE);
+                mTextView.setTextColor(0xFFFFFFFF);
+                if (mCallback != null) {
+                    mCallback.onExited(this, mMenuItem);
+                }
                 return true;
             case DragEvent.ACTION_DROP:
-                // TODO: 2017/11/20
-                Toast.makeText(getContext(), mMenuItem.getTitle() + " selected", Toast.LENGTH_SHORT).show();
+                if (mCallback != null) {
+                    mCallback.onDrop(this, mMenuItem);
+                }
                 return true;
         }
         return false;
     };
 
-//    @Override
-//    public boolean onDragEvent(DragEvent event) {
-//         L.e(mMenuItem.getTitle() + ": onDragEvent - " + event);
-//        switch (event.getAction()) {
-//            case DragEvent.ACTION_DRAG_STARTED:
-//                return DragUtils.isDragForMe(event.getClipDescription().getLabel());
-//            case DragEvent.ACTION_DRAG_ENDED:
-//                // unselected
-//                mTitlePaint.setColor(0xFFFFFFFF);
-//                return true;
-//            case DragEvent.ACTION_DRAG_ENTERED:
-//                // selected
-//                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-//                mTitlePaint.setColor(0xFFFF0000);
-//                invalidate();
-//                return true;
-//            case DragEvent.ACTION_DRAG_EXITED:
-//                // unselected
-//                mTitlePaint.setColor(0xFFFFFFFF);
-//                invalidate();
-//                return true;
-//            case DragEvent.ACTION_DROP:
-//                // TODO: 2017/11/20
-//                Toast.makeText(getContext(), mMenuItem.getTitle() + " selected", Toast.LENGTH_SHORT).show();
-//                return true;
-//        }
-//        return false;
-//    }
+    public interface Callback {
+        void onEntered(ItemView v, MenuItem item);
+
+        void onExited(ItemView v, MenuItem item);
+
+        void onDrop(ItemView v, MenuItem item);
+    }
 
 }

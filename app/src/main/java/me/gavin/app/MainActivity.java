@@ -7,8 +7,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
@@ -44,8 +42,58 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        mBinding.fab.setOnClickListener(v -> createFile());
         afterCreate();
+
+        mBinding.menu.setOnMenuItemSelectedListener(menuItem -> {
+            mSeekBarType = 0;
+            mBinding.seekBar.setVisibility(View.GONE);
+            switch (menuItem.getItemId()) {
+                case R.id.icon_shape:
+                    new ChooseIconDialog(this, svg -> {
+                        mBinding.pre.setSVG(svg);
+                    }).show();
+                    break;
+                case R.id.icon_color:
+                    showColorPicker(false);
+                    // showEditDialog(false);
+                    break;
+                case R.id.icon_size:
+                    mSeekBarType = TYPE_SEEK_ICON_SIZE;
+                    mBinding.seekBar.setVisibility(View.VISIBLE);
+                    break;
+                case R.id.shadow_angle:
+                    break;
+                case R.id.shadow_length:
+                    break;
+                case R.id.shadow_gradient:
+                    mSeekBarType = TYPE_SEEK_SHADOW_GRADIENT;
+                    mBinding.seekBar.setVisibility(View.VISIBLE);
+                    break;
+                case R.id.shadow_alpha:
+                    mSeekBarType = TYPE_SEEK_SHADOW_ALPHA;
+                    mBinding.seekBar.setVisibility(View.VISIBLE);
+                    break;
+                case R.id.background_shape_rect:
+                    mBinding.pre.setBgShape(0);
+                    break;
+                case R.id.background_shape_circle:
+                    mBinding.pre.setBgShape(1);
+                    break;
+                case R.id.background_color:
+                    showColorPicker(true);
+                    // showEditDialog(true);
+                    break;
+
+                case R.id.save:
+                    createFile();
+                    break;
+                case R.id.donate:
+                    // TODO: 2017/11/21
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 
     private void afterCreate() {
@@ -86,54 +134,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        mSeekBarType = 0;
-        mBinding.seekBar.setVisibility(View.GONE);
-        switch (item.getItemId()) {
-            case R.id.icon_shape:
-                new ChooseIconDialog(this, svg -> {
-                    mBinding.pre.setSVG(svg);
-                }).show();
-                return true;
-            case R.id.icon_color:
-                showColorPicker(false);
-                // showEditDialog(false);
-                return true;
-            case R.id.icon_size:
-                mSeekBarType = TYPE_SEEK_ICON_SIZE;
-                mBinding.seekBar.setVisibility(View.VISIBLE);
-                return true;
-            case R.id.shadow_angle:
-                return true;
-            case R.id.shadow_length:
-                return true;
-            case R.id.shadow_gradient:
-                mSeekBarType = TYPE_SEEK_SHADOW_GRADIENT;
-                mBinding.seekBar.setVisibility(View.VISIBLE);
-                return true;
-            case R.id.shadow_alpha:
-                mSeekBarType = TYPE_SEEK_SHADOW_ALPHA;
-                mBinding.seekBar.setVisibility(View.VISIBLE);
-                return true;
-            case R.id.background_shape:
-                mBinding.pre.setBgShape(1);
-                return true;
-            case R.id.background_color:
-                showColorPicker(true);
-                // showEditDialog(true);
-                return true;
-            default:
-                return false;
-        }
     }
 
     private void showEditDialog(boolean isBg) {
