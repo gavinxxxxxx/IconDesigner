@@ -101,7 +101,7 @@ public class MultilevelMenu extends ViewGroup {
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics()));
         mOriginIcon = ta.getDrawable(R.styleable.MultilevelMenu_mlm_originIcon);
         if (mOriginIcon == null) {
-            mOriginIcon = getResources().getDrawable(R.drawable.ic_apps_black_24dp);
+            mOriginIcon = getResources().getDrawable(R.drawable.ic_gesture_24dp);
         }
         int floatIconColor = ta.getColor(R.styleable.MultilevelMenu_mlm_originIconColor, 0xFFFFFFFF);
         mOriginIcon.setColorFilter(floatIconColor, PorterDuff.Mode.SRC_IN);

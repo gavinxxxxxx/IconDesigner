@@ -39,7 +39,7 @@
             app:mlm_menuItemRadius="20dp"
             app:mlm_menuVertical="@menu/menu_vertical"
             app:mlm_originBgColor="@color/colorPrimaryLight"
-            app:mlm_originIcon="@drawable/ic_apps_24dp"
+            app:mlm_originIcon="@drawable/ic_gesture_24dp"
             app:mlm_originIconColor="@android:color/white"
             app:mlm_originMargin="16dp"
             app:mlm_originPadding="16dp"
