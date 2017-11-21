@@ -7,13 +7,13 @@
         <attr name="mlm_originPadding" format="dimension" />
         <attr name="mlm_originIcon" format="reference" />
         <attr name="mlm_originIconColor" format="color" />
-        <attr name="mlm_menuVertical" format="reference" />
-        <attr name="mlm_menuHorizontal" format="reference" />
         <attr name="mlm_menuItemMargin" format="dimension" />
         <attr name="mlm_menuItemRadius" format="dimension" />
         <attr name="mlm_menuItemBgColor" format="color" />
         <attr name="mlm_menuItemPadding" format="dimension" />
         <attr name="mlm_menuItemIconColor" format="color" />
+        <attr name="mlm_menuVertical" format="reference" />
+        <attr name="mlm_menuHorizontal" format="reference" />
     </declare-styleable>
 
 </resources>

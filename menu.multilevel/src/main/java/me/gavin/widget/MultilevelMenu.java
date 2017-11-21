@@ -46,18 +46,22 @@ public class MultilevelMenu extends ViewGroup {
     // 原点
     private Rect mOriginOutlineRect;
     private int mOriginRadius;
-    private int mOriginBackgroundColor;
+    private int mOriginBgColor;
     private Drawable mOriginIcon;
     private int mOriginPadding;
 
+    // MenuItem
     private int mMenuItemMargin;
-
-    private int mFloatDiff;
+    private int mMenuItemRadius;
+    private int mMenuItemBgColor;
+    private int mMenuItemPadding;
+    private int mMenuItemIconColor;
 
     // menu
-    private Menu mMenu;
+    private Menu mVerticalMenu, mHorizontalMenu;
 
     SparseArray<List<ItemView>> menuArray;
+    private SparseArray<List<ItemView2>> mMenuItemArray;
 
     private Consumer<MenuItem> onMenuItemSelectedListener;
 
@@ -81,7 +85,9 @@ public class MultilevelMenu extends ViewGroup {
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.MultilevelMenu);
         mOriginRadius = ta.getDimensionPixelOffset(R.styleable.MultilevelMenu_mlm_originRadius,
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 28, getResources().getDisplayMetrics()));
-        mOriginBackgroundColor = ta.getColor(R.styleable.MultilevelMenu_mlm_originBgColor, 0xFF303030);
+        mOriginBgColor = ta.getColor(R.styleable.MultilevelMenu_mlm_originBgColor, 0xFF303030);
+        mOriginPadding = ta.getDimensionPixelSize(R.styleable.MultilevelMenu_mlm_originPadding,
+                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics()));
         mOriginIcon = ta.getDrawable(R.styleable.MultilevelMenu_mlm_originIcon);
         if (mOriginIcon == null) {
             mOriginIcon = getResources().getDrawable(R.drawable.ic_apps_black_24dp);
@@ -90,16 +96,26 @@ public class MultilevelMenu extends ViewGroup {
         mOriginIcon.setColorFilter(floatIconColor, PorterDuff.Mode.SRC_IN);
         // mFloatIcon.setTint(floatIconColor);
         // mFloatIcon.setTintMode(PorterDuff.Mode.SRC_IN);
-        mOriginPadding = ta.getDimensionPixelSize(R.styleable.MultilevelMenu_mlm_originPadding,
-                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics()));
-
-        mFloatDiff = DisplayUtil.dp2px(8);
 
         mMenuItemMargin = ta.getDimensionPixelSize(R.styleable.MultilevelMenu_mlm_menuItemMargin,
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics()));
+        mMenuItemRadius = ta.getDimensionPixelSize(R.styleable.MultilevelMenu_mlm_menuItemRadius,
+                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics()));
+        mMenuItemBgColor = ta.getColor(R.styleable.MultilevelMenu_mlm_menuItemBgColor, 0xFF303030);
+        mMenuItemPadding = ta.getDimensionPixelSize(R.styleable.MultilevelMenu_mlm_menuItemPadding,
+                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics()));
+        mMenuItemIconColor = ta.getColor(R.styleable.MultilevelMenu_mlm_menuItemIconColor, 0xFFFFFFFF);
 
-        int menuRes = ta.getResourceId(R.styleable.MultilevelMenu_mlm_menuVertical, 0);
-        fromMenu(menuRes);
+        int verticalMenuId = ta.getResourceId(R.styleable.MultilevelMenu_mlm_menuVertical, 0);
+        if (verticalMenuId != 0) {
+            mVerticalMenu = new PopupMenu(getContext(), null).getMenu();
+            initMenu(mVerticalMenu, verticalMenuId);
+        }
+        int hMenuId = ta.getResourceId(R.styleable.MultilevelMenu_mlm_menuHorizontal, 0);
+        if (hMenuId != 0) {
+            mHorizontalMenu = new PopupMenu(getContext(), null).getMenu();
+            initMenu(mHorizontalMenu, verticalMenuId);
+        }
 
         ta.recycle();
     }
@@ -141,7 +157,7 @@ public class MultilevelMenu extends ViewGroup {
                         addView(itemView);
                         sub.add(itemView);
 
-                        layout(itemView, v.getCenterPoint().x, v.getCenterPoint().y, position);
+//                        layout(itemView, v.getCenterPoint().x, v.getCenterPoint().y, position);
                         position++;
                     }
                 }
@@ -190,7 +206,7 @@ public class MultilevelMenu extends ViewGroup {
         return new ShapeDrawable(new RectShape() {
             @Override
             public void draw(Canvas canvas, Paint paint) {
-                paint.setColor(mOriginBackgroundColor);
+                paint.setColor(mOriginBgColor);
                 canvas.drawOval(mOriginOutlineRect.left, mOriginOutlineRect.top, mOriginOutlineRect.right, mOriginOutlineRect.bottom, paint);
             }
 
@@ -206,12 +222,11 @@ public class MultilevelMenu extends ViewGroup {
         // do nothing
     }
 
-    private void fromMenu(int menuRes) {
-        mMenu = new PopupMenu(getContext(), null).getMenu();
+    private void initMenu(Menu menu, int menuRes) {
         MenuInflater inflater = new MenuInflater(getContext());
-        inflater.inflate(menuRes, mMenu);
-        for (int i = 0; i < mMenu.size(); i++) {
-            MenuItem item = mMenu.getItem(i);
+        inflater.inflate(menuRes, menu);
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
             if (item.getIcon() == null || item.getTitle() == null || item.getItemId() == 0) {
                 throw new IllegalArgumentException("menu resource must have an icon, title, and id.");
             }
@@ -252,24 +267,31 @@ public class MultilevelMenu extends ViewGroup {
                     performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
 
                     removeAllViews();
-                    menuArray = new SparseArray<>();
-                    List<ItemView> root = new ArrayList<>();
+                    mMenuItemArray = new SparseArray<>();
+                    List<ItemView2> root = new ArrayList<>();
                     int position = 0;
-                    for (int i = 0; i < mMenu.size(); i++) {
-                        MenuItem menuItem = mMenu.getItem(i);
+                    for (int i = 0; i < mVerticalMenu.size(); i++) {
+                        MenuItem menuItem = mVerticalMenu.getItem(i);
                         if (menuItem.isVisible()) {
-                            ItemView itemView = new ItemView(getContext(), menuItem, 0, ItemView.VERTICAL);
-                            itemView.setVisibility(VISIBLE);
-                            itemView.setCallback(onItemCallback);
+                            ItemView2 itemView = new ItemView2(getContext());
+                            itemView.setMenuItem(menuItem);
+                            itemView.setOrientation(ItemView2.VERTICAL);
+                            itemView.setPadding(mMenuItemPadding, mMenuItemPadding, mMenuItemPadding, mMenuItemPadding);
                             addView(itemView);
                             root.add(itemView);
 
+//                            ItemView itemView = new ItemView(getContext(), menuItem, 0, ItemView.VERTICAL);
+//                            itemView.setVisibility(VISIBLE);
+//                            itemView.setCallback(onItemCallback);
+//                            addView(itemView);
+//                            root.add(itemView);
+
                             layout(itemView, mWidth - mPadding - mOriginRadius,
-                                    mHeight - mPadding - mOriginRadius - mFloatDiff, position);
+                                    mHeight - mPadding - mOriginRadius * 2 + mMenuItemRadius, position);
                             position++;
                         }
                     }
-                    menuArray.append(0, root);
+                    mMenuItemArray.append(0, root);
                     return true;
                 } else {
                     return false;
@@ -283,22 +305,21 @@ public class MultilevelMenu extends ViewGroup {
         return true;
     }
 
-    private void layout(ItemView itemView, int originX, int originY, int position) {
+    private void layout(ItemView2 itemView, int originX, int originY, int position) {
         L.e("layout - " + originX + " - " + originY + " - " + itemView.getOrientation());
-        int itemR = DisplayUtil.dp2px(20);
         measureChild(itemView, 0, 0);
         if (itemView.getOrientation() == ItemView.HORIZONTAL) {
             itemView.layout(
-                    originX - itemR - mMenuItemMargin * (position + 1) - itemView.getMeasuredWidth() * (position + 1) - itemView.getPadding(),
-                    originY + itemR + itemView.getPadding() - itemView.getMeasuredHeight(),
-                    originX - itemR - mMenuItemMargin * (position + 1) - itemView.getMeasuredWidth() * position - itemView.getPadding(),
-                    originY + itemR + itemView.getPadding());
+                    originX - mMenuItemRadius - mMenuItemMargin * (position + 1) - (mMenuItemRadius * 2 + mMenuItemPadding * 2) * (position + 1) - mMenuItemPadding,
+                    originY + mMenuItemRadius + mMenuItemPadding - (mMenuItemRadius * 2 + mMenuItemPadding * 2),
+                    originX - mMenuItemRadius - mMenuItemMargin * (position + 1) - (mMenuItemRadius * 2 + mMenuItemPadding * 2) * position - mMenuItemPadding,
+                    originY + mMenuItemRadius + mMenuItemPadding);
         } else if (itemView.getOrientation() == ItemView.VERTICAL) {
             itemView.layout(
-                    originX + itemR + itemView.getPadding() - itemView.getMeasuredWidth(),
-                    originY - itemR - mMenuItemMargin * (position + 1) - itemView.getMeasuredHeight() * (position + 1) - itemView.getPadding(),
-                    originX + itemR + itemView.getPadding(),
-                    originY - itemR - mMenuItemMargin * (position + 1) - itemView.getMeasuredHeight() * position - itemView.getPadding());
+                    originX + mMenuItemRadius + mMenuItemPadding - (mMenuItemRadius * 2 + mMenuItemPadding * 2),
+                    originY - mMenuItemRadius - mMenuItemMargin * (position + 1) - (mMenuItemRadius * 2 + mMenuItemPadding * 2) * (position + 1) - mMenuItemPadding,
+                    originX + mMenuItemRadius + mMenuItemPadding,
+                    originY - mMenuItemRadius - mMenuItemMargin * (position + 1) - (mMenuItemRadius * 2 + mMenuItemPadding * 2) * position - mMenuItemPadding);
         }
     }
 }
