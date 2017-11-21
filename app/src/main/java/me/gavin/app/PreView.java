@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
@@ -84,6 +85,23 @@ public class PreView extends View {
                         canvas.drawRect(x, y, x + cw, y + cw, paint);
                     }
                 }
+            }
+        });
+    }
+
+    private Drawable buildBackground2() {
+        return new ShapeDrawable(new RectShape() {
+            @Override
+            public void draw(Canvas canvas, Paint paint) {
+                paint.setColor(mBgPaint.getColor());
+                canvas.drawOval((int) rect().left + 10, (int)rect().top + 10,
+                        (int) rect().right - 10, (int)rect().bottom - 10, paint);
+            }
+
+            @Override
+            public void getOutline(Outline outline) {
+                outline.setOval((int) rect().left + 10, (int)rect().top + 10,
+                        (int) rect().right - 10, (int)rect().bottom - 10);
             }
         });
     }

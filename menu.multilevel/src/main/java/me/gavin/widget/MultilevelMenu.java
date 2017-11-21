@@ -28,7 +28,6 @@ import android.widget.PopupMenu;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.gavin.util.DisplayUtil;
 import me.gavin.util.DragUtils;
 import me.gavin.util.L;
 import me.gavin.widget.menu.multilevel.R;
@@ -41,9 +40,9 @@ import me.gavin.widget.menu.multilevel.R;
 public class MultilevelMenu extends ViewGroup {
 
     private int mWidth, mHeight;
-    private int mPadding;
 
     // 原点
+    private int mOriginMargin;
     private Rect mOriginOutlineRect;
     private int mOriginRadius;
     private int mOriginBgColor;
@@ -61,9 +60,14 @@ public class MultilevelMenu extends ViewGroup {
     // menu
     private Menu mVerticalMenu, mHorizontalMenu;
 
-    private SparseArray<List<ItemView>> mMenuItemArray;
+    private SparseArray<List<ItemView>> mMenuItemArray = new SparseArray<>();
 
     private Consumer<MenuItem> onMenuItemSelectedListener;
+
+    private int mCurrLevel = 0;
+
+    private String mCurrTitle = "";
+    private Paint mTitlePaint;
 
     public MultilevelMenu(Context context) {
         this(context, null);
@@ -76,13 +80,20 @@ public class MultilevelMenu extends ViewGroup {
     public MultilevelMenu(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setWillNotDraw(false);
-        mPadding = DisplayUtil.dp2px(16);
+
+        mTitlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mTitlePaint.setColor(0xfff5f5f5);
+        mTitlePaint.setTextSize(TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP, 10, getResources().getDisplayMetrics()));
+        mTitlePaint.setShadowLayer(2, 2, 2, 0xff2b2b2b);
 
         init(context, attrs);
     }
 
     private void init(Context context, AttributeSet attrs) {
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.MultilevelMenu);
+        mOriginMargin = ta.getDimensionPixelOffset(R.styleable.MultilevelMenu_mlm_originMargin,
+                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics()));
         mOriginRadius = ta.getDimensionPixelOffset(R.styleable.MultilevelMenu_mlm_originRadius,
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 28, getResources().getDisplayMetrics()));
         mOriginBgColor = ta.getColor(R.styleable.MultilevelMenu_mlm_originBgColor, 0xFF303030);
@@ -126,12 +137,12 @@ public class MultilevelMenu extends ViewGroup {
         onMenuItemSelectedListener = listener;
     }
 
-    private int mCurrLevel = 0;
-
     private ItemView.Callback onItemCallback = new ItemView.Callback() {
         @Override
         public void onEntered(ItemView v, MenuItem item) {
             L.e(item.getTitle() + " - enter");
+            mCurrTitle = item.getTitle().toString();
+            invalidate();
 
             for (int i = v.getLevel() + 1; i <= mCurrLevel; i++) {
                 List<ItemView> itemViews = mMenuItemArray.get(i);
@@ -176,9 +187,8 @@ public class MultilevelMenu extends ViewGroup {
         @Override
         public void onExited(ItemView v, MenuItem item) {
             L.e(item.getTitle() + " - exit");
-            if (item.getSubMenu() != null && item.getSubMenu().size() > 0) {
-                // TODO: 2017/11/21
-            }
+            mCurrTitle = "";
+            invalidate();
         }
 
         @Override
@@ -196,10 +206,10 @@ public class MultilevelMenu extends ViewGroup {
 
         // outline
         mOriginOutlineRect = new Rect(
-                mWidth - mPadding - mOriginRadius * 2,
-                mHeight - mPadding - mOriginRadius * 2,
-                mWidth - mPadding,
-                mHeight - mPadding);
+                mWidth - mOriginMargin - mOriginRadius * 2,
+                mHeight - mOriginMargin - mOriginRadius * 2,
+                mWidth - mOriginMargin,
+                mHeight - mOriginMargin);
 
         mOriginIcon.setBounds(
                 mOriginOutlineRect.left + mOriginPadding,
@@ -259,13 +269,14 @@ public class MultilevelMenu extends ViewGroup {
     @Override
     protected void onDraw(Canvas canvas) {
         mOriginIcon.draw(canvas);
+        canvas.drawText(mCurrTitle, 20, mHeight - 20, mTitlePaint);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            double distance = Math.sqrt(Math.pow(mWidth - mPadding - mOriginRadius - event.getX(), 2)
-                    + Math.pow(mHeight - mPadding - mOriginRadius - event.getY(), 2));
+            double distance = Math.sqrt(Math.pow(mWidth - mOriginMargin - mOriginRadius - event.getX(), 2)
+                    + Math.pow(mHeight - mOriginMargin - mOriginRadius - event.getY(), 2));
             if (distance <= mOriginRadius) {
                 DragShadowBuilder dragShadowBuilder = new DragShadowBuilder();
                 ClipData dragData = DragUtils.getClipData();
@@ -289,9 +300,6 @@ public class MultilevelMenu extends ViewGroup {
                     // 忽略系统设置 强制震动反馈
                     performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
 
-                    removeAllViews();
-                    mMenuItemArray = new SparseArray<>();
-
                     showRootMenu(mVerticalMenu, ItemView.VERTICAL);
                     showRootMenu(mHorizontalMenu, ItemView.HORIZONTAL);
                     return true;
@@ -299,9 +307,10 @@ public class MultilevelMenu extends ViewGroup {
                     return false;
                 }
             case DragEvent.ACTION_DRAG_ENDED:
-                for (int i = 0; i < getChildCount(); i++) {
-                    getChildAt(i).setVisibility(GONE);
-                }
+                mCurrTitle = "";
+                invalidate();
+                removeAllViews();
+                mMenuItemArray.clear();
                 return true;
         }
         return true;

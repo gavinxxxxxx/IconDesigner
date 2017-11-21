@@ -2,6 +2,7 @@
 <resources>
 
     <declare-styleable name="MultilevelMenu">
+        <attr name="mlm_originMargin" format="dimension" />
         <attr name="mlm_originRadius" format="dimension" />
         <attr name="mlm_originBgColor" format="color" />
         <attr name="mlm_originPadding" format="dimension" />
