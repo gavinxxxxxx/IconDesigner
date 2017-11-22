@@ -18,7 +18,6 @@ import java.io.OutputStream;
 
 import me.gavin.svg.model.SVG;
 import me.gavin.util.DisplayUtil;
-import me.gavin.util.L;
 
 /**
  * 预览
@@ -60,7 +59,7 @@ public class PreView extends View {
         // mBgPaint.setStyle(Paint.Style.STROKE);
         mBgPaint.setAntiAlias(true);
         mBgPaint.setColor(mIcon.bgColor);
-        mBgPaint.setShadowLayer(0.5f, 0, 0.4f, 0x55555555);
+        mBgPaint.setShadowLayer(0.5f, 0, 0.4f, 0x40000000);
 
         mShadowPaint = new Paint();
         mShadowPaint.setAntiAlias(true);
@@ -94,14 +93,14 @@ public class PreView extends View {
             @Override
             public void draw(Canvas canvas, Paint paint) {
                 paint.setColor(mBgPaint.getColor());
-                canvas.drawOval((int) rect().left + 10, (int)rect().top + 10,
-                        (int) rect().right - 10, (int)rect().bottom - 10, paint);
+                canvas.drawOval((int) rect().left + 10, (int) rect().top + 10,
+                        (int) rect().right - 10, (int) rect().bottom - 10, paint);
             }
 
             @Override
             public void getOutline(Outline outline) {
-                outline.setOval((int) rect().left + 10, (int)rect().top + 10,
-                        (int) rect().right - 10, (int)rect().bottom - 10);
+                outline.setOval((int) rect().left + 10, (int) rect().top + 10,
+                        (int) rect().right - 10, (int) rect().bottom - 10);
             }
         });
     }
@@ -118,7 +117,6 @@ public class PreView extends View {
         setMeasuredDimension(mSize, mSize);
     }
 
-    // TODO: 2017/11/8 canvas -> bitmap -> png
     @Override
     protected void onDraw(Canvas canvas) {
         onDraw2(canvas, mMatrix);
@@ -151,7 +149,9 @@ public class PreView extends View {
             }
         }
 
-        canvas.drawPath(mScorePath, mScorePaint);
+        if (mIcon.effectScore) {
+            canvas.drawPath(mScorePath, mScorePaint);
+        }
     }
 
     private void drawBefore() {
@@ -281,6 +281,12 @@ public class PreView extends View {
         buildBgPath();
         buildScorePath();
         invalidate();
+    }
+
+    public boolean toggleEffectScore() {
+        mIcon.effectScore = !mIcon.effectScore;
+        invalidate();
+        return mIcon.effectScore;
     }
 
     public void save(OutputStream outputStream, int size) {

@@ -8,6 +8,22 @@
     <item
         android:id="@+id/donate"
         android:icon="@drawable/ic_donate_24dp"
-        android:title="捐赠" />
+        android:title="捐赠">
+
+        <menu>
+
+            <item
+                android:id="@+id/donate_wechat"
+                android:icon="@drawable/ic_wechat"
+                android:title="微信" />
+
+            <item
+                android:id="@+id/donate_alipay"
+                android:icon="@drawable/ic_alipay"
+                android:title="支付宝" />
+
+        </menu>
+
+    </item>
 
 </menu>

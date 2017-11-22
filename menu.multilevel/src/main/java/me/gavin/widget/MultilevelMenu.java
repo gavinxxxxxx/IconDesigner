@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.gavin.util.DragUtils;
-import me.gavin.util.L;
 import me.gavin.widget.menu.multilevel.R;
 
 /**
@@ -140,7 +139,6 @@ public class MultilevelMenu extends ViewGroup {
     private ItemView.Callback onItemCallback = new ItemView.Callback() {
         @Override
         public void onEntered(ItemView v, MenuItem item) {
-            L.e(item.getTitle() + " - enter");
             mCurrTitle = item.getTitle().toString();
             invalidate();
 
@@ -186,7 +184,6 @@ public class MultilevelMenu extends ViewGroup {
 
         @Override
         public void onExited(ItemView v, MenuItem item) {
-            L.e(item.getTitle() + " - exit");
             mCurrTitle = "";
             invalidate();
         }
@@ -350,7 +347,6 @@ public class MultilevelMenu extends ViewGroup {
     }
 
     private void layout(ItemView itemView, int originX, int originY, int position) {
-        L.e("layout - " + originX + " - " + originY + " - " + itemView.getOrientation());
         measureChild(itemView, 0, 0);
         if (itemView.getOrientation() == ItemView.HORIZONTAL) {
             itemView.layout(

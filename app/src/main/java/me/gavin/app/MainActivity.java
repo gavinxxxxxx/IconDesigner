@@ -22,7 +22,9 @@ import java.util.UUID;
 import io.reactivex.Observable;
 import me.gavin.icon.designer.R;
 import me.gavin.icon.designer.databinding.ActivityMainBinding;
+import me.gavin.icon.designer.databinding.DialogCodeBinding;
 import me.gavin.svg.parser.SVGParser;
+import me.gavin.util.AlipayUtil;
 import me.gavin.util.InputUtil;
 
 public class MainActivity extends AppCompatActivity {
@@ -80,15 +82,25 @@ public class MainActivity extends AppCompatActivity {
                     mBinding.pre.setBgShape(1);
                     break;
                 case R.id.background_color:
-                    showColorPicker(true);
-                    // showEditDialog(true);
+//                    showColorPicker(true);
+                     showEditDialog(true);
+                    break;
+                case R.id.effect_score:
+                    mBinding.pre.toggleEffectScore();
                     break;
 
                 case R.id.save:
                     createFile();
                     break;
-                case R.id.donate:
-                    // TODO: 2017/11/21
+                case R.id.donate_wechat:
+                    new AlertDialog.Builder(this)
+                            .setTitle("微信")
+                            .setView(DialogCodeBinding.inflate(getLayoutInflater()).getRoot())
+                            .setPositiveButton("哦", null)
+                            .show();
+                    break;
+                case R.id.donate_alipay:
+                    AlipayUtil.alipay(this, AlipayUtil.ALIPAY_CODE);
                     break;
                 default:
                     break;
@@ -97,8 +109,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void afterCreate() {
-//        Observable.just("gavin/rect.svg")
-//        Observable.just("gavin/circle.svg")
         Observable.just("gavin/adb.svg")
                 .map(getAssets()::open)
                 .map(SVGParser::parse)
@@ -209,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
     private void createFile() {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("image/jpeg");
+        intent.setType("design/image/jpeg");
         intent.putExtra(Intent.EXTRA_TITLE, UUID.randomUUID() + ".jpg");
         startActivityForResult(intent, 99);
     }

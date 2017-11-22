@@ -102,7 +102,7 @@
                 android:title="折痕" />
             <item
                 android:id="@+id/effect_chine"
-                android:icon="@drawable/ic_format_shapes_24dp"
+                android:icon="@drawable/ic_score_24dp"
                 android:title="折角"
                 android:visible="false" />
 
