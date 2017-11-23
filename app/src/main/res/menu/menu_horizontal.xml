@@ -3,7 +3,43 @@
     <item
         android:id="@+id/save"
         android:icon="@drawable/ic_save_24dp"
-        android:title="保存" />
+        android:title="保存">
+
+        <!--<menu>-->
+
+        <!--<item-->
+        <!--android:id="@+id/save_xxxhdpi"-->
+        <!--android:icon="@drawable/ic_score_24dp"-->
+        <!--android:title="xxxhdpi" />-->
+
+        <!--<item-->
+        <!--android:id="@+id/save_xxhdpi"-->
+        <!--android:icon="@drawable/ic_score_24dp"-->
+        <!--android:title="xxhdpi" />-->
+
+        <!--<item-->
+        <!--android:id="@+id/save_xhdpi"-->
+        <!--android:icon="@drawable/ic_score_24dp"-->
+        <!--android:title="xhdpi" />-->
+
+        <!--<item-->
+        <!--android:id="@+id/save_hdpi"-->
+        <!--android:icon="@drawable/ic_score_24dp"-->
+        <!--android:title="hdpi" />-->
+
+        <!--<item-->
+        <!--android:id="@+id/save_mdpi"-->
+        <!--android:icon="@drawable/ic_score_24dp"-->
+        <!--android:title="mdpi" />-->
+
+        <!--</menu>-->
+
+    </item>
+
+    <item
+        android:id="@+id/send"
+        android:icon="@drawable/ic_send_24dp"
+        android:title="发送" />
 
     <item
         android:id="@+id/donate"

@@ -35,6 +35,7 @@ import me.gavin.widget.menu.multilevel.R;
  * 多级菜单
  *
  * @author gavin.xiong 2017/11/18
+ * @todo Behavior
  */
 public class MultilevelMenu extends ViewGroup {
 
@@ -175,7 +176,7 @@ public class MultilevelMenu extends ViewGroup {
 
                         layout(itemView, (v.getRight() + v.getLeft()) / 2,
                                 (v.getTop() + v.getBottom()) / 2, position);
-                        position ++;
+                        position++;
                     }
                 }
                 mMenuItemArray.append(mCurrLevel, sub);
@@ -242,7 +243,7 @@ public class MultilevelMenu extends ViewGroup {
 
             @Override
             public void getOutline(Outline outline) {
-                outline.setOval((int)rect().left, (int)rect().top, (int)rect().right, (int)rect().bottom);
+                outline.setOval((int) rect().left, (int) rect().top, (int) rect().right, (int) rect().bottom);
             }
         });
     }

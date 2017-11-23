@@ -14,9 +14,10 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import java.io.OutputStream;
+import java.io.IOException;
 
 import me.gavin.svg.model.SVG;
+import me.gavin.util.CacheHelper;
 import me.gavin.util.DisplayUtil;
 
 /**
@@ -289,18 +290,13 @@ public class PreView extends View {
         return mIcon.effectScore;
     }
 
-    public void save(OutputStream outputStream, int size) {
+    public String save(String name, int size) throws IOException {
         Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         Matrix matrix = new Matrix(mMatrix);
         matrix.postScale(size * 1f / mSize, size * 1f / mSize, 0, 0);
         onDraw2(canvas, matrix);
-//        try (fos) {
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            L.e(e);
-//        }
+        return CacheHelper.saveBitmap(bitmap, name);
     }
 
 }

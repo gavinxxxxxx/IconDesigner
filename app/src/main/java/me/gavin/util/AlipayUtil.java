@@ -13,7 +13,7 @@ import android.net.Uri;
  */
 public class AlipayUtil {
 
-    public static final String ALIPAY_CODE = "HTTPS://QR.ALIPAY.COM/FKX04883XNPJ5FKASHP538"; // 个人(收钱)
+    public static final String ALIPAY_CODE = "HTTPS://QR.ALIPAY.COM/FKX03698TBU36ILGO0G5D8"; // 个人(收钱)
 
     /**
      * 支付宝付款

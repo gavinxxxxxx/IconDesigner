@@ -1,30 +1,38 @@
 package me.gavin.app;
 
+import android.Manifest;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
-import com.flask.colorpicker.ColorPickerView;
-import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.UUID;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import me.gavin.icon.designer.R;
 import me.gavin.icon.designer.databinding.ActivityMainBinding;
 import me.gavin.icon.designer.databinding.DialogCodeBinding;
+import me.gavin.icon.designer.databinding.DialogEditColorBinding;
+import me.gavin.icon.designer.databinding.DialogInputNameBinding;
 import me.gavin.svg.parser.SVGParser;
 import me.gavin.util.AlipayUtil;
+import me.gavin.util.CacheHelper;
 import me.gavin.util.InputUtil;
 
 public class MainActivity extends AppCompatActivity {
@@ -51,13 +59,10 @@ public class MainActivity extends AppCompatActivity {
             mBinding.seekBar.setVisibility(View.GONE);
             switch (menuItem.getItemId()) {
                 case R.id.icon_shape:
-                    new ChooseIconDialog(this, svg -> {
-                        mBinding.pre.setSVG(svg);
-                    }).show();
+                    new ChooseIconDialog(this, mBinding.pre::setSVG).show();
                     break;
                 case R.id.icon_color:
-                    showColorPicker(false);
-                    // showEditDialog(false);
+                    showEditDialog(false);
                     break;
                 case R.id.icon_size:
                     mSeekBarType = TYPE_SEEK_ICON_SIZE;
@@ -82,21 +87,49 @@ public class MainActivity extends AppCompatActivity {
                     mBinding.pre.setBgShape(1);
                     break;
                 case R.id.background_color:
-//                    showColorPicker(true);
-                     showEditDialog(true);
+                    showEditDialog(true);
                     break;
                 case R.id.effect_score:
                     mBinding.pre.toggleEffectScore();
                     break;
 
                 case R.id.save:
-                    createFile();
+                    new RxPermissions(this)
+                            .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            .subscribe(granted -> {
+                                if (granted) {
+                                    showSaveDialog();
+                                } else {
+                                    Snackbar.make(mBinding.pre, "保存图片需要 SDCard 卡读写权限", Snackbar.LENGTH_LONG)
+                                            .setAction("设置", v -> {
+                                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                                intent.setData(Uri.parse("package:" + getPackageName()));
+                                                startActivity(intent);
+                                            }).show();
+                                }
+                            });
+                    break;
+                case R.id.send:
+                    new RxPermissions(this)
+                            .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            .subscribe(granted -> {
+                                if (granted) {
+                                    save(null, true);
+                                } else {
+                                    Snackbar.make(mBinding.pre, "保存图片需要 SDCard 卡读写权限", Snackbar.LENGTH_LONG)
+                                            .setAction("设置", v -> {
+                                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                                intent.setData(Uri.parse("package:" + getPackageName()));
+                                                startActivity(intent);
+                                            }).show();
+                                }
+                            });
                     break;
                 case R.id.donate_wechat:
                     new AlertDialog.Builder(this)
                             .setTitle("微信")
                             .setView(DialogCodeBinding.inflate(getLayoutInflater()).getRoot())
-                            .setPositiveButton("哦", null)
+                            .setPositiveButton("哦哦", null)
                             .show();
                     break;
                 case R.id.donate_alipay:
@@ -147,51 +180,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showEditDialog(boolean isBg) {
-        View view = getLayoutInflater().inflate(R.layout.dialog_edit, null);
-        EditText editText = view.findViewById(R.id.editText);
+        DialogEditColorBinding binding = DialogEditColorBinding.inflate(getLayoutInflater());
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setTitle("图标颜色")
-                .setView(view)
+                .setView(binding.getRoot())
                 .setPositiveButton("确定", (dialog, which) -> {
                     if (isBg) {
-                        setBgColor(editText.getText().toString());
+                        setBgColor(binding.editText.getText().toString());
                     } else {
-                        setIconColor(editText.getText().toString());
+                        setIconColor(binding.editText.getText().toString());
                     }
                 })
                 .setNegativeButton("取消", null)
                 .show();
-        editText.postDelayed(() -> InputUtil.show(this, editText), 100);
-        editText.setOnEditorActionListener((v, actionId, event) -> {
+        binding.editText.postDelayed(() -> InputUtil.show(this, binding.editText), 100);
+        binding.editText.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 alertDialog.dismiss();
                 if (isBg) {
-                    setBgColor(editText.getText().toString());
+                    setBgColor(binding.editText.getText().toString());
                 } else {
-                    setIconColor(editText.getText().toString());
+                    setIconColor(binding.editText.getText().toString());
                 }
             }
             return true;
         });
-    }
-
-    private void showColorPicker(boolean isBg) {
-        ColorPickerDialogBuilder
-                .with(this)
-                .setTitle(isBg ? "背景颜色" : "图标颜色")
-                // .initialColor(currentBackgroundColor)
-                .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
-                .density(12)
-                .setPositiveButton("确定", (dialog, color, allColors) -> {
-                    if (isBg) {
-                        mBinding.pre.setBgColor(color);
-                    } else {
-                        mBinding.pre.setIconColor(color);
-                    }
-                })
-                .setNegativeButton("取消", null)
-                .build()
-                .show();
     }
 
     private void setIconColor(String colorStr) {
@@ -202,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
                 mBinding.pre.setIconColor(Color.parseColor("#" + colorStr));
             }
         } catch (Exception e) {
-            Toast.makeText(this, "格式错误", Toast.LENGTH_LONG).show();
+            Snackbar.make(mBinding.pre, "格式错误", Snackbar.LENGTH_LONG).show();
         }
     }
 
@@ -212,28 +225,61 @@ public class MainActivity extends AppCompatActivity {
                 mBinding.pre.setBgColor(Color.parseColor("#" + colorStr));
             }
         } catch (Exception e) {
-            Toast.makeText(this, "格式错误", Toast.LENGTH_LONG).show();
+            Snackbar.make(mBinding.pre, "格式错误", Snackbar.LENGTH_LONG).show();
         }
     }
 
-    private void createFile() {
-        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("design/image/jpeg");
-        intent.putExtra(Intent.EXTRA_TITLE, UUID.randomUUID() + ".jpg");
-        startActivityForResult(intent, 99);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 99 && data != null && data.getData() != null) {
-            try {
-                mBinding.pre.save(getContentResolver().openOutputStream(data.getData()), 192);
-            } catch (IOException e) {
-                e.printStackTrace();
+    private void showSaveDialog() {
+        DialogInputNameBinding binding = DialogInputNameBinding.inflate(getLayoutInflater());
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle("保存")
+                .setView(binding.getRoot())
+                .setPositiveButton("确定", (dialog, which) ->
+                        save(binding.editText.getText().toString(), false))
+                .setNegativeButton("取消", null)
+                .show();
+        binding.editText.postDelayed(() -> InputUtil.show(this, binding.editText), 100);
+        binding.editText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                alertDialog.dismiss();
+                save(binding.editText.getText().toString(), false);
             }
-        }
+            return true;
+        });
+    }
+
+    private void save(String text, boolean isSend) {
+        String name = (TextUtils.isEmpty(text) ? UUID.randomUUID().toString() : text) + "_%sx%s";
+        Observable.just(192, 144, 96, 72, 48)
+                .map(size -> mBinding.pre.save(String.format(name, size, size), size))
+                .map(path -> CacheHelper.file2Uri(this, new File(path)))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(uri -> CacheHelper.updateAlbum(this, uri))
+                .toList()
+                .subscribe(uri -> {
+                    if (isSend) {
+                        ShareCompat.IntentBuilder builder = ShareCompat.IntentBuilder
+                                .from(this)
+                                .setChooserTitle("分享图片")
+                                .setType("image/*");
+                        for (Uri i : uri) {
+                            builder.addStream(i);
+                        }
+                        builder.startChooser();
+                    } else {
+                        Snackbar.make(mBinding.pre, "图片已保存", Snackbar.LENGTH_LONG)
+                                .setAction("查看", v -> {
+                                    try {
+                                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                                        intent.setDataAndType(uri.get(0), "image/*");
+                                        startActivity(intent);
+                                    } catch (ActivityNotFoundException e) {
+                                        Snackbar.make(mBinding.pre, "你跟我说打不开？？？", Snackbar.LENGTH_LONG).show();
+                                    }
+                                }).show();
+                    }
+                }, throwable -> Snackbar.make(mBinding.pre, throwable.getMessage(), Snackbar.LENGTH_LONG).show());
     }
 
 }
