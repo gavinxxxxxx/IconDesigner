@@ -316,8 +316,11 @@ public class MultilevelMenu extends ViewGroup {
     private void showMenuItem(Menu menu) {
         if (menu == null || menu.size() == 0) return;
         for (int i = 0; i < menu.size(); i++) {
-            if (menu.getItem(i).isVisible()) {
-                findViewById(menu.getItem(i).getItemId()).setVisibility(VISIBLE);
+            MenuItem menuItem = menu.getItem(i);
+            if (menuItem.isVisible()) {
+                View child = findViewById(menuItem.getItemId());
+                bringChildToFront(child); // 置顶层级以响应事件
+                child.setVisibility(VISIBLE);
             }
         }
     }
