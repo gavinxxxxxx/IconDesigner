@@ -54,7 +54,7 @@ public class ItemView extends ImageView {
 
     @Override
     public boolean onDragEvent(DragEvent event) {
-        L.e(mMenuItem.getTitle() + ": onDragEvent - " + event);
+        // L.e(mMenuItem.getTitle() + ": onDragEvent - " + event);
         switch (event.getAction()) {
             case DragEvent.ACTION_DRAG_STARTED:
                 return DragUtils.isDragForMe(event.getClipDescription().getLabel());
@@ -63,22 +63,34 @@ public class ItemView extends ImageView {
                 return true;
             case DragEvent.ACTION_DRAG_ENTERED:
                 // selected
-                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                if (mCallback != null) {
-                    mCallback.onEntered(this, mMenuItem);
+                if (getVisibility() == VISIBLE) {
+                    performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                    if (mCallback != null) {
+                        mCallback.onEntered(this, mMenuItem);
+                    }
+                    return true;
+                } else {
+                    return false;
                 }
-                return true;
             case DragEvent.ACTION_DRAG_EXITED:
                 // unselected
-                if (mCallback != null) {
-                    mCallback.onExited(this, mMenuItem);
+                if (getVisibility() == VISIBLE) {
+                    if (mCallback != null) {
+                        mCallback.onExited(this, mMenuItem);
+                    }
+                    return true;
+                } else {
+                    return false;
                 }
-                return true;
             case DragEvent.ACTION_DROP:
-                if (mCallback != null) {
-                    mCallback.onDrop(this, mMenuItem);
+                if (getVisibility() == VISIBLE) {
+                    if (mCallback != null) {
+                        mCallback.onDrop(this, mMenuItem);
+                    }
+                    return true;
+                } else {
+                    return false;
                 }
-                return true;
         }
         return false;
     }
