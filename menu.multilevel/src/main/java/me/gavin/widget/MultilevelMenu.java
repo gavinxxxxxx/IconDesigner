@@ -64,8 +64,6 @@ public class MultilevelMenu extends ViewGroup {
 
     private Consumer<MenuItem> onMenuItemSelectedListener;
 
-    private int mCurrLevel = 0;
-
     private String mCurrTitle = "";
     private Paint mTitlePaint;
 
@@ -288,7 +286,6 @@ public class MultilevelMenu extends ViewGroup {
         int position = 0;
         for (int i = 0; i < menu.size(); i++) {
             MenuItem menuItem = menu.getItem(i);
-            L.e(menuItem.getTitle());
             if (menuItem.isVisible()) {
                 ItemView itemView = new ItemView(getContext());
                 itemView.setId(menuItem.getItemId());

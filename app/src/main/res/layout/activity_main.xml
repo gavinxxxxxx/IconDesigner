@@ -30,6 +30,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="bottom|end"
             android:elevation="6dp"
+            app:layout_behavior="me.gavin.widget.Behavior"
             app:mlm_menuHorizontal="@menu/menu_horizontal"
             app:mlm_menuItemBgColor="@color/colorPrimaryLight"
             app:mlm_menuItemElevation="6dp"
@@ -44,6 +45,13 @@
             app:mlm_originMargin="16dp"
             app:mlm_originPadding="16dp"
             app:mlm_originRadius="28dp" />
+
+        <!--<me.gavin.widget.ElevationView-->
+            <!--android:id="@+id/elevation"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="bottom"-->
+            <!--android:layout_margin="16dp" />-->
 
     </android.support.design.widget.CoordinatorLayout>
 
