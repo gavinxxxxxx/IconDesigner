@@ -54,8 +54,7 @@ public class ItemView extends ImageView {
 
     @Override
     public boolean onDragEvent(DragEvent event) {
-
-        // L.e(mMenuItem.getTitle() + ": onDragEvent - " + event);
+        L.e(mMenuItem.getTitle() + ": onDragEvent - " + event);
         switch (event.getAction()) {
             case DragEvent.ACTION_DRAG_STARTED:
                 return DragUtils.isDragForMe(event.getClipDescription().getLabel());

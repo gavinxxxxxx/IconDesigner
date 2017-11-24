@@ -276,12 +276,10 @@ public class MultilevelMenu extends ViewGroup {
             double distance = Math.sqrt(Math.pow(mWidth - mOriginMargin - mOriginRadius - event.getX(), 2)
                     + Math.pow(mHeight - mOriginMargin - mOriginRadius - event.getY(), 2));
             if (distance <= mOriginRadius) {
-                DragShadowBuilder dragShadowBuilder = new DragShadowBuilder();
-                ClipData dragData = DragUtils.getClipData();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    startDragAndDrop(dragData, dragShadowBuilder, null, 0);
+                    startDragAndDrop(DragUtils.getClipData(), new DragShadowBuilder(), null, 0);
                 } else {
-                    startDrag(dragData, dragShadowBuilder, null, 0);
+                    startDrag(DragUtils.getClipData(), new DragShadowBuilder(), null, 0);
                 }
                 return true;
             }
@@ -297,7 +295,6 @@ public class MultilevelMenu extends ViewGroup {
                 if (DragUtils.isDragForMe(event.getClipDescription().getLabel())) {
                     // 忽略系统设置 强制震动反馈
                     performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-
                     showRootMenu(mVerticalMenu, ItemView.VERTICAL);
                     showRootMenu(mHorizontalMenu, ItemView.HORIZONTAL);
                     return true;

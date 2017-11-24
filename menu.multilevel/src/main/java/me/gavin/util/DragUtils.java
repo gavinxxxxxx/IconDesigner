@@ -1,6 +1,7 @@
 package me.gavin.util;
 
 import android.content.ClipData;
+import android.content.ClipDescription;
 
 /**
  * DragUtils
@@ -16,6 +17,6 @@ public class DragUtils {
     }
 
     public static ClipData getClipData() {
-        return new ClipData(DRAG_LABEL, new String[]{DRAG_LABEL}, new ClipData.Item(DRAG_LABEL));
+         return new ClipData(DRAG_LABEL, new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}, new ClipData.Item(DRAG_LABEL));
     }
 }
