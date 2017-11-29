@@ -35,7 +35,6 @@ import me.gavin.widget.menu.multilevel.R;
  * 多级菜单
  *
  * @author gavin.xiong 2017/11/18
- * @todo Behavior
  */
 public class MultilevelMenu extends ViewGroup {
 

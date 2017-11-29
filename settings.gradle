@@ -1,1 +1,1 @@
-include ':app', ':menu.multilevel'
+include ':app', ':menu.multilevel', ':color.picker'

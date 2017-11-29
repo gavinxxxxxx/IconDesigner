@@ -29,12 +29,12 @@ import me.gavin.icon.designer.R;
 import me.gavin.icon.designer.databinding.ActivityMainBinding;
 import me.gavin.icon.designer.databinding.DialogChooseColorMdBinding;
 import me.gavin.icon.designer.databinding.DialogCodeBinding;
-import me.gavin.icon.designer.databinding.DialogEditColorBinding;
 import me.gavin.icon.designer.databinding.DialogInputNameBinding;
 import me.gavin.svg.parser.SVGParser;
 import me.gavin.util.AlipayUtil;
 import me.gavin.util.CacheHelper;
 import me.gavin.util.InputUtil;
+import me.gavin.widget.color.picker.ColorPickerDialogBuilder;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -76,7 +76,15 @@ public class MainActivity extends AppCompatActivity {
                     new ChooseIconDialog(this, mBinding.pre::setSVG).show();
                     break;
                 case R.id.icon_color:
-                    showEditDialog(false);
+                    ColorPickerDialogBuilder.with(this)
+                            .setTitle("选择颜色")
+                            .setColor(mBinding.pre.getIconColor())
+                            .setInputButton("输入", (dialog, color)
+                                    -> setIconColor(color))
+                            .setPositiveButton("确定", (dialog, color)
+                                    -> mBinding.pre.setIconColor(color))
+                            .setNegativeButton("取消", null)
+                            .show();
                     break;
                 case R.id.icon_size:
                     mSeekBarType = TYPE_SEEK_ICON_SIZE;
@@ -101,7 +109,15 @@ public class MainActivity extends AppCompatActivity {
                     mBinding.pre.setBgShape(1);
                     break;
                 case R.id.background_color:
-                    showEditDialog(true);
+                    ColorPickerDialogBuilder.with(this)
+                            .setTitle("选择颜色")
+                            .setColor(mBinding.pre.getBgColor())
+                            .setInputButton("输入", (dialog, color)
+                                    -> setBgColor(color))
+                            .setPositiveButton("确定", (dialog, color)
+                                    -> mBinding.pre.setBgColor(color))
+                            .setNegativeButton("取消", null)
+                            .show();
                     break;
                 case R.id.effect_score:
                     mBinding.pre.toggleEffectScore();
@@ -200,34 +216,6 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
 
             }
-        });
-    }
-
-    private void showEditDialog(boolean isBg) {
-        DialogEditColorBinding binding = DialogEditColorBinding.inflate(getLayoutInflater());
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setTitle("图标颜色")
-                .setView(binding.getRoot())
-                .setPositiveButton("确定", (dialog, which) -> {
-                    if (isBg) {
-                        setBgColor(binding.editText.getText().toString());
-                    } else {
-                        setIconColor(binding.editText.getText().toString());
-                    }
-                })
-                .setNegativeButton("取消", null)
-                .show();
-        binding.editText.postDelayed(() -> InputUtil.show(this, binding.editText), 100);
-        binding.editText.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                alertDialog.dismiss();
-                if (isBg) {
-                    setBgColor(binding.editText.getText().toString());
-                } else {
-                    setIconColor(binding.editText.getText().toString());
-                }
-            }
-            return true;
         });
     }
 

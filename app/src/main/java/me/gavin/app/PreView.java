@@ -250,11 +250,19 @@ public class PreView extends View {
         invalidate();
     }
 
+    public int getIconColor() {
+        return mIconPaint != null ? mIconPaint.getColor() : 0xFFFFFFFF;
+    }
+
     public void setBgColor(Integer color) {
         if (color != null) {
             mBgPaint.setColor(color);
             invalidate();
         }
+    }
+
+    public int getBgColor() {
+        return mBgPaint.getColor();
     }
 
     public void setIconSize(int progress) {
