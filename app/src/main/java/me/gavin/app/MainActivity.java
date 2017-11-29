@@ -27,6 +27,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import me.gavin.icon.designer.R;
 import me.gavin.icon.designer.databinding.ActivityMainBinding;
+import me.gavin.icon.designer.databinding.DialogChooseColorMdBinding;
 import me.gavin.icon.designer.databinding.DialogCodeBinding;
 import me.gavin.icon.designer.databinding.DialogEditColorBinding;
 import me.gavin.icon.designer.databinding.DialogInputNameBinding;
@@ -147,6 +148,16 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.donate_alipay:
                     AlipayUtil.alipay(this, AlipayUtil.ALIPAY_CODE);
+                    break;
+                case R.id.test:
+                    DialogChooseColorMdBinding binding = DialogChooseColorMdBinding.inflate(getLayoutInflater());
+                    new AlertDialog.Builder(this)
+                            .setView(binding.getRoot())
+                            .setPositiveButton("确定", (dialog, which) -> {
+
+                            })
+                            .setNegativeButton("取消", null)
+                            .show();
                     break;
                 default:
                     break;
