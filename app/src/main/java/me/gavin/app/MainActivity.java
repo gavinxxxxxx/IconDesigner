@@ -25,15 +25,16 @@ import java.util.UUID;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import me.gavin.app.app.ChooseAppDialog;
 import me.gavin.icon.designer.R;
 import me.gavin.icon.designer.databinding.ActivityMainBinding;
-import me.gavin.icon.designer.databinding.DialogChooseColorMdBinding;
 import me.gavin.icon.designer.databinding.DialogCodeBinding;
 import me.gavin.icon.designer.databinding.DialogInputNameBinding;
 import me.gavin.svg.parser.SVGParser;
 import me.gavin.util.AlipayUtil;
 import me.gavin.util.CacheHelper;
 import me.gavin.util.InputUtil;
+import me.gavin.util.ShortcutUtil;
 import me.gavin.widget.color.picker.ColorPickerDialogBuilder;
 
 public class MainActivity extends AppCompatActivity {
@@ -166,13 +167,9 @@ public class MainActivity extends AppCompatActivity {
                     AlipayUtil.alipay(this, AlipayUtil.ALIPAY_CODE);
                     break;
                 case R.id.test:
-                    DialogChooseColorMdBinding binding = DialogChooseColorMdBinding.inflate(getLayoutInflater());
-                    new AlertDialog.Builder(this)
-                            .setView(binding.getRoot())
-                            .setPositiveButton("确定", (dialog, which) -> {
-
-                            })
-                            .setNegativeButton("取消", null)
+                    new ChooseAppDialog(this, appInfo ->
+                            ShortcutUtil.addShortcut(this, appInfo.getIntent(),
+                                    appInfo.label, mBinding.pre.getBitmap(192)))
                             .show();
                     break;
                 default:

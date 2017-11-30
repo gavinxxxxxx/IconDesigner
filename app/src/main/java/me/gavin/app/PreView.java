@@ -251,7 +251,7 @@ public class PreView extends View {
     }
 
     public int getIconColor() {
-        return mIconPaint != null ? mIconPaint.getColor() : 0xFFFFFFFF;
+        return mIconPaint != null ? mIconPaint.getColor() : 0xFFFF0000;
     }
 
     public void setBgColor(Integer color) {
@@ -298,13 +298,17 @@ public class PreView extends View {
         return mIcon.effectScore;
     }
 
-    public String save(String name, int size) throws IOException {
+    public Bitmap getBitmap(int size) {
         Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         Matrix matrix = new Matrix(mMatrix);
         matrix.postScale(size * 1f / mSize, size * 1f / mSize, 0, 0);
         onDraw2(canvas, matrix);
-        return CacheHelper.saveBitmap(bitmap, name);
+        return bitmap;
+    }
+
+    public String save(String name, int size) throws IOException {
+        return CacheHelper.saveBitmap(getBitmap(size), name);
     }
 
 }

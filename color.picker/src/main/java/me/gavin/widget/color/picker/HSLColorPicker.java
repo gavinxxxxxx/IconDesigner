@@ -12,7 +12,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -62,6 +61,8 @@ public class HSLColorPicker extends View {
         mHPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mHPaint.setStyle(Paint.Style.STROKE);
         mHPaint.setStrokeCap(Paint.Cap.ROUND);
+        mHPaint.setShader(new SweepGradient(mCx, mCy, COLORS, null));
+
         mSPaint = new Paint(mHPaint);
         mLPaint = new Paint(mSPaint);
         mAPaint = new Paint(mSPaint);
@@ -124,17 +125,17 @@ public class HSLColorPicker extends View {
         canvas.drawCircle(x, y, mHStoreWidth, mPaint);
 
         // 文字
-        mTextPaint.setTextSize(70f);
+        mTextPaint.setTextSize(mIr / 5f);
         int baseY = (int) (mCy - mTextPaint.descent() / 2 - mTextPaint.ascent() / 2);
         String textHex = String.format(mWithAlpha ? "#%08X" : "#%06X",
                 mWithAlpha ? HSLToColor(mHSL) : ColorUtils.HSLToColor(mHSL));
         canvas.drawText(textHex, mCx, baseY, mTextPaint);
-        mTextPaint.setTextSize(30f);
+        mTextPaint.setTextSize(mTextPaint.getTextSize() / 2.5f);
         String textHSL = String.format(Locale.getDefault(),
                 mWithAlpha ? "%3d° %3d%% %3d%% %3d%%" : "%3d° %3d%% %3d%%",
                 Math.round(mHSL[0]), Math.round(mHSL[1] * 100), Math.round(mHSL[2] * 100),
                 mWithAlpha ? Math.round(mHSL[3] * 100) : null);
-        canvas.drawText(textHSL, mCx, baseY + 60, mTextPaint);
+        canvas.drawText(textHSL, mCx, baseY + mTextPaint.getTextSize() * 2, mTextPaint);
 
         // 线性调节器
         float a = mCy + mOr;
@@ -186,12 +187,12 @@ public class HSLColorPicker extends View {
             float progress = (event.getX() - mLineHMargin) / (getMeasuredWidth() - mLineHMargin * 2);
             mHSL[index] = progress < 0 ? 0 : progress > 1 ? 1 : progress;
         }
-        // TODO: 2017/11/29
-        for (int i = 0; i < COLORS.length; i++) {
-            COLORS[i] &= HSLToColor(mHSL) | 0x00FFFFFF;
-        }
-        L.e(Arrays.toString(COLORS));
-        mHPaint.setShader(new SweepGradient(mCx, mCy, COLORS, null));
+        // TODO: 2017/11/30 H 颜色跟随？
+//        for (int i = 0; i < COLORS.length; i++) {
+//            COLORS[i] &= 0x00FFFFFF;
+//            COLORS[i] |= (Math.round(0xFF * mHSL[3]) << 24);
+//        }
+//        mHPaint.setShader(new SweepGradient(mCx, mCy, COLORS, null));
 
         resetSLPaint(mSPaint, 1);
         resetSLPaint(mLPaint, 2);
@@ -201,7 +202,7 @@ public class HSLColorPicker extends View {
             mAPaint.setShader(new LinearGradient(mLineHMargin, 0, getMeasuredWidth() - mLineHMargin, 0,
                     color & 0x00FFFFFF, color | 0xFF000000, Shader.TileMode.CLAMP));
         }
-        mTextPaint.setColor(ColorUtils.calculateLuminance(HSLToColor(mHSL)) > 0.5 ? 0xFF000000 : 0xFFFFFFFF);
+        mTextPaint.setColor(ColorUtils.calculateLuminance(HSLToColor(mHSL)) > 0.5f ? 0xFF000000 : 0xFFFFFFFF);
         invalidate();
     }
 
