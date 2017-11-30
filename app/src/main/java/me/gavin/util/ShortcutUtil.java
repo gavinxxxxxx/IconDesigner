@@ -19,27 +19,27 @@ public class ShortcutUtil {
     /**
      * 添加快捷方式
      *
-     * @param context      context
-     * @param actionIntent 要启动的Intent
-     * @param name         name
+     * @param context  context
+     * @param shortcut 要启动的Intent
+     * @param name     name
      */
-    public static void addShortcut(Context context, Intent actionIntent, String name, Bitmap iconBitmap) {
-//        Intent addShortcutIntent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+    public static void addShortcut(Context context, Intent shortcut, String name, Bitmap iconBitmap) {
+//        Intent intent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
 //        // 是否允许重复创建
-//        addShortcutIntent.putExtra("duplicate", allowRepeat);
+//        intent.putExtra("duplicate", true);
 //        // 快捷方式的标题
-//        addShortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, name);
+//        intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, name);
 //        // 快捷方式的图标
-//        addShortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON, iconBitmap);
+//        intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, iconBitmap);
 //        // 快捷方式的动作
-//        addShortcutIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, actionIntent);
+//        intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcut);
 //        // 通知 launcher 创建
-//        context.sendBroadcast(addShortcutIntent);
+//        context.sendBroadcast(intent);
         ShortcutManagerCompat.requestPinShortcut(context,
                 new ShortcutInfoCompat.Builder(context, UUID.randomUUID().toString())
                         .setIcon(IconCompat.createWithBitmap(iconBitmap))
                         .setShortLabel(name)
-                        .setIntent(actionIntent)
+                        .setIntent(shortcut)
                         .build(),
                 null);
     }

@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 
+import java.util.UUID;
+
 /**
  * 这里是萌萌哒注释君
  *
@@ -46,7 +48,7 @@ public class AppInfo {
 
     public Intent getIntent() {
         return new Intent(Intent.ACTION_MAIN)
-                // .putExtra("__materialize_nonce__", System.currentTimeMillis())
+                .putExtra("me.gavin.icon.designer.id", UUID.randomUUID().toString())
                 .setComponent(component)
                 .addCategory(Intent.CATEGORY_LAUNCHER)
                 .setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
