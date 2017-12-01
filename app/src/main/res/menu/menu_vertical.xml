@@ -76,6 +76,16 @@
                         android:icon="@drawable/ic_background_circle_24dp"
                         android:title="圆形" />
 
+                    <item
+                        android:id="@+id/background_shape_rect_v"
+                        android:icon="@drawable/ic_background_rect_24dp"
+                        android:title="竖直矩形" />
+
+                    <item
+                        android:id="@+id/background_shape_rect_h"
+                        android:icon="@drawable/ic_background_circle_24dp"
+                        android:title="水平矩形" />
+
                 </menu>
 
             </item>

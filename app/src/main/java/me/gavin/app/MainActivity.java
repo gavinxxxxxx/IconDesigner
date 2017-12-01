@@ -109,6 +109,12 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.background_shape_circle:
                     mBinding.pre.setBgShape(1);
                     break;
+                case R.id.background_shape_rect_v:
+                    mBinding.pre.setBgShape(2);
+                    break;
+                case R.id.background_shape_rect_h:
+                    mBinding.pre.setBgShape(3);
+                    break;
                 case R.id.background_color:
                     ColorPickerDialogBuilder.with(this)
                             .setTitle("选择颜色")
@@ -183,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void afterCreate() {
-        Observable.just("gavin/adb.svg")
+        Observable.just("design/aaa/adb2.svg")
                 .map(getAssets()::open)
                 .map(SVGParser::parse)
                 .subscribe(mBinding.pre::setSVG);
