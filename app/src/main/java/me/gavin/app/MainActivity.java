@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
             if (TextUtils.isEmpty(colorStr)) {
                 mBinding.pre.setIconColor(null);
             } else {
-                mBinding.pre.setIconColor(Color.parseColor("#" + colorStr));
+                mBinding.pre.setIconColor(Color.parseColor(colorStr));
             }
         } catch (Exception e) {
             Snackbar.make(mBinding.pre, "格式错误", Snackbar.LENGTH_LONG).show();
@@ -241,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
     private void setBgColor(String colorStr) {
         try {
             if (!TextUtils.isEmpty(colorStr)) {
-                mBinding.pre.setBgColor(Color.parseColor("#" + colorStr));
+                mBinding.pre.setBgColor(Color.parseColor(colorStr));
             }
         } catch (Exception e) {
             Snackbar.make(mBinding.pre, "格式错误", Snackbar.LENGTH_LONG).show();
