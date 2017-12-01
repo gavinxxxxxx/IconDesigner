@@ -23,7 +23,7 @@ public class ShortcutUtil {
      * @param shortcut 要启动的Intent
      * @param name     name
      */
-    public static void addShortcut(Context context, Intent shortcut, String name, Bitmap iconBitmap) {
+    public static boolean addShortcut(Context context, Intent shortcut, String name, Bitmap iconBitmap) {
 //        Intent intent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
 //        // 是否允许重复创建
 //        intent.putExtra("duplicate", true);
@@ -35,7 +35,7 @@ public class ShortcutUtil {
 //        intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcut);
 //        // 通知 launcher 创建
 //        context.sendBroadcast(intent);
-        ShortcutManagerCompat.requestPinShortcut(context,
+        return ShortcutManagerCompat.requestPinShortcut(context,
                 new ShortcutInfoCompat.Builder(context, UUID.randomUUID().toString())
                         .setIcon(IconCompat.createWithBitmap(iconBitmap))
                         .setShortLabel(name)

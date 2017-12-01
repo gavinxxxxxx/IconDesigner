@@ -7,6 +7,10 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 
+import com.github.stuxuhai.jpinyin.PinyinException;
+import com.github.stuxuhai.jpinyin.PinyinFormat;
+import com.github.stuxuhai.jpinyin.PinyinHelper;
+
 import java.util.UUID;
 
 /**
@@ -22,7 +26,7 @@ public class AppInfo {
 
     public String label;
 
-    // ublic Pinyin labelPinyin;
+    public String labelPinyin;
 
     public Drawable drawable;
 
@@ -39,7 +43,12 @@ public class AppInfo {
         packageName = activityInfo.packageName;
 
         label = activityInfo.loadLabel(packageManager).toString();
-        // labelPinyin = Pinyin.from(label);
+
+        try {
+            labelPinyin = PinyinHelper.convertToPinyinString(label, "", PinyinFormat.WITHOUT_TONE).toLowerCase();
+        } catch (PinyinException e) {
+            e.printStackTrace();
+        }
 
         drawable = activityInfo.loadIcon(packageManager);
 
@@ -57,7 +66,11 @@ public class AppInfo {
 
     @Override
     public String toString() {
-        return "AppInfo{" + (component == null ? "(not resolved)" : component.flattenToShortString()) + "}";
+        return "AppInfo{" +
+                "packageName='" + packageName + '\'' +
+                ", component=" + component +
+                ", label='" + label + '\'' +
+                ", labelPinyin='" + labelPinyin + '\'' +
+                '}';
     }
-
 }

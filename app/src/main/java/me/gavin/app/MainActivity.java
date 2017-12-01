@@ -124,6 +124,13 @@ public class MainActivity extends AppCompatActivity {
                     mBinding.pre.toggleEffectScore();
                     break;
 
+                case R.id.attach:
+                    new ChooseAppDialog(this, appInfo -> {
+                        boolean supports = ShortcutUtil.addShortcut(this,
+                                appInfo.getIntent(), appInfo.label, mBinding.pre.getBitmap(192));
+                        Snackbar.make(mBinding.pre, supports ? "图标已添加到主屏幕" : "launcher 不支持", Snackbar.LENGTH_LONG).show();
+                    }).show();
+                    break;
                 case R.id.save:
                     new RxPermissions(this)
                             .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -167,10 +174,7 @@ public class MainActivity extends AppCompatActivity {
                     AlipayUtil.alipay(this, AlipayUtil.ALIPAY_CODE);
                     break;
                 case R.id.test:
-                    new ChooseAppDialog(this, appInfo ->
-                            ShortcutUtil.addShortcut(this, appInfo.getIntent(),
-                                    appInfo.label, mBinding.pre.getBitmap(192)))
-                            .show();
+
                     break;
                 default:
                     break;

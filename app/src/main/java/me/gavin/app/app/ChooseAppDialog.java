@@ -1,30 +1,34 @@
 package me.gavin.app.app;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.v7.util.DiffUtil;
 import android.view.WindowManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import me.gavin.base.function.Consumer;
 import me.gavin.icon.designer.databinding.LayoutRecyclerBinding;
 
 /**
- * 这里是萌萌哒注释君
+ * ChooseAppDialog
  *
  * @author gavin.xiong 2017/11/13
  */
 public class ChooseAppDialog extends BottomSheetDialog {
 
     private LayoutRecyclerBinding mBinding;
-    private List<AppInfo> appList;
     private AppInfoAdapter mAdapter;
+
+    private List<AppInfo> appInfoList;
+    private List<AppInfo> tempList;
 
     private Consumer<AppInfo> callback;
 
@@ -42,23 +46,36 @@ public class ChooseAppDialog extends BottomSheetDialog {
         getWindow().getAttributes().height = WindowManager.LayoutParams.MATCH_PARENT;
         getWindow().setDimAmount(0.4f);
 
-
-        Intent intent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
         PackageManager pm = getContext().getPackageManager();
-        List<ResolveInfo> list = pm.queryIntentActivities(intent, 0);
-        appList = new ArrayList<>();
-        for (ResolveInfo resolve : list) {
-            appList.add(AppInfo.from(pm, resolve.activityInfo));
-        }
-
-        mAdapter = new AppInfoAdapter(getContext(), appList);
-        mAdapter.setCallback(appInfo -> {
-            if (callback != null) {
-                callback.accept(appInfo);
-            }
-            dismiss();
-        });
-        mBinding.recycler.setAdapter(mAdapter);
+        Rx.intentActivities(pm, Rx.getMainIntent(), 0)
+                .map(resolve -> AppInfo.from(pm, resolve.activityInfo))
+                .map(appInfo -> {
+                    tempList.add(appInfo);
+                    Collections.sort(tempList, (o1, o2) -> o1.labelPinyin.compareTo(o2.labelPinyin));
+                    return tempList;
+                })
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe(disposable -> {
+                    appInfoList = new ArrayList<>();
+                    tempList = new ArrayList<>();
+                    mAdapter = new AppInfoAdapter(getContext(), appInfoList);
+                    mAdapter.setCallback(appInfo -> {
+                        if (callback != null) {
+                            callback.accept(appInfo);
+                        }
+                        dismiss();
+                    });
+                    mBinding.recycler.setAdapter(mAdapter);
+                })
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(newList -> {
+                    DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallback(appInfoList, newList));
+                    appInfoList.clear();
+                    appInfoList.addAll(tempList);
+                    diffResult.dispatchUpdatesTo(mAdapter);
+                    mBinding.recycler.scrollToPosition(0);
+                }, Throwable::printStackTrace);
     }
 
 }

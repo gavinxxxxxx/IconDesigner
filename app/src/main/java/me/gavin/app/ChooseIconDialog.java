@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialog;
-import android.text.TextUtils;
 import android.view.WindowManager;
 
 import java.util.ArrayList;
@@ -17,10 +16,9 @@ import me.gavin.base.function.Consumer;
 import me.gavin.icon.designer.databinding.DialogChooseIconBinding;
 import me.gavin.svg.model.SVG;
 import me.gavin.svg.parser.SVGParser;
-import me.gavin.util.L;
 
 /**
- * 这里是萌萌哒注释君
+ * ChooseIconDialog
  *
  * @author gavin.xiong 2017/11/13
  */
@@ -61,7 +59,6 @@ public class ChooseIconDialog extends BottomSheetDialog {
                 .doOnSubscribe(disposable -> {
                     svgList = new ArrayList<>();
                     mAdapter = new SVGAdapter(getContext(), svgList, svg -> {
-                        L.e(svg);
                         callback.accept(svg);
                         dismiss();
                     });

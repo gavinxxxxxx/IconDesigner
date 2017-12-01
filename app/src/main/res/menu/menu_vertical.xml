@@ -114,7 +114,7 @@
         android:id="@+id/test"
         android:icon="@drawable/ic_adb_24dp"
         android:title="测试"
-        android:visible="true">
+        android:visible="false">
 
     </item>
 
