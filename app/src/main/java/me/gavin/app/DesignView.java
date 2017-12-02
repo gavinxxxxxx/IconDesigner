@@ -12,6 +12,8 @@ import android.view.View;
 
 import java.io.IOException;
 
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import me.gavin.svg.model.SVG;
 import me.gavin.util.CacheHelper;
 
@@ -40,13 +42,13 @@ public class DesignView extends View {
 
     private Icon mIcon;
 
-    private Path mBgPath = new Path(), mShadowPath, mShadowPathTemp = new Path(), mScorePath;
+    private Path mBgPath = new Path(), mShadowPath = new Path(), mShadowPathTemp = new Path(), mScorePath;
 
     private Matrix mBgMatrix = new Matrix();
 
     private Paint mBgPaint, mShadowPaint, mIconPaint, mScorePaint;
 
-    private float scaleNow = 0.65f;
+    private float scaleNow = 0.2f;
 
     public DesignView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -131,10 +133,11 @@ public class DesignView extends View {
         // 折痕
         buildScorePath();
 
+        // 阴影初始化
+        initShadowPath();
+
         // 当前缩放比
         mMatrix.postScale(scaleNow, scaleNow, mSize / 2f, mSize / 2f);
-        // 阴影初始化
-        initShadowPath(40f, 0.1f);
     }
 
     private void buildBgPath() {
@@ -162,37 +165,48 @@ public class DesignView extends View {
     }
 
     private void buildScorePath() {
-        float w = mSvg.viewBox.width / scaleNow / 2f;
-        float h = mSvg.viewBox.height / scaleNow / 2f;
+        float size = Math.max(mSvg.width, mSvg.height) / mInherentScale / 2f / scaleNow;
         mScorePath = new Path();
-        mScorePath.addRect(mSvg.viewBox.width / 2f - w,
-                mSvg.viewBox.height / 2f - h,
-                mSvg.viewBox.width / 2f + w,
+        mScorePath.addRect(mSvg.viewBox.width / 2f - size,
+                mSvg.viewBox.height / 2f - size,
+                mSvg.viewBox.width / 2f + size,
                 mSvg.viewBox.height / 2f,
                 Path.Direction.CCW);
-        // TODO: 2017/12/1  mScorePath.op(mBgPath, Path.Op.INTERSECT);
+        mScorePath.op(mBgPath, Path.Op.INTERSECT);
     }
 
     /**
      * 阴影初始化
-     *
-     * @param length
-     * @param diff
+     * 1024 * 1024 0.5 & 800
      */
-    private void initShadowPath(float length, float diff) {
-        mShadowPath = new Path();
-        for (int i = 0; i < mSvg.paths.size(); i++) {
-            if (mSvg.drawables.get(i).getFillPaint().getColor() != 0) {
-                mShadowPath.op(mSvg.paths.get(i), Path.Op.UNION);
-            }
-        }
-        float d = length;
-        while (d >= diff) {
-            d /= 2f;
-            mShadowPathTemp.set(mShadowPath);
-            mShadowPathTemp.offset(d, d);
-            mShadowPath.op(mShadowPathTemp, Path.Op.UNION);
-        }
+    private void initShadowPath() {
+        float length = Math.max(mSvg.viewBox.width, mSvg.viewBox.height) / 0.5f;
+        float diff = Math.max(mSvg.viewBox.width, mSvg.viewBox.height) / 200f;
+        Observable
+                .create(e -> {
+                    float d = length;
+                    while (d >= diff) {
+                        d /= 2f;
+                        mShadowPathTemp.set(mShadowPath);
+                        mShadowPathTemp.offset(d, d);
+                        mShadowPath.op(mShadowPathTemp, Path.Op.UNION);
+                        e.onNext(d);
+                    }
+                    e.onComplete();
+                })
+                // .throttleLast(200, TimeUnit.MILLISECONDS)
+                .doOnSubscribe(disposable -> {
+                    mShadowPath.reset();
+                    for (int i = 0; i < mSvg.paths.size(); i++) {
+                        if (mSvg.drawables.get(i).getFillPaint().getColor() != 0) {
+                            mShadowPath.op(mSvg.paths.get(i), Path.Op.UNION);
+                        }
+                    }
+                })
+                .doOnComplete(this::postInvalidate)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(arg0 -> postInvalidate());
     }
 
     public void setSVG(SVG svg) {
