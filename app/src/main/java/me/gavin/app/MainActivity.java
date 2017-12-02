@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void afterCreate() {
-        Observable.just("design/aaa/adb2.svg")
+        Observable.just("design/aaa/rect.svg")
                 .map(getAssets()::open)
                 .map(SVGParser::parse)
                 .subscribe(mBinding.pre::setSVG);
@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void save(String text, boolean isSend) {
         String name = (TextUtils.isEmpty(text) ? UUID.randomUUID().toString() : text) + "_%sx%s";
-        Observable.just(192, 144, 96, 72, 48)
+        Observable.just(1024)
                 .map(size -> mBinding.pre.save(String.format(name, size, size), size))
                 .map(path -> CacheHelper.file2Uri(this, new File(path)))
                 .subscribeOn(Schedulers.io())

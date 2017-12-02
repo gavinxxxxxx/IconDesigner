@@ -48,7 +48,7 @@ public class DesignView extends View {
 
     private Paint mBgPaint, mShadowPaint, mIconPaint, mScorePaint;
 
-    private float scaleNow = 0.2f;
+    private float scaleNow = 0.3f;
 
     public DesignView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -104,7 +104,7 @@ public class DesignView extends View {
         canvas.drawPath(mBgPath, mBgPaint);
 
         mShadowPathTemp.set(mShadowPath);
-        mShadowPathTemp.op(mBgPath, Path.Op.INTERSECT);
+//        mShadowPathTemp.op(mBgPath, Path.Op.INTERSECT);
         canvas.drawPath(mShadowPathTemp, mShadowPaint);
 
         for (int i = 0; i < mSvg.paths.size(); i++) {
@@ -177,11 +177,11 @@ public class DesignView extends View {
 
     /**
      * 阴影初始化
-     * 1024 * 1024 0.5 & 800
+     * 1024 * 1024 0.8 & 512
      */
     private void initShadowPath() {
-        float length = Math.max(mSvg.viewBox.width, mSvg.viewBox.height) / 0.5f;
-        float diff = Math.max(mSvg.viewBox.width, mSvg.viewBox.height) / 200f;
+        float length = Math.max(mSvg.viewBox.width, mSvg.viewBox.height) / 0.8f;
+        float diff = Math.max(mSvg.viewBox.width, mSvg.viewBox.height) / 512f;
         Observable
                 .create(e -> {
                     float d = length;
@@ -242,7 +242,7 @@ public class DesignView extends View {
     }
 
     public void setIconSize(int progress) {
-        float aimScale = 0.2f + progress / 100f * 0.8f;
+        float aimScale = 0.3f + progress / 100f * 0.4f;
         mMatrix.postScale(aimScale / scaleNow, aimScale / scaleNow, mSize / 2f, mSize / 2f);
 
         mBgMatrix.reset();
