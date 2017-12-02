@@ -104,7 +104,7 @@ public class DesignView extends View {
         canvas.drawPath(mBgPath, mBgPaint);
 
         mShadowPathTemp.set(mShadowPath);
-//        mShadowPathTemp.op(mBgPath, Path.Op.INTERSECT);
+        mShadowPathTemp.op(mBgPath, Path.Op.INTERSECT);
         canvas.drawPath(mShadowPathTemp, mShadowPaint);
 
         for (int i = 0; i < mSvg.paths.size(); i++) {
