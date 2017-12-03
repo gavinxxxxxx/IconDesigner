@@ -48,7 +48,7 @@ public class DesignView extends View {
 
     private Paint mBgPaint, mShadowPaint, mIconPaint, mScorePaint;
 
-    private float scaleNow = 0.3f;
+    private float scaleNow = 0.5f;
 
     public DesignView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
