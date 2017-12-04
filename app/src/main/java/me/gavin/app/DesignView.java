@@ -181,7 +181,7 @@ public class DesignView extends View {
      */
     private void initShadowPath() {
         float length = Math.max(mSvg.viewBox.width, mSvg.viewBox.height) / 0.8f;
-        float diff = Math.max(mSvg.viewBox.width, mSvg.viewBox.height) / 512f;
+        float diff = Math.max(mSvg.viewBox.width, mSvg.viewBox.height) / 64;
         Observable
                 .create(e -> {
                     float d = length;
