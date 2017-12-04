@@ -14,7 +14,7 @@ public class Icon {
     public final int COLOR_BG = 0xFF26A69A;
 
     public int bgShape = 0; // 0:圆角矩形 1:圆形 2: 竖直矩形 3：水平矩形
-    public int bgCorner = 8; // 背景圆角大小圆角 （dp）
+    public int bgCorner = 16; // 背景圆角大小圆角 （dp）
     public Integer bgColor = COLOR_BG;
     public int bgShadowLayer = 2;
 
