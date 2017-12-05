@@ -10,11 +10,34 @@
             <item
                 android:id="@+id/icon_shape"
                 android:icon="@drawable/ic_apps_24dp"
-                android:title="图标形状" />
+                android:title="图标形状">
+
+                <menu>
+
+                    <item
+                        android:id="@+id/icon_shape_md"
+                        android:icon="@drawable/ic_apps_24dp"
+                        android:title="内置" />
+
+                    <item
+                        android:id="@+id/icon_shape_app"
+                        android:icon="@drawable/ic_adb_24dp"
+                        android:title="应用" />
+
+                    <item
+                        android:id="@+id/icon_shape_image"
+                        android:icon="@drawable/ic_apps_24dp"
+                        android:title="相册" />
+
+                </menu>
+
+            </item>
+
             <item
                 android:id="@+id/icon_color"
                 android:icon="@drawable/ic_color_lens_24dp"
                 android:title="图标颜色" />
+
             <item
                 android:id="@+id/icon_size"
                 android:icon="@drawable/ic_bubble_chart_24dp"

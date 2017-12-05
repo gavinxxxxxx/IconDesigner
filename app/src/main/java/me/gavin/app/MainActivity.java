@@ -5,9 +5,12 @@ import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ShareCompat;
@@ -20,6 +23,7 @@ import android.widget.SeekBar;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.UUID;
 
 import io.reactivex.Observable;
@@ -73,8 +77,16 @@ public class MainActivity extends AppCompatActivity {
             mSeekBarType = 0;
             mBinding.seekBar.setVisibility(View.GONE);
             switch (menuItem.getItemId()) {
-                case R.id.icon_shape:
+                case R.id.icon_shape_md:
                     new ChooseIconDialog(this, mBinding.pre::setSVG).show();
+                    break;
+                case R.id.icon_shape_app:
+                    new ChooseAppDialog(this, appInfo
+                            -> mBinding.pre.setDrawable(appInfo.drawable)).show();
+                    break;
+                case R.id.icon_shape_image:
+                    startActivityForResult(new Intent(Intent.ACTION_PICK,
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI), 0);
                     break;
                 case R.id.icon_color:
                     ColorPickerDialogBuilder.with(this)
@@ -188,6 +200,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+            try {
+                Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(data.getData()));
+                mBinding.pre.setBitmap(bitmap);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void afterCreate() {
         Observable.just("design/aaa/rect.svg")
                 .map(getAssets()::open)
@@ -269,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void save(String text, boolean isSend) {
         String name = (TextUtils.isEmpty(text) ? UUID.randomUUID().toString() : text) + "_%sx%s";
-        Observable.just(1024)
+        Observable.just(192)
                 .map(size -> mBinding.pre.save(String.format(name, size, size), size))
                 .map(path -> CacheHelper.file2Uri(this, new File(path)))
                 .subscribeOn(Schedulers.io())

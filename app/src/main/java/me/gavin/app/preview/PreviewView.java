@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -26,7 +27,9 @@ public class PreviewView extends View {
 
     private int mSize;
 
-    private SVG mSvg;
+    private SVG mSrcSVG;
+    private Drawable mSrcDrawable;
+    private Bitmap mSrcBitmap;
 
     private final Icon mIcon;
 
@@ -65,9 +68,9 @@ public class PreviewView extends View {
         // 取最大正方形
         mSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
         setMeasuredDimension(mSize, mSize);
-        if (mSvg != null && mSize > 0) {
+        if (mSrcSVG != null && mSize > 0) {
             mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner);
-            mIconBitmap = Utils.SVGToBitmap(mSvg, mSize, mIcon.iconScale);
+            mIconBitmap = Utils.SVGToBitmap(mSrcSVG, mSize, mIcon.iconScale);
             mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
             mScorePath = Utils.getScorePath(mSize, mBgPath);
             invalidate();
@@ -76,21 +79,28 @@ public class PreviewView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mSvg == null || mSize <= 0) return;
+        if (mBgPath != null && mIconBitmap != null && mShadowBitmap != null && mSize > 0) {
+            canvas.drawPath(mBgPath, mBgPaint);
+            canvas.drawBitmap(mShadowBitmap, 0, 0, mShadowPaint);
+            canvas.drawBitmap(mIconBitmap, 0, 0, mIconPaint);
+            if (mIcon.effectScore && mScorePath != null) {
+                canvas.drawPath(mScorePath, mScorePaint);
+            }
+        }
+    }
 
-        canvas.drawPath(mBgPath, mBgPaint);
-
-        canvas.drawBitmap(mShadowBitmap, 0, 0, mShadowPaint);
-
-        canvas.drawBitmap(mIconBitmap, 0, 0, mIconPaint);
-
-        if (mIcon.effectScore) {
-            canvas.drawPath(mScorePath, mScorePaint);
+    private void recyclerSrc() {
+        this.mSrcSVG = null;
+        this.mSrcDrawable = null;
+        if (mSrcBitmap != null) {
+            mSrcBitmap.recycle();
+            mSrcBitmap = null;
         }
     }
 
     public void setSVG(SVG mSvg) {
-        this.mSvg = mSvg;
+        recyclerSrc();
+        this.mSrcSVG = mSvg;
         if (mSvg != null && mSize > 0) {
             mIconBitmap = Utils.SVGToBitmap(mSvg, mSize, mIcon.iconScale);
             mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
@@ -98,14 +108,38 @@ public class PreviewView extends View {
         }
     }
 
-    public void setBgShape(int shape) {
-        this.mIcon.bgShape = shape;
-        if (mSvg != null && mSize > 0) {
-            mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner);
+    public void setDrawable(Drawable drawable) {
+        recyclerSrc();
+        this.mSrcDrawable = drawable;
+        mIconBitmap = Utils.drawable2Bitmap(drawable, mSize, mIcon.iconScale, mBgPath);
+        if (mSize > 0) {
             mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
-            mScorePath = Utils.getScorePath(mSize, mBgPath);
             invalidate();
         }
+    }
+
+    public void setBitmap(Bitmap bitmap) {
+        recyclerSrc();
+        this.mSrcBitmap = bitmap;
+        mIconBitmap = Utils.bitmap2Bitmap(mSrcBitmap, mSize, mIcon.iconScale, mBgPath);
+        if (mSize > 0) {
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            invalidate();
+        }
+    }
+
+    public void setBgShape(int shape) {
+        this.mIcon.bgShape = shape;
+        mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner);
+        mScorePath = Utils.getScorePath(mSize, mBgPath);
+        if (mShadowBitmap != null && !mShadowBitmap.isRecycled()) {
+            mShadowBitmap.recycle();
+        }
+        if (mIconBitmap != null && !mIconBitmap.isRecycled() && mSize > 0) {
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            invalidate();
+        }
+
     }
 
     public int getBgColor() {
@@ -119,9 +153,21 @@ public class PreviewView extends View {
     }
 
     public void setIconSize(float progress) {
-        this.mIcon.iconScale = 0.3f + progress / 100f * 0.4f;
-        if (mSvg != null && mSize > 0) {
-            mIconBitmap = Utils.SVGToBitmap(mSvg, mSize, mIcon.iconScale);
+        this.mIcon.iconScale = Icon.ICON_SCALE_MIN + progress / 100f * Icon.ICON_SCALE_ADJ;
+        if (mIconBitmap != null) {
+            mIconBitmap.recycle();
+        }
+        if (mShadowBitmap != null && !mShadowBitmap.isRecycled()) {
+            mShadowBitmap.recycle();
+        }
+        if (mSrcSVG != null && mSize > 0) {
+            mIconBitmap = Utils.SVGToBitmap(mSrcSVG, mSize, mIcon.iconScale);
+        } else if (mSrcDrawable != null && mSize > 0) {
+            mIconBitmap = Utils.drawable2Bitmap(mSrcDrawable, mSize, mIcon.iconScale, mBgPath);
+        } else if (mSrcBitmap != null && mSize > 0) {
+            mIconBitmap = Utils.bitmap2Bitmap(mSrcBitmap, mSize, mIcon.iconScale, mBgPath);
+        }
+        if (mIconBitmap != null && !mIconBitmap.isRecycled()) {
             mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
             invalidate();
         }
@@ -150,7 +196,7 @@ public class PreviewView extends View {
     }
 
     public Bitmap getBitmap(int size) {
-        return Utils.getBitmap(mSvg, mIcon, size, mBgPaint, mShadowPaint, mIconPaint, mScorePaint);
+        return Utils.getBitmap(mSrcSVG, mIcon, size, mBgPaint, mShadowPaint, mIconPaint, mScorePaint);
     }
 
     public String save(String name, int size) throws IOException {

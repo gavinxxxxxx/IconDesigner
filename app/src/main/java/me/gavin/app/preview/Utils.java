@@ -5,6 +5,8 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 
 import me.gavin.svg.model.SVG;
@@ -14,7 +16,7 @@ import me.gavin.svg.model.SVG;
  *
  * @author gavin.xiong 2017/12/5
  */
-class Utils {
+public class Utils {
 
     static Path getBgPath(int bgShape, int mSize, float bgCorner) {
         Path mBgPath = new Path();
@@ -77,7 +79,7 @@ class Utils {
         shadowCanvas.clipPath(mBgPath);
         Paint mIconPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mIconPaint.setStyle(Paint.Style.FILL);
-        for (int i = 1; i <= mSize / 2; i += preview ? 2 : 1) {
+        for (int i = 1; i <= mSize; i += preview ? 2 : 1) {
             shadowCanvas.drawBitmap(mIconBitmap, i, i, mIconPaint);
         }
         return mShadowBitmap;
@@ -111,5 +113,49 @@ class Utils {
         }
 
         return bitmap;
+    }
+
+    public static Bitmap drawable2Bitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if (bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
+
+        Bitmap bitmap;
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
+    static Bitmap drawable2Bitmap(Drawable drawable, int size, float scale, Path mBgPath) {
+        Bitmap result = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        canvas.clipPath(mBgPath);
+        int a = (int) (size * scale / 2f);
+        drawable.setBounds(size / 2 - a, size / 2 - a, size / 2 + a, size / 2 + a);
+        drawable.draw(canvas);
+        return result;
+    }
+
+    static Bitmap bitmap2Bitmap(Bitmap bitmap, int size, float iconScale, Path mBgPath) {
+        Bitmap result = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        canvas.clipPath(mBgPath);
+        Matrix matrix = new Matrix();
+        matrix.postTranslate((size - bitmap.getWidth()) / 2f, (size - bitmap.getHeight()) / 2f);
+        float scale = size * 1f / Math.min(bitmap.getWidth(), bitmap.getHeight());
+        matrix.postScale(scale, scale, size / 2f, size / 2f);
+        matrix.postScale(iconScale, iconScale, size / 2f, size / 2f);
+        canvas.drawBitmap(bitmap, matrix, new Paint());
+        return result;
     }
 }
