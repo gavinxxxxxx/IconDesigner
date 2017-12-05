@@ -48,6 +48,7 @@ public class ChooseIconDialog extends BottomSheetDialog {
                 .flatMap(dir -> Observable.just(dir)
                         .map(getContext().getAssets()::list)
                         .flatMap(Observable::fromArray)
+                        .filter(s -> !"aaa".equals(s))
                         .map(s -> dir + "/" + s))
                 .flatMap(dir -> Observable.just(dir)
                         .map(getContext().getAssets()::list)
