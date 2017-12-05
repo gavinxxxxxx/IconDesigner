@@ -75,7 +75,7 @@ public class PreviewView extends View {
         setMeasuredDimension(mSize, mSize);
         if (mSrcSVG != null && mSize > 0) {
             mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner);
-            mIconBitmap = Utils.SVGToBitmap(mSrcSVG, mSize, mIcon.iconScale);
+            mIconBitmap = Utils.SVGToBitmap(mSrcSVG, mSize, mIcon.iconScale, mBgPath);
             mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
             mScorePath = Utils.getScorePath(mSize, mBgPath);
             invalidate();
@@ -111,7 +111,7 @@ public class PreviewView extends View {
         recyclerSrc();
         this.mSrcSVG = mSvg;
         if (mSvg != null && mSize > 0) {
-            mIconBitmap = Utils.SVGToBitmap(mSvg, mSize, mIcon.iconScale);
+            mIconBitmap = Utils.SVGToBitmap(mSvg, mSize, mIcon.iconScale, mBgPath);
             mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
             invalidate();
         }
@@ -174,7 +174,7 @@ public class PreviewView extends View {
             mShadowBitmap.recycle();
         }
         if (mSrcSVG != null && mSize > 0) {
-            mIconBitmap = Utils.SVGToBitmap(mSrcSVG, mSize, mIcon.iconScale);
+            mIconBitmap = Utils.SVGToBitmap(mSrcSVG, mSize, mIcon.iconScale, mBgPath);
         } else if (mSrcDrawable != null && mSize > 0) {
             mIconBitmap = Utils.drawable2Bitmap(mSrcDrawable, mSize, mIcon.iconScale, mBgPath);
         } else if (mSrcBitmap != null && mSize > 0) {
@@ -214,7 +214,14 @@ public class PreviewView extends View {
     }
 
     public Bitmap getBitmap(int size) {
-        return Utils.getBitmap(mSrcSVG, mIcon, size, mBgPaint, mShadowPaint, mIconPaint, mScorePaint);
+        Bitmap result = Utils.getBitmap(mSrcSVG, mSrcDrawable, mSrcBitmap, mIcon, size,
+                mBgPaint, mShadowPaint, mIconPaint, mScorePaint);
+        if (result == null) {
+            result = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(result);
+            draw(canvas);
+        }
+        return result;
     }
 
     public String save(String name, int size) throws IOException {

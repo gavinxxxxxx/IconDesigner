@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 
@@ -16,7 +15,7 @@ import me.gavin.svg.model.SVG;
  *
  * @author gavin.xiong 2017/12/5
  */
-public class Utils {
+class Utils {
 
     static Path getKeyLines(int mSize) {
         Path mKeyLinesPath = new Path();
@@ -82,9 +81,10 @@ public class Utils {
         return mBgPath;
     }
 
-    static Bitmap SVGToBitmap(@NonNull SVG mSvg, int mSize, float iconScale) {
+    static Bitmap SVGToBitmap(@NonNull SVG mSvg, int mSize, float iconScale, @NonNull Path mBgPath) {
         Bitmap mIconBitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
         Canvas iconCanvas = new Canvas(mIconBitmap);
+        iconCanvas.clipPath(mBgPath);
 
         Matrix mMatrix = new Matrix();
         float mInherentScale = mSvg.getInherentScale();
@@ -132,50 +132,6 @@ public class Utils {
         return mScorePath;
     }
 
-    static Bitmap getBitmap(SVG mSvg, Icon mIcon, int size, Paint mBgPaint, Paint mShadowPaint, Paint mIconPaint, Paint mScorePaint) {
-        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-
-        // TODO: 2017/12/5 bgPaint layer
-        Path mBgPath = Utils.getBgPath(mIcon.bgShape, size, mIcon.bgCorner);
-        canvas.drawPath(mBgPath, mBgPaint);
-
-        Bitmap mIconBitmap = Utils.SVGToBitmap(mSvg, size, mIcon.iconScale);
-        Bitmap mShadowBitmap = Utils.getShadow(mIconBitmap, size, mBgPath, false);
-        canvas.drawBitmap(mShadowBitmap, 0, 0, mShadowPaint);
-        canvas.drawBitmap(mIconBitmap, 0, 0, mIconPaint);
-        mIconBitmap.recycle();
-        mShadowBitmap.recycle();
-
-        if (mIcon.effectScore) {
-            Path mScorePath = Utils.getScorePath(size, mBgPath);
-            canvas.drawPath(mScorePath, mScorePaint);
-        }
-
-        return bitmap;
-    }
-
-    public static Bitmap drawable2Bitmap(Drawable drawable) {
-        if (drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if (bitmapDrawable.getBitmap() != null) {
-                return bitmapDrawable.getBitmap();
-            }
-        }
-
-        Bitmap bitmap;
-        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        }
-
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        return bitmap;
-    }
-
     static Bitmap drawable2Bitmap(Drawable drawable, int size, float scale, Path mBgPath) {
         Bitmap result = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
@@ -197,5 +153,41 @@ public class Utils {
         matrix.postScale(iconScale, iconScale, size / 2f, size / 2f);
         canvas.drawBitmap(bitmap, matrix, new Paint());
         return result;
+    }
+
+    static Bitmap getBitmap(SVG mSvg, Drawable mSrcDrawable, Bitmap mSrcBitmap, Icon mIcon, int size,
+                            Paint mBgPaint, Paint mShadowPaint, Paint mIconPaint, Paint mScorePaint) {
+
+        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        // TODO: 2017/12/5 bgPaint layer
+        Path mBgPath = Utils.getBgPath(mIcon.bgShape, size, mIcon.bgCorner);
+        canvas.drawPath(mBgPath, mBgPaint);
+
+        Bitmap mIconBitmap;
+        if (mSvg != null) {
+            mIconBitmap = Utils.SVGToBitmap(mSvg, size, mIcon.iconScale, mBgPath);
+        } else if (mSrcDrawable != null) {
+            mIconBitmap = Utils.drawable2Bitmap(mSrcDrawable, size, mIcon.iconScale, mBgPath);
+        } else if (mSrcBitmap != null) {
+            mIconBitmap = Utils.bitmap2Bitmap(mSrcBitmap, size, mIcon.iconScale, mBgPath);
+        } else {
+            bitmap.recycle();
+            return null;
+        }
+
+        Bitmap mShadowBitmap = Utils.getShadow(mIconBitmap, size, mBgPath, false);
+        canvas.drawBitmap(mShadowBitmap, 0, 0, mShadowPaint);
+        canvas.drawBitmap(mIconBitmap, 0, 0, mIconPaint);
+        mIconBitmap.recycle();
+        mShadowBitmap.recycle();
+
+        if (mIcon.effectScore) {
+            Path mScorePath = Utils.getScorePath(size, mBgPath);
+            canvas.drawPath(mScorePath, mScorePaint);
+        }
+
+        return bitmap;
     }
 }
