@@ -44,10 +44,11 @@ import me.gavin.widget.color.picker.ColorPickerDialogBuilder;
 public class MainActivity extends AppCompatActivity {
 
     private final int TYPE_SEEK_ICON_SIZE = 0x10;
-    private final int TYPE_SEEK_SHADOW_ANGLE = 0x20;
-    private final int TYPE_SEEK_SHADOW_LENGTH = 0x21;
-    private final int TYPE_SEEK_SHADOW_GRADIENT = 0x22;
-    private final int TYPE_SEEK_SHADOW_ALPHA = 0x23;
+    private final int TYPE_SEEK_BG_CORNER = 0x20;
+    private final int TYPE_SEEK_SHADOW_ANGLE = 0x30;
+    private final int TYPE_SEEK_SHADOW_LENGTH = 0x31;
+    private final int TYPE_SEEK_SHADOW_GRADIENT = 0x32;
+    private final int TYPE_SEEK_SHADOW_ALPHA = 0x33;
 
     ActivityMainBinding mBinding;
 
@@ -103,18 +104,6 @@ public class MainActivity extends AppCompatActivity {
                     mSeekBarType = TYPE_SEEK_ICON_SIZE;
                     mBinding.seekBar.setVisibility(View.VISIBLE);
                     break;
-                case R.id.shadow_angle:
-                    break;
-                case R.id.shadow_length:
-                    break;
-                case R.id.shadow_gradient:
-                    mSeekBarType = TYPE_SEEK_SHADOW_GRADIENT;
-                    mBinding.seekBar.setVisibility(View.VISIBLE);
-                    break;
-                case R.id.shadow_alpha:
-                    mSeekBarType = TYPE_SEEK_SHADOW_ALPHA;
-                    mBinding.seekBar.setVisibility(View.VISIBLE);
-                    break;
                 case R.id.background_shape_rect:
                     mBinding.pre.setBgShape(0);
                     break;
@@ -127,6 +116,10 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.background_shape_rect_h:
                     mBinding.pre.setBgShape(3);
                     break;
+                case R.id.background_corner:
+                    mSeekBarType = TYPE_SEEK_BG_CORNER;
+                    mBinding.seekBar.setVisibility(View.VISIBLE);
+                    break;
                 case R.id.background_color:
                     ColorPickerDialogBuilder.with(this)
                             .setTitle("选择颜色")
@@ -138,8 +131,23 @@ public class MainActivity extends AppCompatActivity {
                             .setNegativeButton("取消", null)
                             .show();
                     break;
+                case R.id.shadow_angle:
+                    break;
+                case R.id.shadow_length:
+                    break;
+                case R.id.shadow_gradient:
+                    mSeekBarType = TYPE_SEEK_SHADOW_GRADIENT;
+                    mBinding.seekBar.setVisibility(View.VISIBLE);
+                    break;
+                case R.id.shadow_alpha:
+                    mSeekBarType = TYPE_SEEK_SHADOW_ALPHA;
+                    mBinding.seekBar.setVisibility(View.VISIBLE);
+                    break;
                 case R.id.effect_score:
                     mBinding.pre.toggleEffectScore();
+                    break;
+                case R.id.effect_lines:
+                    mBinding.pre.toggleEffectLines();
                     break;
 
                 case R.id.attach:
@@ -225,6 +233,9 @@ public class MainActivity extends AppCompatActivity {
                 switch (mSeekBarType) {
                     case TYPE_SEEK_ICON_SIZE:
                         mBinding.pre.setIconSize(progress);
+                        break;
+                    case TYPE_SEEK_BG_CORNER:
+                        mBinding.pre.setBgCorner(progress);
                         break;
                     case TYPE_SEEK_SHADOW_ANGLE:
                         break;

@@ -9,7 +9,7 @@
 
             <item
                 android:id="@+id/icon_shape"
-                android:icon="@drawable/ic_apps_24dp"
+                android:icon="@drawable/ic_widgets_24dp"
                 android:title="图标形状">
 
                 <menu>
@@ -26,7 +26,7 @@
 
                     <item
                         android:id="@+id/icon_shape_image"
-                        android:icon="@drawable/ic_apps_24dp"
+                        android:icon="@drawable/ic_image_24dp"
                         android:title="相册" />
 
                 </menu>
@@ -42,6 +42,58 @@
                 android:id="@+id/icon_size"
                 android:icon="@drawable/ic_bubble_chart_24dp"
                 android:title="图标大小" />
+
+        </menu>
+
+    </item>
+
+    <item
+        android:id="@+id/background"
+        android:icon="@drawable/ic_background_24dp"
+        android:title="背景">
+
+        <menu>
+
+            <item
+                android:id="@+id/background_shape"
+                android:icon="@drawable/ic_apps_24dp"
+                android:title="背景形状">
+
+                <menu>
+
+                    <item
+                        android:id="@+id/background_shape_rect"
+                        android:icon="@drawable/ic_crop_square_24dp"
+                        android:title="矩形" />
+
+                    <item
+                        android:id="@+id/background_shape_circle"
+                        android:icon="@drawable/ic_radio_button_unchecked_24dp"
+                        android:title="圆形" />
+
+                    <item
+                        android:id="@+id/background_shape_rect_v"
+                        android:icon="@drawable/ic_crop_portrait_24dp"
+                        android:title="竖直矩形" />
+
+                    <item
+                        android:id="@+id/background_shape_rect_h"
+                        android:icon="@drawable/ic_crop_landscape_24dp"
+                        android:title="水平矩形" />
+
+                </menu>
+
+            </item>
+
+            <item
+                android:id="@+id/background_corner"
+                android:icon="@drawable/ic_rounded_corner_24dp"
+                android:title="背景圆角" />
+
+            <item
+                android:id="@+id/background_color"
+                android:icon="@drawable/ic_color_lens_24dp"
+                android:title="背景颜色" />
 
         </menu>
 
@@ -68,55 +120,8 @@
                 android:visible="false" />
             <item
                 android:id="@+id/shadow_alpha"
-                android:icon="@drawable/ic_alpha_24dp"
+                android:icon="@drawable/ic_opacity_24dp"
                 android:title="阴影透明度" />
-
-        </menu>
-
-    </item>
-
-    <item
-        android:id="@+id/background"
-        android:icon="@drawable/ic_background_24dp"
-        android:title="背景">
-
-        <menu>
-
-            <item
-                android:id="@+id/background_shape"
-                android:icon="@drawable/ic_apps_24dp"
-                android:title="背景形状">
-
-                <menu>
-
-                    <item
-                        android:id="@+id/background_shape_rect"
-                        android:icon="@drawable/ic_background_rect_24dp"
-                        android:title="矩形" />
-
-                    <item
-                        android:id="@+id/background_shape_circle"
-                        android:icon="@drawable/ic_background_circle_24dp"
-                        android:title="圆形" />
-
-                    <item
-                        android:id="@+id/background_shape_rect_v"
-                        android:icon="@drawable/ic_background_rect_24dp"
-                        android:title="竖直矩形" />
-
-                    <item
-                        android:id="@+id/background_shape_rect_h"
-                        android:icon="@drawable/ic_background_circle_24dp"
-                        android:title="水平矩形" />
-
-                </menu>
-
-            </item>
-
-            <item
-                android:id="@+id/background_color"
-                android:icon="@drawable/ic_color_lens_24dp"
-                android:title="背景颜色" />
 
         </menu>
 
@@ -133,11 +138,17 @@
                 android:id="@+id/effect_score"
                 android:icon="@drawable/ic_score_24dp"
                 android:title="折痕" />
+
             <item
                 android:id="@+id/effect_chine"
                 android:icon="@drawable/ic_score_24dp"
                 android:title="折角"
                 android:visible="false" />
+
+            <item
+                android:id="@+id/effect_lines"
+                android:icon="@drawable/ic_key_lines_24dp"
+                android:title="关键线" />
 
         </menu>
 

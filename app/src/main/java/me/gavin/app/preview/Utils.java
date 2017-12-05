@@ -18,10 +18,50 @@ import me.gavin.svg.model.SVG;
  */
 public class Utils {
 
+    static Path getKeyLines(int mSize) {
+        Path mKeyLinesPath = new Path();
+
+        mKeyLinesPath.addRect(0, 0, mSize, mSize, Path.Direction.CCW);
+
+        float half = mSize / 2f;
+        float hla = mSize * Icon.BG_L_RATIO / 2f;
+        float hma = mSize * Icon.BG_M_RATIO / 2f;
+        float hsa = mSize * Icon.BG_S_RATIO / 2f;
+        float c = mSize * Icon.BG_C_RATIO;
+
+        mKeyLinesPath.addRoundRect(half - hma, half - hma, half + hma, half + hma, c, c, Path.Direction.CCW);
+        mKeyLinesPath.addCircle(half, half, hla, Path.Direction.CCW);
+        mKeyLinesPath.addRoundRect(half - hsa, half - hla, half + hsa, half + hla, c, c, Path.Direction.CCW);
+        mKeyLinesPath.addRoundRect(half - hla, half - hsa, half + hla, half + hsa, c, c, Path.Direction.CCW);
+
+        mKeyLinesPath.moveTo(0, 0);
+        mKeyLinesPath.rLineTo(mSize, mSize);
+        mKeyLinesPath.rMoveTo(-mSize, 0);
+        mKeyLinesPath.rLineTo(mSize, -mSize);
+
+        mKeyLinesPath.moveTo(0, 68f / 192f * mSize);
+        mKeyLinesPath.rLineTo(mSize, 0);
+        mKeyLinesPath.rMoveTo(0, 28f / 192f * mSize);
+        mKeyLinesPath.rLineTo(-mSize, 0);
+        mKeyLinesPath.rMoveTo(0, 28f / 192f * mSize);
+        mKeyLinesPath.rLineTo(mSize, 0);
+
+        mKeyLinesPath.moveTo(68f / 192f * mSize, 0);
+        mKeyLinesPath.rLineTo(0, mSize);
+        mKeyLinesPath.rMoveTo(28f / 192f * mSize, 0);
+        mKeyLinesPath.rLineTo(0, -mSize);
+        mKeyLinesPath.rMoveTo(28f / 192f * mSize, 0);
+        mKeyLinesPath.rLineTo(0, mSize);
+
+        mKeyLinesPath.addCircle(half, half, 40f / 192f * mSize, Path.Direction.CCW);
+
+        return mKeyLinesPath;
+    }
+
     static Path getBgPath(int bgShape, int mSize, float bgCorner) {
         Path mBgPath = new Path();
         float half = mSize / 2f;
-        float corner = half * bgCorner;
+        float corner = mSize * bgCorner;
         if (bgShape == 0) {
             float hs = half * Icon.BG_M_RATIO;
             mBgPath.addRoundRect(half - hs, half - hs, half + hs, half + hs,
@@ -29,13 +69,13 @@ public class Utils {
         } else if (bgShape == 1) {
             mBgPath.addCircle(half, half, half * Icon.BG_L_RATIO, Path.Direction.CCW);
         } else if (bgShape == 2) {
-            float hhs = half * Icon.BG_L_RATIO;
-            float hvs = half * Icon.BG_S_RATIO;
+            float hhs = half * Icon.BG_S_RATIO;
+            float hvs = half * Icon.BG_L_RATIO;
             mBgPath.addRoundRect(half - hhs, half - hvs, half + hhs, half + hvs,
                     corner, corner, Path.Direction.CCW);
         } else if (bgShape == 3) {
-            float hhs = half * Icon.BG_S_RATIO;
-            float hvs = half * Icon.BG_L_RATIO;
+            float hhs = half * Icon.BG_L_RATIO;
+            float hvs = half * Icon.BG_S_RATIO;
             mBgPath.addRoundRect(half - hhs, half - hvs, half + hhs, half + hvs,
                     corner, corner, Path.Direction.CCW);
         }

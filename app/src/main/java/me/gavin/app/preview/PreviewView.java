@@ -33,16 +33,21 @@ public class PreviewView extends View {
 
     private final Icon mIcon;
 
-    private Path mBgPath, mScorePath;
+    private Path mKeyLinesPath = new Path(), mBgPath, mScorePath;
 
     private Bitmap mIconBitmap, mShadowBitmap;
 
-    private final Paint mBgPaint, mIconPaint, mShadowPaint, mScorePaint;
+    private final Paint mKeyLinesPaint, mBgPaint, mIconPaint, mShadowPaint, mScorePaint;
 
     public PreviewView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setLayerType(LAYER_TYPE_SOFTWARE, null);
         mIcon = new Icon();
+
+        mKeyLinesPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
+        mKeyLinesPaint.setStyle(Paint.Style.STROKE);
+        mKeyLinesPaint.setStrokeWidth(1);
+        mKeyLinesPaint.setColor(0xFFFFFFFF);
 
         mBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mBgPaint.setStyle(Paint.Style.FILL);
@@ -75,6 +80,7 @@ public class PreviewView extends View {
             mScorePath = Utils.getScorePath(mSize, mBgPath);
             invalidate();
         }
+        mKeyLinesPath = Utils.getKeyLines(mSize);
     }
 
     @Override
@@ -86,6 +92,9 @@ public class PreviewView extends View {
             if (mIcon.effectScore && mScorePath != null) {
                 canvas.drawPath(mScorePath, mScorePaint);
             }
+        }
+        if (mSize > 0 && mIcon.showKeyLines) {
+            canvas.drawPath(mKeyLinesPath, mKeyLinesPaint);
         }
     }
 
@@ -139,7 +148,11 @@ public class PreviewView extends View {
             mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
             invalidate();
         }
+    }
 
+    public void setBgCorner(int progress) {
+        this.mIcon.bgCorner = progress / 192f;
+        this.setBgShape(mIcon.bgShape);
     }
 
     public int getBgColor() {
@@ -152,7 +165,7 @@ public class PreviewView extends View {
         invalidate();
     }
 
-    public void setIconSize(float progress) {
+    public void setIconSize(int progress) {
         this.mIcon.iconScale = Icon.ICON_SCALE_MIN + progress / 100f * Icon.ICON_SCALE_ADJ;
         if (mIconBitmap != null) {
             mIconBitmap.recycle();
@@ -192,6 +205,11 @@ public class PreviewView extends View {
 
     public void toggleEffectScore() {
         this.mIcon.effectScore = !this.mIcon.effectScore;
+        invalidate();
+    }
+
+    public void toggleEffectLines() {
+        this.mIcon.showKeyLines = !this.mIcon.showKeyLines;
         invalidate();
     }
 
