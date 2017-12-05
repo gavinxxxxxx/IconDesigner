@@ -3,7 +3,6 @@ package me.gavin.app.preview;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
@@ -31,34 +30,32 @@ public class PreviewView extends View {
 
     private final Icon mIcon;
 
-    private final Path mBgPath = new Path(), mScorePath = new Path();
-
-    private final Paint mBgPaint, mIconPaint, mShadowPaint, mScorePaint;
+    private Path mBgPath, mScorePath;
 
     private Bitmap mIconBitmap, mShadowBitmap;
 
-    private final Matrix mMatrix = new Matrix();
+    private final Paint mBgPaint, mIconPaint, mShadowPaint, mScorePaint;
 
     public PreviewView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setLayerType(LAYER_TYPE_SOFTWARE, null);
         mIcon = new Icon();
 
-        mBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mBgPaint.setStyle(Paint.Style.FILL);
         mBgPaint.setColor(mIcon.bgColor);
         mBgPaint.setShadowLayer(DisplayUtil.dp2px(mIcon.bgShadowLayer), 0,
                 DisplayUtil.dp2px(mIcon.bgShadowLayer / 1.25f), 0x30000000);
 
-        mIconPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mIconPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mIconPaint.setStyle(Paint.Style.FILL);
         mIconPaint.setColor(0xFFFFFFFF);
 
-        mShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mShadowPaint.setStyle(Paint.Style.FILL);
         mShadowPaint.setColorFilter(new PorterDuffColorFilter(0x30000000, PorterDuff.Mode.SRC_IN));
 
-        mScorePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mScorePaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mScorePaint.setStyle(Paint.Style.FILL);
         mScorePaint.setColor(0x18181818);
     }
@@ -68,11 +65,13 @@ public class PreviewView extends View {
         // 取最大正方形
         mSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
         setMeasuredDimension(mSize, mSize);
-        resetBgPath();
-        resetIconPath();
-        resetShadow();
-        resetScorePath();
-        invalidate();
+        if (mSvg != null && mSize > 0) {
+            mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner);
+            mIconBitmap = Utils.SVGToBitmap(mSvg, mSize, mIcon.iconScale);
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            mScorePath = Utils.getScorePath(mSize, mBgPath);
+            invalidate();
+        }
     }
 
     @Override
@@ -90,92 +89,23 @@ public class PreviewView extends View {
         }
     }
 
-    private void resetBgPath() {
-        if (mSvg == null || mSize <= 0) return;
-        mBgPath.reset();
-        float half = mSize / 2f;
-        float corner = DisplayUtil.dp2px(mIcon.bgCorner);
-        if (mIcon.bgShape == 0) {
-            float hs = half * Icon.BG_M_RATIO;
-            mBgPath.addRoundRect(half - hs, half - hs, half + hs, half + hs,
-                    corner, corner, Path.Direction.CCW);
-        } else if (mIcon.bgShape == 1) {
-            mBgPath.addCircle(half, half, half * Icon.BG_L_RATIO, Path.Direction.CCW);
-        } else if (mIcon.bgShape == 2) {
-            float hhs = half * Icon.BG_L_RATIO;
-            float hvs = half * Icon.BG_S_RATIO;
-            mBgPath.addRoundRect(half - hhs, half - hvs, half + hhs, half + hvs,
-                    corner, corner, Path.Direction.CCW);
-        } else if (mIcon.bgShape == 3) {
-            float hhs = half * Icon.BG_S_RATIO;
-            float hvs = half * Icon.BG_L_RATIO;
-            mBgPath.addRoundRect(half - hhs, half - hvs, half + hhs, half + hvs,
-                    corner, corner, Path.Direction.CCW);
-        }
-    }
-
-    private void resetIconPath() {
-        if (mSvg == null || mSize <= 0) return;
-        mIconBitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
-        Canvas iconCanvas = new Canvas(mIconBitmap);
-
-        mMatrix.reset();
-        float mInherentScale = mSvg.getInherentScale();
-        // 比例同步
-        mMatrix.postScale(mInherentScale, mInherentScale);
-        mMatrix.postTranslate((mSize - mSvg.width) / 2f, (mSize - mSvg.height) / 2f);
-        float scale = Math.min(mSize / mSvg.width, mSize / mSvg.height);
-        mMatrix.postScale(scale, scale, mSize / 2f, mSize / 2f);
-        // 当前缩放比
-        mMatrix.postScale(mIcon.iconScale, mIcon.iconScale, mSize / 2f, mSize / 2f);
-
-        iconCanvas.setMatrix(mMatrix);
-
-        if (mSvg.width / mSvg.height != mSvg.viewBox.width / mSvg.viewBox.height) {
-            iconCanvas.translate(
-                    mSvg.width / mSvg.height > mSvg.viewBox.width / mSvg.viewBox.height
-                            ? (mSvg.width - mSvg.viewBox.width / mSvg.viewBox.height * mSvg.height) / 2 / mInherentScale : 0,
-                    mSvg.width / mSvg.height > mSvg.viewBox.width / mSvg.viewBox.height
-                            ? 0 : (mSvg.height - mSvg.viewBox.height / mSvg.viewBox.width * mSvg.width) / 2 / mInherentScale);
-        }
-
-        for (int i = 0; i < mSvg.paths.size(); i++) {
-            if (mSvg.drawables.get(i).getFillPaint().getColor() != 0) {
-                iconCanvas.drawPath(mSvg.paths.get(i), mIconPaint != null ? mIconPaint : mSvg.drawables.get(i).getFillPaint());
-            }
-        }
-    }
-
-    private void resetShadow() {
-        if (mSvg == null || mSize <= 0) return;
-        mShadowBitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
-        Canvas shadowCanvas = new Canvas(mShadowBitmap);
-        shadowCanvas.clipPath(mBgPath);
-        for (int i = 1; i <= mSize / 2; i += 2) {
-            shadowCanvas.drawBitmap(mIconBitmap, i, i, mIconPaint);
-        }
-    }
-
-    private void resetScorePath() {
-        if (mSvg == null || mSize <= 0) return;
-        mScorePath.reset();
-        mScorePath.addRect(0, 0, mSize, mSize / 2f, Path.Direction.CCW);
-        mScorePath.op(mBgPath, Path.Op.INTERSECT);
-    }
-
     public void setSVG(SVG mSvg) {
         this.mSvg = mSvg;
-        resetIconPath();
-        resetShadow();
-        invalidate();
+        if (mSvg != null && mSize > 0) {
+            mIconBitmap = Utils.SVGToBitmap(mSvg, mSize, mIcon.iconScale);
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            invalidate();
+        }
     }
 
     public void setBgShape(int shape) {
         this.mIcon.bgShape = shape;
-        resetBgPath();
-        resetShadow();
-        resetScorePath();
-        invalidate();
+        if (mSvg != null && mSize > 0) {
+            mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner);
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            mScorePath = Utils.getScorePath(mSize, mBgPath);
+            invalidate();
+        }
     }
 
     public int getBgColor() {
@@ -190,9 +120,11 @@ public class PreviewView extends View {
 
     public void setIconSize(float progress) {
         this.mIcon.iconScale = 0.3f + progress / 100f * 0.4f;
-        resetIconPath();
-        resetShadow();
-        invalidate();
+        if (mSvg != null && mSize > 0) {
+            mIconBitmap = Utils.SVGToBitmap(mSvg, mSize, mIcon.iconScale);
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            invalidate();
+        }
     }
 
     public int getIconColor() {
@@ -218,11 +150,7 @@ public class PreviewView extends View {
     }
 
     public Bitmap getBitmap(int size) {
-        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        canvas.scale(size * 1f / mSize, size * 1f / mSize, 0, 0);
-        onDraw(canvas);
-        return bitmap;
+        return Utils.getBitmap(mSvg, mIcon, size, mBgPaint, mShadowPaint, mIconPaint, mScorePaint);
     }
 
     public String save(String name, int size) throws IOException {

@@ -5,24 +5,24 @@ package me.gavin.app.preview;
  *
  * @author gavin.xiong 2017/12/4
  */
-public class Icon {
+class Icon {
 
-    public static final float BG_L_RATIO = 176f / 192f;
-    public static final float BG_M_RATIO = 152f / 192f;
-    public static final float BG_S_RATIO = 128f / 192f;
+    static final float BG_L_RATIO = 176f / 192f;
+    static final float BG_M_RATIO = 152f / 192f;
+    static final float BG_S_RATIO = 128f / 192f;
 
-    public final int COLOR_BG = 0xFF26A69A;
+    private final int COLOR_BG = 0xFF26A69A;
 
-    public int bgShape = 0; // 0:圆角矩形 1:圆形 2: 竖直矩形 3：水平矩形
-    public int bgCorner = 16; // 背景圆角大小圆角 （dp）
-    public Integer bgColor = COLOR_BG;
-    public int bgShadowLayer = 2;
+    int bgShape = 0; // 0:圆角矩形 1:圆形 2: 竖直矩形 3：水平矩形
+    float bgCorner = 16f * 2 / 192f; // 背景圆角大小圆角
+    Integer bgColor = COLOR_BG;
+    int bgShadowLayer = 2;
 
-    public Integer iconColor;
-    public float iconScale = 0.5f;
+    Integer iconColor;
+    float iconScale = 0.5f;
 
-    public int shadowAlpha; // 0x00 ~ 0xFF;
+    int shadowAlpha; // 0x00 ~ 0xFF;
 
-    public boolean effectScore = true;
+    boolean effectScore = true;
 
 }
