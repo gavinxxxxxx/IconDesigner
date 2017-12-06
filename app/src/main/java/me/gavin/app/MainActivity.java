@@ -89,6 +89,24 @@ public class MainActivity extends AppCompatActivity {
                     startActivityForResult(new Intent(Intent.ACTION_PICK,
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI), 0);
                     break;
+                case R.id.icon_shape_text:
+                    DialogInputNameBinding binding = DialogInputNameBinding.inflate(getLayoutInflater());
+                    AlertDialog alertDialog = new AlertDialog.Builder(this)
+                            .setTitle("输入")
+                            .setView(binding.getRoot())
+                            .setPositiveButton("确定", (dialog, which) ->
+                                    mBinding.pre.setText(binding.editText.getText().toString()))
+                            .setNegativeButton("取消", null)
+                            .show();
+                    binding.editText.postDelayed(() -> InputUtil.show(this, binding.editText), 100);
+                    binding.editText.setOnEditorActionListener((v, actionId, event) -> {
+                        if (actionId == EditorInfo.IME_ACTION_DONE) {
+                            alertDialog.dismiss();
+                            mBinding.pre.setText(binding.editText.getText().toString());
+                        }
+                        return true;
+                    });
+                    break;
                 case R.id.icon_color:
                     ColorPickerDialogBuilder.with(this)
                             .setTitle("选择颜色")
@@ -211,6 +229,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        mBinding.pre.save();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && data != null && data.getData() != null) {
@@ -307,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void save(String text, boolean isSend) {
         String name = (TextUtils.isEmpty(text) ? UUID.randomUUID().toString() : text) + "_%sx%s";
-        Observable.just(192)
+        Observable.just(1024)
                 .map(size -> mBinding.pre.save(String.format(name, size, size), size))
                 .map(path -> CacheHelper.file2Uri(this, new File(path)))
                 .subscribeOn(Schedulers.io())

@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 
@@ -81,7 +82,26 @@ class Utils {
         return mBgPath;
     }
 
-    static Bitmap SVGToBitmap(@NonNull SVG mSvg, int mSize, float iconScale, @NonNull Path mBgPath) {
+    static Bitmap getShadow(@NonNull Bitmap mIconBitmap, int mSize, @NonNull Path mBgPath, boolean preview) {
+        Bitmap mShadowBitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
+        Canvas shadowCanvas = new Canvas(mShadowBitmap);
+        shadowCanvas.clipPath(mBgPath);
+        Paint mIconPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
+        mIconPaint.setStyle(Paint.Style.FILL);
+        for (int i = 1; i <= mSize; i += preview ? 2 : 1) {
+            shadowCanvas.drawBitmap(mIconBitmap, i, i, mIconPaint);
+        }
+        return mShadowBitmap;
+    }
+
+    static Path getScorePath(int mSize, @NonNull Path mBgPath) {
+        Path mScorePath = new Path();
+        mScorePath.addRect(0, 0, mSize, mSize / 2f, Path.Direction.CCW);
+        mScorePath.op(mBgPath, Path.Op.INTERSECT);
+        return mScorePath;
+    }
+
+    static Bitmap getBitmap(@NonNull SVG mSvg, int mSize, float iconScale, @NonNull Path mBgPath) {
         Bitmap mIconBitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
         Canvas iconCanvas = new Canvas(mIconBitmap);
         iconCanvas.clipPath(mBgPath);
@@ -113,26 +133,7 @@ class Utils {
         return mIconBitmap;
     }
 
-    static Bitmap getShadow(@NonNull Bitmap mIconBitmap, int mSize, @NonNull Path mBgPath, boolean preview) {
-        Bitmap mShadowBitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
-        Canvas shadowCanvas = new Canvas(mShadowBitmap);
-        shadowCanvas.clipPath(mBgPath);
-        Paint mIconPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
-        mIconPaint.setStyle(Paint.Style.FILL);
-        for (int i = 1; i <= mSize; i += preview ? 2 : 1) {
-            shadowCanvas.drawBitmap(mIconBitmap, i, i, mIconPaint);
-        }
-        return mShadowBitmap;
-    }
-
-    static Path getScorePath(int mSize, @NonNull Path mBgPath) {
-        Path mScorePath = new Path();
-        mScorePath.addRect(0, 0, mSize, mSize / 2f, Path.Direction.CCW);
-        mScorePath.op(mBgPath, Path.Op.INTERSECT);
-        return mScorePath;
-    }
-
-    static Bitmap drawable2Bitmap(Drawable drawable, int size, float scale, Path mBgPath) {
+    static Bitmap getBitmap(Drawable drawable, int size, float scale, Path mBgPath) {
         Bitmap result = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
         canvas.clipPath(mBgPath);
@@ -142,7 +143,7 @@ class Utils {
         return result;
     }
 
-    static Bitmap bitmap2Bitmap(Bitmap bitmap, int size, float iconScale, Path mBgPath) {
+    static Bitmap getBitmap(Bitmap bitmap, int size, float iconScale, Path mBgPath) {
         Bitmap result = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
         canvas.clipPath(mBgPath);
@@ -155,7 +156,21 @@ class Utils {
         return result;
     }
 
-    static Bitmap getBitmap(SVG mSvg, Drawable mSrcDrawable, Bitmap mSrcBitmap, Icon mIcon, int size,
+    static Bitmap getBitmap(String text, int size, float iconScale, Path mBgPath) {
+        Bitmap result = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        canvas.clipPath(mBgPath);
+        Paint mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint.setColor(0xFFFFFFFF);
+        mTextPaint.setTextAlign(Paint.Align.CENTER);
+        mTextPaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL));
+        mTextPaint.setTextSize(size * iconScale);
+        int baseY = (int) (size / 2 - mTextPaint.descent() / 2 - mTextPaint.ascent() / 2);
+        canvas.drawText(text, size / 2, baseY, mTextPaint);
+        return result;
+    }
+
+    static Bitmap getBitmap(SVG mSvg, Drawable mSrcDrawable, Bitmap mSrcBitmap, String mSrcText, Icon mIcon, int size,
                             Paint mBgPaint, Paint mShadowPaint, Paint mIconPaint, Paint mScorePaint) {
 
         Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
@@ -167,11 +182,13 @@ class Utils {
 
         Bitmap mIconBitmap;
         if (mSvg != null) {
-            mIconBitmap = Utils.SVGToBitmap(mSvg, size, mIcon.iconScale, mBgPath);
+            mIconBitmap = Utils.getBitmap(mSvg, size, mIcon.iconScale, mBgPath);
         } else if (mSrcDrawable != null) {
-            mIconBitmap = Utils.drawable2Bitmap(mSrcDrawable, size, mIcon.iconScale, mBgPath);
+            mIconBitmap = Utils.getBitmap(mSrcDrawable, size, mIcon.iconScale, mBgPath);
         } else if (mSrcBitmap != null) {
-            mIconBitmap = Utils.bitmap2Bitmap(mSrcBitmap, size, mIcon.iconScale, mBgPath);
+            mIconBitmap = Utils.getBitmap(mSrcBitmap, size, mIcon.iconScale, mBgPath);
+        } else if (mSrcText != null) {
+            mIconBitmap = Utils.getBitmap(mSrcText, size, mIcon.iconScale, mBgPath);
         } else {
             bitmap.recycle();
             return null;
