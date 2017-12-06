@@ -45,6 +45,11 @@ public class ColorPickerDialogBuilder {
         return this;
     }
 
+    public ColorPickerDialogBuilder withAlpha(boolean enable) {
+        picker.withAlpha(enable);
+        return this;
+    }
+
     public ColorPickerDialogBuilder setColor(int color) {
         picker.setColor(color);
         return this;

@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.icon_color:
                     ColorPickerDialogBuilder.with(this)
                             .setTitle("选择颜色")
+                            .withAlpha(true)
                             .setColor(mBinding.pre.getIconColor())
                             .setInputButton("输入", (dialog, color)
                                     -> setIconColor(color))
@@ -123,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.background_color:
                     ColorPickerDialogBuilder.with(this)
                             .setTitle("选择颜色")
+                            .withAlpha(true)
                             .setColor(mBinding.pre.getBgColor())
                             .setInputButton("输入", (dialog, color)
                                     -> setBgColor(color))

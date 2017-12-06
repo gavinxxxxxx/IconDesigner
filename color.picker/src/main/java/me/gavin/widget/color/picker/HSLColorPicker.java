@@ -60,8 +60,6 @@ public class HSLColorPicker extends View {
         super(context, attrs, defStyleAttr);
         mHPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mHPaint.setStyle(Paint.Style.STROKE);
-        mHPaint.setStrokeCap(Paint.Cap.ROUND);
-        mHPaint.setShader(new SweepGradient(mCx, mCy, COLORS, null));
 
         mSPaint = new Paint(mHPaint);
         mLPaint = new Paint(mSPaint);
@@ -97,6 +95,7 @@ public class HSLColorPicker extends View {
         mOr = Math.min(mCx, mCy) - mHStoreWidth * 2f + mHStoreWidth / 2f;
         mIr = mOr - mHStoreWidth;
         mLineHMargin = (int) (w / 2f - mOr + mLineWidth / 2f);
+        mHPaint.setShader(new SweepGradient(mCx, mCy, COLORS, null));
         mHPaint.setStrokeWidth(mHStoreWidth);
 
         mSPaint.setStrokeWidth(mLineWidth);
@@ -128,7 +127,7 @@ public class HSLColorPicker extends View {
         mTextPaint.setTextSize(mIr / 5f);
         int baseY = (int) (mCy - mTextPaint.descent() / 2 - mTextPaint.ascent() / 2);
         String textHex = String.format(mWithAlpha ? "#%08X" : "#%06X",
-                mWithAlpha ? HSLToColor(mHSL) : ColorUtils.HSLToColor(mHSL));
+                mWithAlpha ? HSLToColor(mHSL) : ColorUtils.HSLToColor(mHSL) & 0x00FFFFFF);
         canvas.drawText(textHex, mCx, baseY, mTextPaint);
         mTextPaint.setTextSize(mTextPaint.getTextSize() / 2.5f);
         String textHSL = String.format(Locale.getDefault(),
@@ -244,5 +243,10 @@ public class HSLColorPicker extends View {
 
     public int getColor() {
         return HSLToColor(mHSL);
+    }
+
+    public void withAlpha(boolean enable) {
+        this.mWithAlpha = enable;
+        requestLayout();
     }
 }
