@@ -3,12 +3,12 @@
     <item
         android:id="@+id/attach"
         android:icon="@drawable/ic_adb_24dp"
-        android:title="指定" />
+        android:title="@string/attach" />
 
     <item
         android:id="@+id/save"
         android:icon="@drawable/ic_save_24dp"
-        android:title="保存">
+        android:title="@string/save">
 
         <!--<menu>-->
 
@@ -44,24 +44,24 @@
     <item
         android:id="@+id/send"
         android:icon="@drawable/ic_send_24dp"
-        android:title="发送" />
+        android:title="@string/send" />
 
     <item
         android:id="@+id/donate"
         android:icon="@drawable/ic_donate_24dp"
-        android:title="捐赠">
+        android:title="@string/donate">
 
         <menu>
 
             <item
                 android:id="@+id/donate_wechat"
                 android:icon="@drawable/ic_wechat"
-                android:title="微信" />
+                android:title="@string/donate_wechat" />
 
             <item
                 android:id="@+id/donate_alipay"
                 android:icon="@drawable/ic_alipay"
-                android:title="支付宝" />
+                android:title="@string/donate_alipay" />
 
         </menu>
 

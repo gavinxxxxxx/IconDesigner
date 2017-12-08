@@ -1,3 +1,51 @@
 <resources>
     <string name="app_name">Icon Designer</string>
+
+    <string name="icon">Icon</string>
+    <string name="icon_shape">Shape</string>
+    <string name="icon_shape_md">Material Design</string>
+    <string name="icon_shape_app">App</string>
+    <string name="icon_shape_image">Image</string>
+    <string name="icon_shape_text">Text</string>
+    <string name="icon_color">Icon color</string>
+    <string name="icon_size">Icon size</string>
+
+    <string name="background">Background</string>
+    <string name="background_shape">Shape</string>
+    <string name="background_shape_rect">Square</string>
+    <string name="background_shape_circle">Circle</string>
+    <string name="background_shape_rect_v">Vertical rectangle</string>
+    <string name="background_shape_rect_h">Horizontal rectangle</string>
+    <string name="background_corner">Background corner</string>
+    <string name="background_color">Background color</string>
+
+    <string name="shadow">Shadows</string>
+    <string name="shadow_angle">Shadow angle</string>
+    <string name="shadow_length">Shadow length</string>
+    <string name="shadow_gradient">Shadow gradient</string>
+    <string name="shadow_opacity">Shadow opacity</string>
+
+    <string name="effect">Effect</string>
+    <string name="effect_score">Score</string>
+    <string name="effect_chine">Dog-ear</string>
+    <string name="effect_lines">Key lines</string>
+
+
+    <string name="attach">Attach</string>
+
+    <string name="save">Save</string>
+
+    <string name="send">Send</string>
+
+    <string name="donate">Donate</string>
+    <string name="donate_alipay">Alipay</string>
+    <string name="donate_wechat">WeChat</string>
+
+
+    <string name="input">Input</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="choose_color">Choose color</string>
+
 </resources>

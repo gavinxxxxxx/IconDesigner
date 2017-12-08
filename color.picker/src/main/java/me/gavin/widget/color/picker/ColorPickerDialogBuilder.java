@@ -45,6 +45,11 @@ public class ColorPickerDialogBuilder {
         return this;
     }
 
+    public ColorPickerDialogBuilder setTitle(int titleRes) {
+        builder.setTitle(titleRes);
+        return this;
+    }
+
     public ColorPickerDialogBuilder withAlpha(boolean enable) {
         picker.withAlpha(enable);
         return this;
@@ -53,6 +58,10 @@ public class ColorPickerDialogBuilder {
     public ColorPickerDialogBuilder setColor(int color) {
         picker.setColor(color);
         return this;
+    }
+
+    public ColorPickerDialogBuilder setInputButton(int text, final OnColorInputListener listener) {
+        return setInputButton(mContext.getString(text), listener);
     }
 
     public ColorPickerDialogBuilder setInputButton(CharSequence text, final OnColorInputListener listener) {
@@ -96,9 +105,17 @@ public class ColorPickerDialogBuilder {
         return this;
     }
 
+    public ColorPickerDialogBuilder setPositiveButton(int text, OnColorSelectedListener listener) {
+        return setPositiveButton(mContext.getString(text), listener);
+    }
+
     public ColorPickerDialogBuilder setNegativeButton(CharSequence text, DialogInterface.OnClickListener listener) {
         builder.setNegativeButton(text, listener);
         return this;
+    }
+
+    public ColorPickerDialogBuilder setNegativeButton(int text, DialogInterface.OnClickListener listener) {
+        return setNegativeButton(mContext.getString(text), listener);
     }
 
     public ColorPickerDialogBuilder setNeutralButton(CharSequence text, DialogInterface.OnClickListener listener) {

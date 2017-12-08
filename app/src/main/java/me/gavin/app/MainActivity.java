@@ -92,11 +92,11 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.icon_shape_text:
                     DialogInputNameBinding binding = DialogInputNameBinding.inflate(getLayoutInflater());
                     AlertDialog alertDialog = new AlertDialog.Builder(this)
-                            .setTitle("输入")
+                            .setTitle(R.string.input)
                             .setView(binding.getRoot())
-                            .setPositiveButton("确定", (dialog, which) ->
+                            .setPositiveButton(R.string.ok, (dialog, which) ->
                                     mBinding.pre.setText(binding.editText.getText().toString()))
-                            .setNegativeButton("取消", null)
+                            .setNegativeButton(R.string.cancel, null)
                             .show();
                     binding.editText.postDelayed(() -> InputUtil.show(this, binding.editText), 100);
                     binding.editText.setOnEditorActionListener((v, actionId, event) -> {
@@ -109,14 +109,14 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.icon_color:
                     ColorPickerDialogBuilder.with(this)
-                            .setTitle("选择颜色")
+                            .setTitle(R.string.choose_color)
                             .withAlpha(true)
                             .setColor(mBinding.pre.getIconColor())
-                            .setInputButton("输入", (dialog, color)
+                            .setInputButton(R.string.input, (dialog, color)
                                     -> setIconColor(color))
-                            .setPositiveButton("确定", (dialog, color)
+                            .setPositiveButton(R.string.ok, (dialog, color)
                                     -> mBinding.pre.setIconColor(color))
-                            .setNegativeButton("取消", null)
+                            .setNegativeButton(R.string.cancel, null)
                             .show();
                     break;
                 case R.id.icon_size:
@@ -141,14 +141,14 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.background_color:
                     ColorPickerDialogBuilder.with(this)
-                            .setTitle("选择颜色")
+                            .setTitle(R.string.choose_color)
                             .withAlpha(true)
                             .setColor(mBinding.pre.getBgColor())
-                            .setInputButton("输入", (dialog, color)
+                            .setInputButton(R.string.input, (dialog, color)
                                     -> setBgColor(color))
-                            .setPositiveButton("确定", (dialog, color)
+                            .setPositiveButton(R.string.ok, (dialog, color)
                                     -> mBinding.pre.setBgColor(color))
-                            .setNegativeButton("取消", null)
+                            .setNegativeButton(R.string.cancel, null)
                             .show();
                     break;
                 case R.id.shadow_angle:

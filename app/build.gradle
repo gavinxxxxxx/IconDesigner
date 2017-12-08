@@ -18,7 +18,6 @@ android {
         targetSdkVersion 26
         versionCode autoVersionCode()
         versionName autoVersionName()
-        resConfigs "zh"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 

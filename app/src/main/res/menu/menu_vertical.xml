@@ -3,36 +3,36 @@
     <item
         android:id="@+id/icon"
         android:icon="@drawable/ic_extension_24dp"
-        android:title="图标">
+        android:title="@string/icon">
 
         <menu>
 
             <item
                 android:id="@+id/icon_shape"
                 android:icon="@drawable/ic_widgets_24dp"
-                android:title="图标形状">
+                android:title="@string/icon_shape">
 
                 <menu>
 
                     <item
                         android:id="@+id/icon_shape_md"
                         android:icon="@drawable/ic_apps_24dp"
-                        android:title="内置" />
+                        android:title="@string/icon_shape_md" />
 
                     <item
                         android:id="@+id/icon_shape_app"
                         android:icon="@drawable/ic_adb_24dp"
-                        android:title="应用" />
+                        android:title="@string/icon_shape_app" />
 
                     <item
                         android:id="@+id/icon_shape_image"
                         android:icon="@drawable/ic_image_24dp"
-                        android:title="相册" />
+                        android:title="@string/icon_shape_image" />
 
                     <item
                         android:id="@+id/icon_shape_text"
                         android:icon="@drawable/ic_keyboard_24dp"
-                        android:title="文字" />
+                        android:title="@string/icon_shape_text" />
 
                 </menu>
 
@@ -41,12 +41,12 @@
             <item
                 android:id="@+id/icon_color"
                 android:icon="@drawable/ic_color_lens_24dp"
-                android:title="图标颜色" />
+                android:title="@string/icon_color" />
 
             <item
                 android:id="@+id/icon_size"
                 android:icon="@drawable/ic_bubble_chart_24dp"
-                android:title="图标大小" />
+                android:title="@string/icon_size" />
 
         </menu>
 
@@ -55,36 +55,36 @@
     <item
         android:id="@+id/background"
         android:icon="@drawable/ic_background_24dp"
-        android:title="背景">
+        android:title="@string/background">
 
         <menu>
 
             <item
                 android:id="@+id/background_shape"
                 android:icon="@drawable/ic_apps_24dp"
-                android:title="背景形状">
+                android:title="@string/background_shape">
 
                 <menu>
 
                     <item
                         android:id="@+id/background_shape_rect"
                         android:icon="@drawable/ic_crop_square_24dp"
-                        android:title="矩形" />
+                        android:title="@string/background_shape_rect" />
 
                     <item
                         android:id="@+id/background_shape_circle"
                         android:icon="@drawable/ic_radio_button_unchecked_24dp"
-                        android:title="圆形" />
+                        android:title="@string/background_shape_circle" />
 
                     <item
                         android:id="@+id/background_shape_rect_v"
                         android:icon="@drawable/ic_crop_portrait_24dp"
-                        android:title="竖直矩形" />
+                        android:title="@string/background_shape_rect_v" />
 
                     <item
                         android:id="@+id/background_shape_rect_h"
                         android:icon="@drawable/ic_crop_landscape_24dp"
-                        android:title="水平矩形" />
+                        android:title="@string/background_shape_rect_h" />
 
                 </menu>
 
@@ -93,12 +93,12 @@
             <item
                 android:id="@+id/background_corner"
                 android:icon="@drawable/ic_rounded_corner_24dp"
-                android:title="背景圆角" />
+                android:title="@string/background_corner" />
 
             <item
                 android:id="@+id/background_color"
                 android:icon="@drawable/ic_color_lens_24dp"
-                android:title="背景颜色" />
+                android:title="@string/background_color" />
 
         </menu>
 
@@ -107,26 +107,26 @@
     <item
         android:id="@+id/shadow"
         android:icon="@drawable/ic_layers_24dp"
-        android:title="阴影">
+        android:title="@string/shadow">
 
         <menu>
 
             <item
                 android:id="@+id/shadow_angle"
-                android:title="阴影角度"
+                android:title="@string/shadow_angle"
                 android:visible="false" />
             <item
                 android:id="@+id/shadow_length"
-                android:title="阴影长度"
+                android:title="@string/shadow_length"
                 android:visible="false" />
             <item
                 android:id="@+id/shadow_gradient"
-                android:title="阴影梯度"
+                android:title="@string/shadow_gradient"
                 android:visible="false" />
             <item
                 android:id="@+id/shadow_alpha"
                 android:icon="@drawable/ic_opacity_24dp"
-                android:title="阴影透明度" />
+                android:title="@string/shadow_opacity" />
 
         </menu>
 
@@ -135,25 +135,25 @@
     <item
         android:id="@+id/effect"
         android:icon="@drawable/ic_effect_24dp"
-        android:title="效果">
+        android:title="@string/effect">
 
         <menu>
 
             <item
                 android:id="@+id/effect_score"
                 android:icon="@drawable/ic_score_24dp"
-                android:title="折痕" />
+                android:title="@string/effect_score" />
 
             <item
                 android:id="@+id/effect_chine"
                 android:icon="@drawable/ic_score_24dp"
-                android:title="折角"
+                android:title="@string/effect_chine"
                 android:visible="false" />
 
             <item
                 android:id="@+id/effect_lines"
                 android:icon="@drawable/ic_key_lines_24dp"
-                android:title="关键线" />
+                android:title="@string/effect_lines" />
 
         </menu>
 
