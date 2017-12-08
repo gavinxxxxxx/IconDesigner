@@ -1,12 +1,5 @@
 package me.gavin.app.preview;
 
-import android.graphics.Bitmap;
-
-import me.gavin.app.App;
-import me.gavin.svg.model.Drawable;
-import me.gavin.svg.model.SVG;
-import me.gavin.util.Base64Helper;
-import me.gavin.util.L;
 import me.gavin.util.SPUtil;
 
 /**
@@ -29,10 +22,6 @@ class Icon {
     Integer bgColor;
     int bgShadowLayer;
 
-    SVG svg;
-    Drawable drawable;
-    Bitmap bitmap;
-    String text = "熊文强~";
     Integer iconColor;
     float iconScale;
 
@@ -47,16 +36,6 @@ class Icon {
         this.bgColor = SPUtil.getInt("bgColor", 0xFF26A69A);
         this.bgShadowLayer = SPUtil.getInt("bgShadowLayer", 2);
 
-        try {
-//            this.svg = (SVG) Base64Helper.fromBytes(Base64Helper.fromBase64(SPUtil.getString("svg")));
-            Object obj = Base64Helper.fromBytes(Base64Helper.fromBase64(SPUtil.getString("svg")));
-            L.e(obj);
-            if (obj != null) {
-                this.text = (String)obj ;
-            }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
         this.iconColor = SPUtil.getInt("iconColor");
         this.iconScale = SPUtil.getFloat("iconScale", 0.5f);
 
@@ -72,15 +51,6 @@ class Icon {
         SPUtil.putInt("bgColor", this.bgColor);
         SPUtil.putInt("bgShadowLayer", this.bgShadowLayer);
 
-        try {
-            L.e(text);
-            String str = Base64Helper.toBase64(Base64Helper.toBytes(text));
-            L.e(str);
-            SPUtil.putString("svg", str);
-//            Base64Helper.saveObject(App.get(), "svg2", text);
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
         SPUtil.putInt("iconColor", this.iconColor);
         SPUtil.putFloat("iconScale", this.iconScale);
 

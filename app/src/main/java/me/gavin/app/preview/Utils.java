@@ -164,7 +164,7 @@ class Utils {
         mTextPaint.setColor(0xFFFFFFFF);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextPaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL));
-        mTextPaint.setTextSize(size * iconScale);
+        mTextPaint.setTextSize(size * iconScale / text.length());
         int baseY = (int) (size / 2 - mTextPaint.descent() / 2 - mTextPaint.ascent() / 2);
         canvas.drawText(text, size / 2, baseY, mTextPaint);
         return result;
