@@ -15,9 +15,8 @@
             android:id="@+id/imageView"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@mipmap/ic_logo"
             tools:ignore="contentDescription"
-            tools:src="@mipmap/ic_logo" />
+            tools:src="@mipmap/a" />
 
         <TextView
             android:id="@+id/textView"

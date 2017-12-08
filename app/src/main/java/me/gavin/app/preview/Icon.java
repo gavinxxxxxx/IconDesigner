@@ -9,10 +9,11 @@ import me.gavin.util.SPUtil;
  */
 class Icon {
 
-    static final float BG_L_RATIO = 176f / 192f;
-    static final float BG_M_RATIO = 152f / 192f;
-    static final float BG_S_RATIO = 128f / 192f;
-    static final float BG_C_RATIO = 12f / 192f;
+    static final float BG_L_RATIO = 44f / 48f;
+    static final float BG_M_RATIO = 38f / 48f;
+    static final float BG_S_RATIO = 32f / 48f;
+    static final float BG_C_RATIO = 03f / 48f; // 背景圆角
+    static final float BG_SL_RATIO = 1f / 48f; // 背景阴影
 
     static final float ICON_SCALE_MIN = 0.2f;
     static final float ICON_SCALE_ADJ = 0.8f;
@@ -20,7 +21,6 @@ class Icon {
     int bgShape; // 0:圆角矩形 1:圆形 2: 竖直矩形 3：水平矩形
     float bgCorner; // 背景圆角大小圆角
     Integer bgColor;
-    int bgShadowLayer;
 
     Integer iconColor;
     float iconScale;
@@ -33,15 +33,14 @@ class Icon {
     Icon() {
         this.bgShape = SPUtil.getInt("bgShape", 0);
         this.bgCorner = SPUtil.getFloat("bgCorner", BG_C_RATIO);
-        this.bgColor = SPUtil.getInt("bgColor", 0xFF26A69A);
-        this.bgShadowLayer = SPUtil.getInt("bgShadowLayer", 2);
+        this.bgColor = SPUtil.getInt("bgColor", 0xFFFFFFFF);
 
         this.iconColor = SPUtil.getInt("iconColor");
         this.iconScale = SPUtil.getFloat("iconScale", 0.5f);
 
-        this.shadowAlpha = SPUtil.getInt("shadowAlpha", 100);
+        this.shadowAlpha = SPUtil.getInt("shadowAlpha", 30);
 
-        this.effectScore = SPUtil.getBoolean("effectScore", true);
+        this.effectScore = SPUtil.getBoolean("effectScore", false);
         this.showKeyLines = SPUtil.getBoolean("showKeyLines", false);
     }
 
@@ -49,7 +48,6 @@ class Icon {
         SPUtil.putInt("bgShape", this.bgShape);
         SPUtil.putFloat("bgCorner", this.bgCorner);
         SPUtil.putInt("bgColor", this.bgColor);
-        SPUtil.putInt("bgShadowLayer", this.bgShadowLayer);
 
         SPUtil.putInt("iconColor", this.iconColor);
         SPUtil.putFloat("iconScale", this.iconScale);

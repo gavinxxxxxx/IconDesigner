@@ -34,11 +34,11 @@ public class PreviewView extends View {
 
     private final Icon mIcon;
 
-    private Path mKeyLinesPath = new Path(), mBgPath, mScorePath;
+    private Path mKeyLinesPath = new Path(), mBgPath, mBgLayerPath, mScorePath;
 
     private Bitmap mIconBitmap, mShadowBitmap;
 
-    private final Paint mKeyLinesPaint, mBgPaint, mIconPaint, mShadowPaint, mScorePaint;
+    private final Paint mKeyLinesPaint, mBgPaint, mBgLayerPaint, mIconPaint, mShadowPaint, mScorePaint;
 
     public PreviewView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -52,9 +52,11 @@ public class PreviewView extends View {
 
         mBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mBgPaint.setStyle(Paint.Style.FILL);
-        mBgPaint.setShadowLayer(DisplayUtil.dp2px(mIcon.bgShadowLayer), 0,
-                DisplayUtil.dp2px(mIcon.bgShadowLayer / 1.25f), 0x30000000);
         mBgPaint.setColor(mIcon.bgColor);
+
+        mBgLayerPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
+        mBgLayerPaint.setStyle(Paint.Style.FILL);
+        mBgLayerPaint.setColor(0x00000000);
 
         mIconPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mIconPaint.setStyle(Paint.Style.FILL);
@@ -63,7 +65,7 @@ public class PreviewView extends View {
 
         mShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mShadowPaint.setStyle(Paint.Style.FILL);
-        mShadowPaint.setColorFilter(new PorterDuffColorFilter(0x30000000, PorterDuff.Mode.SRC_IN));
+        mShadowPaint.setColorFilter(new PorterDuffColorFilter(mIcon.shadowAlpha << 24, PorterDuff.Mode.SRC_IN));
 
         mScorePaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mScorePaint.setStyle(Paint.Style.FILL);
@@ -75,8 +77,11 @@ public class PreviewView extends View {
         // 取最大正方形
         mSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
         setMeasuredDimension(mSize, mSize);
+        mBgLayerPaint.setShadowLayer(mSize * Icon.BG_SL_RATIO, 0,
+                DisplayUtil.dp2px(mSize * Icon.BG_SL_RATIO / 4f), 0x50000000);
         if (mSrcSVG != null && mSize > 0) {
             mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner);
+            mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
             mIconBitmap = Utils.getBitmap(mSrcSVG, mSize, mIcon.iconScale, mBgPath);
             mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
             mScorePath = Utils.getScorePath(mSize, mBgPath);
@@ -88,6 +93,7 @@ public class PreviewView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         if (mBgPath != null && mIconBitmap != null && mShadowBitmap != null && mSize > 0) {
+            canvas.drawPath(mBgLayerPath, mBgLayerPaint);
             canvas.drawPath(mBgPath, mBgPaint);
             canvas.drawBitmap(mShadowBitmap, 0, 0, mShadowPaint);
             canvas.drawBitmap(mIconBitmap, 0, 0, mIconPaint);
@@ -153,6 +159,7 @@ public class PreviewView extends View {
     public void setBgShape(int shape) {
         this.mIcon.bgShape = shape;
         mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner);
+        mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
         mScorePath = Utils.getScorePath(mSize, mBgPath);
         if (mShadowBitmap != null && !mShadowBitmap.isRecycled()) {
             mShadowBitmap.recycle();
@@ -230,7 +237,7 @@ public class PreviewView extends View {
 
     public Bitmap getBitmap(int size) {
         Bitmap result = Utils.getBitmap(mSrcSVG, mSrcDrawable, mSrcBitmap, mSrcText,
-                mIcon, size, mBgPaint, mShadowPaint, mIconPaint, mScorePaint);
+                mIcon, size, mBgPaint, mBgLayerPaint, mShadowPaint, mIconPaint, mScorePaint);
         if (result == null) {
             result = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(result);

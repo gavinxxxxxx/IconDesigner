@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 
 import me.gavin.svg.model.SVG;
+import me.gavin.util.DisplayUtil;
 
 /**
  * Utils
@@ -80,6 +81,14 @@ class Utils {
                     corner, corner, Path.Direction.CCW);
         }
         return mBgPath;
+    }
+
+    static Path getBgLayerPath(Path mBgPath, int mSize) {
+        Path path = new Path(mBgPath);
+        Matrix matrix = new Matrix();
+        matrix.postScale(1 - Icon.BG_SL_RATIO, 1 + Icon.BG_SL_RATIO / 4f, mSize / 2f, mSize / 2f);
+        path.transform(matrix);
+        return path;
     }
 
     static Bitmap getShadow(@NonNull Bitmap mIconBitmap, int mSize, @NonNull Path mBgPath, boolean preview) {
@@ -161,7 +170,7 @@ class Utils {
         Canvas canvas = new Canvas(result);
         canvas.clipPath(mBgPath);
         Paint mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setColor(0xFFFFFFFF);
+        mTextPaint.setColor(0xFF000000);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextPaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL));
         mTextPaint.setTextSize(size * iconScale / text.length());
@@ -171,15 +180,26 @@ class Utils {
     }
 
     static Bitmap getBitmap(SVG mSvg, Drawable mSrcDrawable, Bitmap mSrcBitmap, String mSrcText, Icon mIcon, int size,
-                            Paint mBgPaint, Paint mShadowPaint, Paint mIconPaint, Paint mScorePaint) {
-
+                            Paint mBgPaint, Paint mBgLayerPaint, Paint mShadowPaint, Paint mIconPaint, Paint mScorePaint) {
+        // 创建 bitmap
         Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
 
-        // TODO: 2017/12/5 bgPaint layer
+        // 背景 Path
         Path mBgPath = Utils.getBgPath(mIcon.bgShape, size, mIcon.bgCorner);
+        // 背景阴影 Path
+        Path mBgLayerPath = Utils.getBgLayerPath(mBgPath, size);
+
+        // 背景阴影画笔
+        Paint mBgLayerPaint2 = new Paint(mBgLayerPaint);
+        mBgLayerPaint2.setShadowLayer(size * Icon.BG_SL_RATIO, 0,
+                DisplayUtil.dp2px(size * Icon.BG_SL_RATIO / 4f), 0x50000000);
+        // 画背景阴影
+        canvas.drawPath(mBgLayerPath, mBgLayerPaint2);
+        // 画背景
         canvas.drawPath(mBgPath, mBgPaint);
 
+        // 前景
         Bitmap mIconBitmap;
         if (mSvg != null) {
             mIconBitmap = Utils.getBitmap(mSvg, size, mIcon.iconScale, mBgPath);
@@ -194,12 +214,16 @@ class Utils {
             return null;
         }
 
+        // 前景阴影
         Bitmap mShadowBitmap = Utils.getShadow(mIconBitmap, size, mBgPath, false);
+        // 画前景阴影
         canvas.drawBitmap(mShadowBitmap, 0, 0, mShadowPaint);
+        // 画前景
         canvas.drawBitmap(mIconBitmap, 0, 0, mIconPaint);
         mIconBitmap.recycle();
         mShadowBitmap.recycle();
 
+        // 画折痕
         if (mIcon.effectScore) {
             Path mScorePath = Utils.getScorePath(size, mBgPath);
             canvas.drawPath(mScorePath, mScorePaint);
