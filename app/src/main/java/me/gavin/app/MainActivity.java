@@ -94,9 +94,9 @@ public class MainActivity extends AppCompatActivity {
                     AlertDialog alertDialog = new AlertDialog.Builder(this)
                             .setTitle(R.string.input)
                             .setView(binding.getRoot())
-                            .setPositiveButton(R.string.ok, (dialog, which) ->
+                            .setPositiveButton(android.R.string.ok, (dialog, which) ->
                                     mBinding.pre.setText(binding.editText.getText().toString()))
-                            .setNegativeButton(R.string.cancel, null)
+                            .setNegativeButton(android.R.string.cancel, null)
                             .show();
                     binding.editText.postDelayed(() -> InputUtil.show(this, binding.editText), 100);
                     binding.editText.setOnEditorActionListener((v, actionId, event) -> {
@@ -114,9 +114,9 @@ public class MainActivity extends AppCompatActivity {
                             .setColor(mBinding.pre.getIconColor())
                             .setInputButton(R.string.input, (dialog, color)
                                     -> setIconColor(color))
-                            .setPositiveButton(R.string.ok, (dialog, color)
+                            .setPositiveButton(android.R.string.ok, (dialog, color)
                                     -> mBinding.pre.setIconColor(color))
-                            .setNegativeButton(R.string.cancel, null)
+                            .setNegativeButton(android.R.string.cancel, null)
                             .show();
                     break;
                 case R.id.icon_size:
@@ -146,9 +146,9 @@ public class MainActivity extends AppCompatActivity {
                             .setColor(mBinding.pre.getBgColor())
                             .setInputButton(R.string.input, (dialog, color)
                                     -> setBgColor(color))
-                            .setPositiveButton(R.string.ok, (dialog, color)
+                            .setPositiveButton(android.R.string.ok, (dialog, color)
                                     -> mBinding.pre.setBgColor(color))
-                            .setNegativeButton(R.string.cancel, null)
+                            .setNegativeButton(android.R.string.cancel, null)
                             .show();
                     break;
                 case R.id.shadow_angle:
@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
                     new ChooseAppDialog(this, appInfo -> {
                         boolean supports = ShortcutUtil.addShortcut(this,
                                 appInfo.getIntent(), appInfo.label, mBinding.pre.getBitmap(192));
-                        Snackbar.make(mBinding.pre, supports ? "图标已添加到主屏幕" : "launcher 不支持", Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(mBinding.pre, supports ? R.string.attach_success : R.string.attach_not_support, Snackbar.LENGTH_LONG).show();
                     }).show();
                     break;
                 case R.id.save:
@@ -184,8 +184,8 @@ public class MainActivity extends AppCompatActivity {
                                 if (granted) {
                                     showSaveDialog();
                                 } else {
-                                    Snackbar.make(mBinding.pre, "保存图片需要 SDCard 卡读写权限", Snackbar.LENGTH_LONG)
-                                            .setAction("设置", v -> {
+                                    Snackbar.make(mBinding.pre, R.string.permission_denied, Snackbar.LENGTH_LONG)
+                                            .setAction(R.string.settings, v -> {
                                                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                                 intent.setData(Uri.parse("package:" + getPackageName()));
                                                 startActivity(intent);
@@ -200,8 +200,8 @@ public class MainActivity extends AppCompatActivity {
                                 if (granted) {
                                     save(null, true);
                                 } else {
-                                    Snackbar.make(mBinding.pre, "保存图片需要 SDCard 卡读写权限", Snackbar.LENGTH_LONG)
-                                            .setAction("设置", v -> {
+                                    Snackbar.make(mBinding.pre, R.string.permission_denied, Snackbar.LENGTH_LONG)
+                                            .setAction(R.string.settings, v -> {
                                                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                                 intent.setData(Uri.parse("package:" + getPackageName()));
                                                 startActivity(intent);
@@ -211,9 +211,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.donate_wechat:
                     new AlertDialog.Builder(this)
-                            .setTitle("微信")
+                            .setTitle(R.string.donate_wechat)
                             .setView(DialogCodeBinding.inflate(getLayoutInflater()).getRoot())
-                            .setPositiveButton("哦哦", null)
+                            .setPositiveButton(android.R.string.ok, null)
                             .show();
                     break;
                 case R.id.donate_alipay:
@@ -296,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
                 mBinding.pre.setIconColor(Color.parseColor(colorStr));
             }
         } catch (Exception e) {
-            Snackbar.make(mBinding.pre, "格式错误", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(mBinding.pre, R.string.wrong_format, Snackbar.LENGTH_LONG).show();
         }
     }
 
@@ -306,18 +306,18 @@ public class MainActivity extends AppCompatActivity {
                 mBinding.pre.setBgColor(Color.parseColor(colorStr));
             }
         } catch (Exception e) {
-            Snackbar.make(mBinding.pre, "格式错误", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(mBinding.pre, R.string.wrong_format, Snackbar.LENGTH_LONG).show();
         }
     }
 
     private void showSaveDialog() {
         DialogInputNameBinding binding = DialogInputNameBinding.inflate(getLayoutInflater());
         AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setTitle("保存")
+                .setTitle(R.string.save)
                 .setView(binding.getRoot())
-                .setPositiveButton("确定", (dialog, which) ->
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
                         save(binding.editText.getText().toString(), false))
-                .setNegativeButton("取消", null)
+                .setNegativeButton(android.R.string.cancel, null)
                 .show();
         binding.editText.postDelayed(() -> InputUtil.show(this, binding.editText), 100);
         binding.editText.setOnEditorActionListener((v, actionId, event) -> {
@@ -331,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void save(String text, boolean isSend) {
         String name = (TextUtils.isEmpty(text) ? UUID.randomUUID().toString() : text) + "_%sx%s";
-        Observable.just(192)
+        Observable.just(512)
                 .map(size -> mBinding.pre.save(String.format(name, size, size), size))
                 .map(path -> CacheHelper.file2Uri(this, new File(path)))
                 .subscribeOn(Schedulers.io())
@@ -342,21 +342,21 @@ public class MainActivity extends AppCompatActivity {
                     if (isSend) {
                         ShareCompat.IntentBuilder builder = ShareCompat.IntentBuilder
                                 .from(this)
-                                .setChooserTitle("分享图片")
+                                .setChooserTitle(R.string.send)
                                 .setType("image/*");
                         for (Uri i : uri) {
                             builder.addStream(i);
                         }
                         builder.startChooser();
                     } else {
-                        Snackbar.make(mBinding.pre, "图片已保存", Snackbar.LENGTH_LONG)
-                                .setAction("查看", v -> {
+                        Snackbar.make(mBinding.pre, R.string.image_saved, Snackbar.LENGTH_LONG)
+                                .setAction(R.string.view, v -> {
                                     try {
                                         Intent intent = new Intent(Intent.ACTION_VIEW);
                                         intent.setDataAndType(uri.get(0), "image/*");
                                         startActivity(intent);
                                     } catch (ActivityNotFoundException e) {
-                                        Snackbar.make(mBinding.pre, "你跟我说打不开？？？", Snackbar.LENGTH_LONG).show();
+                                        Snackbar.make(mBinding.pre, R.string.cant_open, Snackbar.LENGTH_LONG).show();
                                     }
                                 }).show();
                     }

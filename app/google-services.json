@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "88334739635",
+    "firebase_url": "https://icon-designer.firebaseio.com",
+    "project_id": "icon-designer",
+    "storage_bucket": "icon-designer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:88334739635:android:3930a5a29a0bfc04",
+        "android_client_info": {
+          "package_name": "me.gavin.icon.designer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "88334739635-eeah7qvm65v19i3ocr9ahl5r510tegdt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvMH4rYGYlv8nvg5WQtYSmD-lRigaPzm4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

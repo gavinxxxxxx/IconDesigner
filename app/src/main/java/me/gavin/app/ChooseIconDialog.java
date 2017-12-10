@@ -16,6 +16,7 @@ import me.gavin.base.function.Consumer;
 import me.gavin.icon.designer.databinding.DialogChooseIconBinding;
 import me.gavin.svg.model.SVG;
 import me.gavin.svg.parser.SVGParser;
+import me.gavin.util.AdHelper;
 
 /**
  * ChooseIconDialog
@@ -43,6 +44,8 @@ public class ChooseIconDialog extends BottomSheetDialog {
         getWindow().getAttributes().width = WindowManager.LayoutParams.MATCH_PARENT;
         getWindow().getAttributes().height = WindowManager.LayoutParams.MATCH_PARENT;
         getWindow().setDimAmount(0.4f);
+
+        AdHelper.init(mBinding.adView);
 
         Observable.just("design")
                 .flatMap(dir -> Observable.just(dir)

@@ -15,7 +15,8 @@ import java.util.List;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import me.gavin.base.function.Consumer;
-import me.gavin.icon.designer.databinding.LayoutRecyclerBinding;
+import me.gavin.icon.designer.databinding.DialogChooseAppBinding;
+import me.gavin.util.AdHelper;
 
 /**
  * ChooseAppDialog
@@ -24,7 +25,7 @@ import me.gavin.icon.designer.databinding.LayoutRecyclerBinding;
  */
 public class ChooseAppDialog extends BottomSheetDialog {
 
-    private LayoutRecyclerBinding mBinding;
+    private DialogChooseAppBinding mBinding;
     private AppInfoAdapter mAdapter;
 
     private List<AppInfo> appInfoList;
@@ -40,11 +41,13 @@ public class ChooseAppDialog extends BottomSheetDialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = LayoutRecyclerBinding.inflate(getLayoutInflater());
+        mBinding = DialogChooseAppBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
         getWindow().getAttributes().width = WindowManager.LayoutParams.MATCH_PARENT;
         getWindow().getAttributes().height = WindowManager.LayoutParams.MATCH_PARENT;
         getWindow().setDimAmount(0.4f);
+
+        AdHelper.init(mBinding.adView);
 
         PackageManager pm = getContext().getPackageManager();
         Rx.intentActivities(pm, Rx.getMainIntent(), 0)

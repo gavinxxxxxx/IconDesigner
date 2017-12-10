@@ -18,6 +18,7 @@ android {
         targetSdkVersion 26
         versionCode autoVersionCode()
         versionName autoVersionName()
+        resConfigs "zh", "en"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -88,7 +89,7 @@ andResGuard {
             "resources.arsc"
     ]
     sevenzip {
-        artifact = 'com.tencent.mm:SevenZip:1.2.7'
+        artifact = 'com.tencent.mm:SevenZip:1.2.10'
     }
 }
 
@@ -109,6 +110,10 @@ dependencies {
 
     implementation 'com.github.SilenceDut:jpinyin:v1.0'
 
+    implementation 'com.google.firebase:firebase-ads:11.6.2'
+
     implementation project(':menu.multilevel')
     implementation project(':color.picker')
 }
+
+apply plugin: 'com.google.gms.google-services'

@@ -76,11 +76,11 @@ public class ColorPickerDialogBuilder {
             editText.setFilters(new InputFilter[]{new ColorInputFilter()});
             parent.addView(editText);
             final AlertDialog alertDialog = new AlertDialog.Builder(mContext)
-                    .setTitle("输入颜色")
+                    .setTitle(text)
                     .setView(parent)
-                    .setPositiveButton("确定", (dialog1, which1)
+                    .setPositiveButton(android.R.string.ok, (dialog1, which1)
                             -> listener.onColorSelected(dialog, editText.getText().toString()))
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(android.R.string.cancel, null)
                     .show();
             editText.postDelayed(() -> {
                 InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
