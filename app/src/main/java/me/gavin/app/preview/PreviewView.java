@@ -88,8 +88,10 @@ public class PreviewView extends View {
             mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
             mIconBitmap = Utils.getBitmap(mSrcSVG, mSize, mIcon.iconScale, mBgPath);
             mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
-            mEarPath = Utils.getEarPath(mBgPath, mSize);
-            mEarShadowBitmap = Utils.getEarShadow(mEarPath, mSize, mBgPath, true);
+            if (mIcon.bgShape != 1) {
+                mEarPath = Utils.getEarPath(mBgPath, mSize);
+                mEarShadowBitmap = Utils.getEarShadow(mEarPath, mSize, mBgPath, true);
+            }
             mScorePath = Utils.getScorePath(mSize, mBgPath);
             invalidate();
         }
@@ -106,7 +108,7 @@ public class PreviewView extends View {
             if (mIcon.effectScore && mScorePath != null) {
                 canvas.drawPath(mScorePath, mScorePaint);
             }
-            if (mIcon.effectEar && mEarPath != null) {
+            if (mIcon.bgShape != 1 && mIcon.effectEar && mEarPath != null) {
                 canvas.drawBitmap(mEarShadowBitmap, 0, 0, mShadowPaint);
                 canvas.drawPath(mEarPath, mEarPaint);
             }
@@ -170,8 +172,10 @@ public class PreviewView extends View {
         this.mIcon.bgShape = shape;
         mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner, mIcon.effectEar);
         mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
-        mEarPath = Utils.getEarPath(mBgPath, mSize);
-        mEarShadowBitmap = Utils.getEarShadow(mEarPath, mSize, mBgPath, true);
+        if (mIcon.bgShape != 1) {
+            mEarPath = Utils.getEarPath(mBgPath, mSize);
+            mEarShadowBitmap = Utils.getEarShadow(mEarPath, mSize, mBgPath, true);
+        }
         mScorePath = Utils.getScorePath(mSize, mBgPath);
         if (mShadowBitmap != null && !mShadowBitmap.isRecycled()) {
             mShadowBitmap.recycle();
@@ -245,12 +249,14 @@ public class PreviewView extends View {
 
     public void toggleEffectEar() {
         this.mIcon.effectEar = !this.mIcon.effectEar;
-        mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner, mIcon.effectEar);
-        mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
-        mEarPath = Utils.getEarPath(mBgPath, mSize);
-        mEarShadowBitmap = Utils.getEarShadow(mEarPath, mSize, mBgPath, true);
-        mScorePath = Utils.getScorePath(mSize, mBgPath);
-        invalidate();
+        if (mIcon.bgShape != 1) {
+            mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner, mIcon.effectEar);
+            mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
+            mEarPath = Utils.getEarPath(mBgPath, mSize);
+            mEarShadowBitmap = Utils.getEarShadow(mEarPath, mSize, mBgPath, true);
+            mScorePath = Utils.getScorePath(mSize, mBgPath);
+            invalidate();
+        }
     }
 
     public void toggleEffectLines() {
