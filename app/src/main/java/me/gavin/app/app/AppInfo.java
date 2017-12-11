@@ -21,15 +21,14 @@ import java.util.UUID;
 public class AppInfo {
 
     public String packageName;
-
-    public ComponentName component;
+    public String className;
 
     public String label;
 
     public String labelPinyin;
+    public String sPinyin;
 
     public Drawable drawable;
-
 
     @Nullable
     public static AppInfo from(PackageManager packageManager, ActivityInfo activityInfo) {
@@ -37,20 +36,25 @@ public class AppInfo {
         return app.resolve(packageManager, activityInfo) ? app : null;
     }
 
-    private boolean resolve(PackageManager packageManager, ActivityInfo activityInfo) {
-        component = new ComponentName(activityInfo.packageName, activityInfo.name);
-
+    private boolean resolve(PackageManager pm, ActivityInfo activityInfo) {
         packageName = activityInfo.packageName;
+        className = activityInfo.name;
 
-        label = activityInfo.loadLabel(packageManager).toString();
+        label = activityInfo.loadLabel(pm).toString();
 
         try {
-            labelPinyin = PinyinHelper.convertToPinyinString(label, "", PinyinFormat.WITHOUT_TONE).toLowerCase();
+            labelPinyin = PinyinHelper
+                    .convertToPinyinString(label, "", PinyinFormat.WITHOUT_TONE)
+                    .toLowerCase();
+            sPinyin = PinyinHelper
+                    .getShortPinyin(label).toLowerCase();
         } catch (PinyinException e) {
+            labelPinyin = "";
+            sPinyin = "";
             e.printStackTrace();
         }
 
-        drawable = activityInfo.loadIcon(packageManager);
+        drawable = activityInfo.loadIcon(pm);
 
         return true;
     }
@@ -58,7 +62,7 @@ public class AppInfo {
     public Intent getIntent() {
         return new Intent(Intent.ACTION_MAIN)
                 .putExtra("me.gavin.icon.designer.id", UUID.randomUUID().toString())
-                .setComponent(component)
+                .setComponent(new ComponentName(packageName, className))
                 .addCategory(Intent.CATEGORY_LAUNCHER)
                 .setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
                 .addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
@@ -68,9 +72,9 @@ public class AppInfo {
     public String toString() {
         return "AppInfo{" +
                 "packageName='" + packageName + '\'' +
-                ", component=" + component +
                 ", label='" + label + '\'' +
                 ", labelPinyin='" + labelPinyin + '\'' +
+                ", sPinyin='" + sPinyin + '\'' +
                 '}';
     }
 }

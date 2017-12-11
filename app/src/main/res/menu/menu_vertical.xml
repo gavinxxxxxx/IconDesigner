@@ -146,7 +146,7 @@
 
             <item
                 android:id="@+id/effect_ear"
-                android:icon="@drawable/ic_adb_24dp"
+                android:icon="@drawable/ic_insert_drive_file_24dp"
                 android:title="@string/effect_chine" />
 
             <item

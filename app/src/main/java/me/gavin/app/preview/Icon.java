@@ -13,7 +13,7 @@ class Icon {
     static final float BG_M_RATIO = 38f / 48f;
     static final float BG_S_RATIO = 32f / 48f;
     static final float BG_C_RATIO = 03f / 48f; // 背景圆角
-    static final float BG_E_RATIO = 22f / 48f; // 背景狗耳
+    static final float BG_E_RATIO = 20f / 48f; // 背景狗耳 - 22f / 48f
     static final float BG_SL_RATIO = 1f / 48f; // 背景阴影
 
     static final float ICON_SCALE_MIN = 0.2f;

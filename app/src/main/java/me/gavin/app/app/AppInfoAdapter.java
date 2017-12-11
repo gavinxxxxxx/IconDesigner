@@ -19,7 +19,7 @@ public class AppInfoAdapter extends RecyclerAdapter<AppInfo, ItemAppBinding> {
 
     private Consumer<AppInfo> callback;
 
-    public AppInfoAdapter(Context context, List<AppInfo> list) {
+    AppInfoAdapter(Context context, List<AppInfo> list) {
         super(context, list, R.layout.item_app);
     }
 
