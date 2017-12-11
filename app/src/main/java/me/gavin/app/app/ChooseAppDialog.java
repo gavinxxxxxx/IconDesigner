@@ -1,6 +1,7 @@
 package me.gavin.app.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -23,7 +24,6 @@ import me.gavin.base.function.Consumer;
 import me.gavin.icon.designer.databinding.DialogChooseAppBinding;
 import me.gavin.util.AdHelper;
 import me.gavin.util.DisplayUtil;
-import me.gavin.util.L;
 
 /**
  * ChooseAppDialog
@@ -64,25 +64,20 @@ public class ChooseAppDialog extends BottomSheetDialog {
         AdHelper.init(mBinding.adView);
 
         PackageManager pm = getContext().getPackageManager();
-        Rx.intentActivities(pm, Rx.getMainIntent(), 0)
+        Observable.fromIterable(pm.queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0))
                 .map(resolve -> AppInfo.from(pm, resolve.activityInfo))
-                .map(appInfo -> {
-                    tempList.add(appInfo);
-                    Collections.sort(tempList, (o1, o2) -> o1.labelPinyin.compareTo(o2.labelPinyin));
-                    return tempList;
-                })
                 .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> {
-                    tempList = new ArrayList<>();
                     resultList = new ArrayList<>();
                     mAdapter = new AppInfoAdapter(getContext(), resultList);
+                    mBinding.recycler.setAdapter(mAdapter);
                     mAdapter.setCallback(appInfo -> {
                         if (callback != null) {
                             callback.accept(appInfo);
                         }
                         dismiss();
                     });
-                    mBinding.recycler.setAdapter(mAdapter);
                 })
                 .doOnComplete(() -> {
                     appInfoList = new ArrayList<>();
@@ -106,14 +101,11 @@ public class ChooseAppDialog extends BottomSheetDialog {
                     });
                 })
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(newList -> {
-                    DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallback(resultList, newList));
-                    resultList.clear();
-                    resultList.addAll(tempList);
-                    diffResult.dispatchUpdatesTo(mAdapter);
-                    mBinding.recycler.scrollToPosition(0);
-                }, Throwable::printStackTrace);
+                .subscribe(appInfo -> {
+                    resultList.add(appInfo);
+                    Collections.sort(resultList, (o1, o2) -> o1.labelPinyin.compareTo(o2.labelPinyin));
+                    mAdapter.notifyItemInserted(resultList.indexOf(appInfo));
+                });
     }
 
     private void search(String text) {
@@ -123,8 +115,6 @@ public class ChooseAppDialog extends BottomSheetDialog {
                         || appInfo.sPinyin.contains(text.toLowerCase()))
                 .toList()
                 .subscribe(newList -> {
-                    L.e(appInfoList);
-                    L.e(newList);
                     DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallback(resultList, newList));
                     resultList.clear();
                     resultList.addAll(newList);

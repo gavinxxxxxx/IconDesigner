@@ -11,9 +11,9 @@ import java.util.List;
  */
 public class DiffCallback extends DiffUtil.Callback {
 
-    private List<AppInfo> mOldList, mNewList;//看名字
+    private List<AppInfo> mOldList, mNewList;
 
-    public DiffCallback(List<AppInfo> oldList, List<AppInfo> newList) {
+    DiffCallback(List<AppInfo> oldList, List<AppInfo> newList) {
         this.mOldList = oldList;
         this.mNewList = newList;
     }
