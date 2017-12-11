@@ -34,11 +34,11 @@ public class PreviewView extends View {
 
     private final Icon mIcon;
 
-    private Path mKeyLinesPath = new Path(), mBgPath, mBgLayerPath, mScorePath;
+    private Path mKeyLinesPath = new Path(), mBgPath, mBgLayerPath, mScorePath, mEarPath;
 
-    private Bitmap mIconBitmap, mShadowBitmap;
+    private Bitmap mIconBitmap, mShadowBitmap, mEarShadowBitmap;
 
-    private final Paint mKeyLinesPaint, mBgPaint, mBgLayerPaint, mIconPaint, mShadowPaint, mScorePaint;
+    private final Paint mKeyLinesPaint, mBgPaint, mBgLayerPaint, mIconPaint, mShadowPaint, mScorePaint, mEarPaint;
 
     public PreviewView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -70,6 +70,10 @@ public class PreviewView extends View {
         mScorePaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mScorePaint.setStyle(Paint.Style.FILL);
         mScorePaint.setColor(0x18181818);
+
+        mEarPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
+        mEarPaint.setStyle(Paint.Style.FILL);
+        mEarPaint.setColor(Utils.getEarColor(mIcon.bgColor));
     }
 
     @Override
@@ -80,10 +84,12 @@ public class PreviewView extends View {
         mBgLayerPaint.setShadowLayer(mSize * Icon.BG_SL_RATIO, 0,
                 DisplayUtil.dp2px(mSize * Icon.BG_SL_RATIO / 4f), 0x50000000);
         if (mSrcSVG != null && mSize > 0) {
-            mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner);
+            mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner, mIcon.effectEar);
             mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
             mIconBitmap = Utils.getBitmap(mSrcSVG, mSize, mIcon.iconScale, mBgPath);
             mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            mEarPath = Utils.getEarPath(mBgPath, mSize);
+            mEarShadowBitmap = Utils.getEarShadow(mEarPath, mSize, mBgPath, true);
             mScorePath = Utils.getScorePath(mSize, mBgPath);
             invalidate();
         }
@@ -99,6 +105,10 @@ public class PreviewView extends View {
             canvas.drawBitmap(mIconBitmap, 0, 0, mIconPaint);
             if (mIcon.effectScore && mScorePath != null) {
                 canvas.drawPath(mScorePath, mScorePaint);
+            }
+            if (mIcon.effectEar && mEarPath != null) {
+                canvas.drawBitmap(mEarShadowBitmap, 0, 0, mShadowPaint);
+                canvas.drawPath(mEarPath, mEarPaint);
             }
         }
         if (mSize > 0 && mIcon.showKeyLines && mKeyLinesPath != null) {
@@ -158,8 +168,10 @@ public class PreviewView extends View {
 
     public void setBgShape(int shape) {
         this.mIcon.bgShape = shape;
-        mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner);
+        mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner, mIcon.effectEar);
         mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
+        mEarPath = Utils.getEarPath(mBgPath, mSize);
+        mEarShadowBitmap = Utils.getEarShadow(mEarPath, mSize, mBgPath, true);
         mScorePath = Utils.getScorePath(mSize, mBgPath);
         if (mShadowBitmap != null && !mShadowBitmap.isRecycled()) {
             mShadowBitmap.recycle();
@@ -182,6 +194,7 @@ public class PreviewView extends View {
     public void setBgColor(Integer color) {
         this.mIcon.bgColor = color;
         mBgPaint.setColor(color == null ? 0 : color);
+        mEarPaint.setColor(Utils.getEarColor(mIcon.bgColor));
         invalidate();
     }
 
@@ -230,6 +243,16 @@ public class PreviewView extends View {
         invalidate();
     }
 
+    public void toggleEffectEar() {
+        this.mIcon.effectEar = !this.mIcon.effectEar;
+        mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner, mIcon.effectEar);
+        mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
+        mEarPath = Utils.getEarPath(mBgPath, mSize);
+        mEarShadowBitmap = Utils.getEarShadow(mEarPath, mSize, mBgPath, true);
+        mScorePath = Utils.getScorePath(mSize, mBgPath);
+        invalidate();
+    }
+
     public void toggleEffectLines() {
         this.mIcon.showKeyLines = !this.mIcon.showKeyLines;
         invalidate();
@@ -237,7 +260,7 @@ public class PreviewView extends View {
 
     public Bitmap getBitmap(int size) {
         Bitmap result = Utils.getBitmap(mSrcSVG, mSrcDrawable, mSrcBitmap, mSrcText,
-                mIcon, size, mBgPaint, mBgLayerPaint, mShadowPaint, mIconPaint, mScorePaint);
+                mIcon, size, mBgPaint, mBgLayerPaint, mShadowPaint, mIconPaint, mScorePaint, mEarPaint);
         if (result == null) {
             result = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(result);

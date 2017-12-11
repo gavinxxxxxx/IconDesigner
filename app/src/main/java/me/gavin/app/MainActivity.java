@@ -59,19 +59,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-//        mBinding.elevation.setOnClickListener(v -> {
-//            try {
-//                v = mBinding.getRoot();
-//                Bitmap bitmap = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
-//                Canvas canvas = new Canvas(bitmap);
-//                canvas.drawColor(ContextCompat.getColor(this, R.color.colorPrimary));
-//                v.draw(canvas);
-//                CacheHelper.saveBitmap(bitmap, "Elevation");
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        });
-
         afterCreate();
 
         mBinding.menu.setOnMenuItemSelectedListener(menuItem -> {
@@ -165,6 +152,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.effect_score:
                     mBinding.pre.toggleEffectScore();
+                    break;
+                case R.id.effect_ear:
+                    mBinding.pre.toggleEffectEar();
                     break;
                 case R.id.effect_lines:
                     mBinding.pre.toggleEffectLines();

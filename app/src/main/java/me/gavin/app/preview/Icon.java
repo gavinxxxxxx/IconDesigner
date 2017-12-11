@@ -13,6 +13,7 @@ class Icon {
     static final float BG_M_RATIO = 38f / 48f;
     static final float BG_S_RATIO = 32f / 48f;
     static final float BG_C_RATIO = 03f / 48f; // 背景圆角
+    static final float BG_E_RATIO = 22f / 48f; // 背景狗耳
     static final float BG_SL_RATIO = 1f / 48f; // 背景阴影
 
     static final float ICON_SCALE_MIN = 0.2f;
@@ -28,6 +29,7 @@ class Icon {
     int shadowAlpha; // 0x00 ~ 0xFF;
 
     boolean effectScore;
+    boolean effectEar;
     boolean showKeyLines;
 
     Icon() {
@@ -41,6 +43,7 @@ class Icon {
         this.shadowAlpha = SPUtil.getInt("shadowAlpha", 30);
 
         this.effectScore = SPUtil.getBoolean("effectScore", false);
+        this.effectEar = SPUtil.getBoolean("effectEar", false);
         this.showKeyLines = SPUtil.getBoolean("showKeyLines", false);
     }
 
@@ -55,6 +58,7 @@ class Icon {
         SPUtil.putInt("shadowAlpha", this.shadowAlpha);
 
         SPUtil.putBoolean("effectScore", this.effectScore);
+        SPUtil.putBoolean("effectEar", this.effectEar);
         SPUtil.putBoolean("showKeyLines", this.showKeyLines);
     }
 }

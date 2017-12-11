@@ -145,10 +145,9 @@
                 android:title="@string/effect_score" />
 
             <item
-                android:id="@+id/effect_chine"
-                android:icon="@drawable/ic_score_24dp"
-                android:title="@string/effect_chine"
-                android:visible="false" />
+                android:id="@+id/effect_ear"
+                android:icon="@drawable/ic_adb_24dp"
+                android:title="@string/effect_chine" />
 
             <item
                 android:id="@+id/effect_lines"

@@ -5,9 +5,11 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.v4.graphics.ColorUtils;
 
 import me.gavin.svg.model.SVG;
 import me.gavin.util.DisplayUtil;
@@ -19,50 +21,57 @@ import me.gavin.util.DisplayUtil;
  */
 class Utils {
 
-    static Path getKeyLines(int mSize) {
-        Path mKeyLinesPath = new Path();
+    static Path getKeyLines(int size) {
+        Path path = new Path();
 
-        mKeyLinesPath.addRect(0, 0, mSize, mSize, Path.Direction.CCW);
+        float half = 48 / 2f;
+        float hla = Icon.BG_L_RATIO * half;
+        float hma = Icon.BG_M_RATIO * half;
+        float hsa = Icon.BG_S_RATIO * half;
+        float c = Icon.BG_C_RATIO * 48;
 
-        float half = mSize / 2f;
-        float hla = mSize * Icon.BG_L_RATIO / 2f;
-        float hma = mSize * Icon.BG_M_RATIO / 2f;
-        float hsa = mSize * Icon.BG_S_RATIO / 2f;
-        float c = mSize * Icon.BG_C_RATIO;
+        path.addRoundRect(half - hma, half - hma, half + hma, half + hma, c, c, Path.Direction.CCW);
+        path.addCircle(half, half, hla, Path.Direction.CCW);
+        path.addRoundRect(half - hsa, half - hla, half + hsa, half + hla, c, c, Path.Direction.CCW);
+        path.addRoundRect(half - hla, half - hsa, half + hla, half + hsa, c, c, Path.Direction.CCW);
 
-        mKeyLinesPath.addRoundRect(half - hma, half - hma, half + hma, half + hma, c, c, Path.Direction.CCW);
-        mKeyLinesPath.addCircle(half, half, hla, Path.Direction.CCW);
-        mKeyLinesPath.addRoundRect(half - hsa, half - hla, half + hsa, half + hla, c, c, Path.Direction.CCW);
-        mKeyLinesPath.addRoundRect(half - hla, half - hsa, half + hla, half + hsa, c, c, Path.Direction.CCW);
+        path.moveTo(6, 6);
+        path.rLineTo(36, 36);
+        path.rMoveTo(-36, 0);
+        path.rLineTo(36, -36);
 
-        mKeyLinesPath.moveTo(0, 0);
-        mKeyLinesPath.rLineTo(mSize, mSize);
-        mKeyLinesPath.rMoveTo(-mSize, 0);
-        mKeyLinesPath.rLineTo(mSize, -mSize);
+        path.moveTo(2, 17);
+        path.rLineTo(44, 0);
+        path.rMoveTo(0, 7);
+        path.rLineTo(-44, 0);
+        path.rMoveTo(0, 7);
+        path.rLineTo(44, 0);
 
-        mKeyLinesPath.moveTo(0, 68f / 192f * mSize);
-        mKeyLinesPath.rLineTo(mSize, 0);
-        mKeyLinesPath.rMoveTo(0, 28f / 192f * mSize);
-        mKeyLinesPath.rLineTo(-mSize, 0);
-        mKeyLinesPath.rMoveTo(0, 28f / 192f * mSize);
-        mKeyLinesPath.rLineTo(mSize, 0);
+        path.moveTo(17f, 2);
+        path.rLineTo(0, 44);
+        path.rMoveTo(7f, 0);
+        path.rLineTo(0, -44);
+        path.rMoveTo(7f, 0);
+        path.rLineTo(0, 44);
 
-        mKeyLinesPath.moveTo(68f / 192f * mSize, 0);
-        mKeyLinesPath.rLineTo(0, mSize);
-        mKeyLinesPath.rMoveTo(28f / 192f * mSize, 0);
-        mKeyLinesPath.rLineTo(0, -mSize);
-        mKeyLinesPath.rMoveTo(28f / 192f * mSize, 0);
-        mKeyLinesPath.rLineTo(0, mSize);
+        path.addCircle(half, half, 10, Path.Direction.CCW);
 
-        mKeyLinesPath.addCircle(half, half, 40f / 192f * mSize, Path.Direction.CCW);
+        path.transform(getMatrix(size));
 
-        return mKeyLinesPath;
+        return path;
     }
 
-    static Path getBgPath(int bgShape, int mSize, float bgCorner) {
+    private static Matrix getMatrix(int size) {
+        Matrix matrix = new Matrix();
+        matrix.postScale(size / 48f, size / 48f, 24, 24);
+        matrix.postTranslate(size / 2f - 24, size / 2f - 24);
+        return matrix;
+    }
+
+    static Path getBgPath(int bgShape, int size, float bgCorner, boolean ear) {
         Path mBgPath = new Path();
-        float half = mSize / 2f;
-        float corner = mSize * bgCorner;
+        float half = size / 2f;
+        float corner = size * bgCorner;
         if (bgShape == 0) {
             float hs = half * Icon.BG_M_RATIO;
             mBgPath.addRoundRect(half - hs, half - hs, half + hs, half + hs,
@@ -80,7 +89,59 @@ class Utils {
             mBgPath.addRoundRect(half - hhs, half - hvs, half + hhs, half + hvs,
                     corner, corner, Path.Direction.CCW);
         }
+
+        if (ear && bgShape != 1) {
+            Path path = new Path();
+            path.moveTo(size - Icon.BG_E_RATIO * size, 0);
+            path.rLineTo(Icon.BG_E_RATIO * size, Icon.BG_E_RATIO * size);
+            path.lineTo(size, 0);
+            path.close();
+            mBgPath.op(path, Path.Op.DIFFERENCE);
+        }
+
         return mBgPath;
+    }
+
+    static Path getEarPath(Path mBgPath, int size) {
+        Path path = new Path();
+        path.lineTo(Icon.BG_E_RATIO * size, 0);
+        path.lineTo(0, Icon.BG_E_RATIO * size);
+        path.close();
+        path.op(mBgPath, Path.Op.INTERSECT);
+
+        RectF rect = new RectF();
+        path.computeBounds(rect, false);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(-90f, rect.centerX(), rect.centerY());
+        matrix.postTranslate(size - rect.left - rect.right, 0);
+        path.transform(matrix);
+
+        return path;
+    }
+
+    static int getEarColor(Integer bgColor) {
+        if (bgColor == null) return 0;
+        float[] hsl = new float[3];
+        ColorUtils.colorToHSL(bgColor, hsl);
+        hsl[2] = Math.min(hsl[2] + 0.1f, 1f);
+        return ColorUtils.HSLToColor(hsl);
+    }
+
+    static Bitmap getEarShadow(@NonNull Path mEarPath, int mSize, @NonNull Path mBgPath, boolean preview) {
+        Bitmap mShadowBitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
+        Canvas shadowCanvas = new Canvas(mShadowBitmap);
+        shadowCanvas.clipPath(mBgPath);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
+        paint.setStyle(Paint.Style.FILL);
+
+        Bitmap earBitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
+        Canvas earCanvas = new Canvas(earBitmap);
+        earCanvas.drawPath(mEarPath, paint);
+
+        for (int i = 1; i <= mSize; i += preview ? 2 : 1) {
+            shadowCanvas.drawBitmap(earBitmap, i, i, paint);
+        }
+        return mShadowBitmap;
     }
 
     static Path getBgLayerPath(Path mBgPath, int mSize) {
@@ -104,10 +165,10 @@ class Utils {
     }
 
     static Path getScorePath(int mSize, @NonNull Path mBgPath) {
-        Path mScorePath = new Path();
-        mScorePath.addRect(0, 0, mSize, mSize / 2f, Path.Direction.CCW);
-        mScorePath.op(mBgPath, Path.Op.INTERSECT);
-        return mScorePath;
+        Path path = new Path();
+        path.addRect(0, 0, mSize, mSize / 2f, Path.Direction.CCW);
+        path.op(mBgPath, Path.Op.INTERSECT);
+        return path;
     }
 
     static Bitmap getBitmap(@NonNull SVG mSvg, int mSize, float iconScale, @NonNull Path mBgPath) {
@@ -180,13 +241,13 @@ class Utils {
     }
 
     static Bitmap getBitmap(SVG mSvg, Drawable mSrcDrawable, Bitmap mSrcBitmap, String mSrcText, Icon mIcon, int size,
-                            Paint mBgPaint, Paint mBgLayerPaint, Paint mShadowPaint, Paint mIconPaint, Paint mScorePaint) {
+                            Paint mBgPaint, Paint mBgLayerPaint, Paint mShadowPaint, Paint mIconPaint, Paint mScorePaint, Paint mEarPaint) {
         // 创建 bitmap
         Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
 
         // 背景 Path
-        Path mBgPath = Utils.getBgPath(mIcon.bgShape, size, mIcon.bgCorner);
+        Path mBgPath = Utils.getBgPath(mIcon.bgShape, size, mIcon.bgCorner, mIcon.effectEar);
         // 背景阴影 Path
         Path mBgLayerPath = Utils.getBgLayerPath(mBgPath, size);
 
@@ -222,6 +283,14 @@ class Utils {
         canvas.drawBitmap(mIconBitmap, 0, 0, mIconPaint);
         mIconBitmap.recycle();
         mShadowBitmap.recycle();
+
+        // 狗耳
+        if (mIcon.effectEar) {
+            Path mEarPath = Utils.getEarPath(mBgPath, size);
+            Bitmap mEarShadow = Utils.getEarShadow(mEarPath, size, mBgPath, false);
+            canvas.drawBitmap(mEarShadow, 0, 0, mShadowPaint);
+            canvas.drawPath(mEarPath, mEarPaint);
+        }
 
         // 画折痕
         if (mIcon.effectScore) {
