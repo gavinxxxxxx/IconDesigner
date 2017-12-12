@@ -18,8 +18,11 @@ android {
         targetSdkVersion 26
         versionCode autoVersionCode()
         versionName autoVersionName()
-        resConfigs "zh", "en"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        resConfigs "zh", "en"
+        ndk {
+            abiFilters 'armeabi'//, 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64', 'mips', 'mips64'
+        }
     }
 
     buildTypes {
@@ -62,6 +65,12 @@ android {
         }
     }
 
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ["libs"]
+        }
+    }
+
     dataBinding {
         enabled = true
     }
@@ -93,12 +102,22 @@ andResGuard {
     }
 }
 
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 
+    implementation project(':menu.multilevel')
+    implementation project(':color.picker')
+
+    implementation 'com.android.support:support-v4:26.1.0'
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support:recyclerview-v7:26.1.0'
     implementation 'com.android.support:design:26.1.0'
@@ -112,8 +131,9 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-ads:11.6.2'
 
-    implementation project(':menu.multilevel')
-    implementation project(':color.picker')
+    implementation files('libs/GDTUnionSDK.4.13.555.min.jar')
+
+    implementation name: 'YoumiSdk_v7.4.0_2017-07-18', ext: 'aar'
 }
 
 apply plugin: 'com.google.gms.google-services'

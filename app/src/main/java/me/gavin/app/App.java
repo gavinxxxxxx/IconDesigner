@@ -4,6 +4,10 @@ import android.app.Application;
 
 import com.google.android.gms.ads.MobileAds;
 
+import net.youmi.android.AdManager;
+import net.youmi.android.nm.sp.SpotManager;
+import net.youmi.android.nm.sp.SpotRequestListener;
+
 /**
  * Application
  *
