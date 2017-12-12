@@ -19,6 +19,7 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 import me.gavin.base.function.Consumer;
 import me.gavin.icon.designer.databinding.DialogChooseAppBinding;
@@ -32,12 +33,12 @@ import me.gavin.util.DisplayUtil;
  */
 public class ChooseAppDialog extends BottomSheetDialog {
 
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+
     private DialogChooseAppBinding mBinding;
-    private BottomSheetBehavior mBehavior;
     private AppInfoAdapter mAdapter;
 
-    private List<AppInfo> appInfoList;
-    private List<AppInfo> tempList;
+    private List<AppInfo> allList;
     private List<AppInfo> resultList;
 
     private Consumer<AppInfo> callback;
@@ -52,14 +53,13 @@ public class ChooseAppDialog extends BottomSheetDialog {
         super.onCreate(savedInstanceState);
         mBinding = DialogChooseAppBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
-        mBehavior = BottomSheetBehavior.from((View) mBinding.getRoot().getParent());
+
         getWindow().getAttributes().width = WindowManager.LayoutParams.MATCH_PARENT;
         getWindow().getAttributes().height = WindowManager.LayoutParams.MATCH_PARENT;
         getWindow().setDimAmount(0.4f);
-
-        int peekHeight = (int) (DisplayUtil.getScreenHeight() * 9f / 16f);
-        mBehavior.setPeekHeight(peekHeight);
-        mBinding.recycler.setMinimumHeight(peekHeight - DisplayUtil.dp2px(50) - DisplayUtil.dp2px(51));
+        BottomSheetBehavior mBehavior = BottomSheetBehavior.from((View) mBinding.getRoot().getParent());
+        mBehavior.setPeekHeight(DisplayUtil.getScreenHeight());
+        mBinding.recycler.setMinimumHeight(DisplayUtil.getScreenHeight());
 
         AdHelper.init(mBinding.adView);
 
@@ -69,6 +69,7 @@ public class ChooseAppDialog extends BottomSheetDialog {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> {
+                    mCompositeDisposable.add(disposable);
                     resultList = new ArrayList<>();
                     mAdapter = new AppInfoAdapter(getContext(), resultList);
                     mBinding.recycler.setAdapter(mAdapter);
@@ -80,8 +81,8 @@ public class ChooseAppDialog extends BottomSheetDialog {
                     });
                 })
                 .doOnComplete(() -> {
-                    appInfoList = new ArrayList<>();
-                    appInfoList.addAll(resultList);
+                    allList = new ArrayList<>();
+                    allList.addAll(resultList);
                     search(mBinding.editText.getText().toString().replaceAll("\\s", ""));
                     mBinding.editText.addTextChangedListener(new TextWatcher() {
                         @Override
@@ -105,15 +106,17 @@ public class ChooseAppDialog extends BottomSheetDialog {
                     resultList.add(appInfo);
                     Collections.sort(resultList, (o1, o2) -> o1.labelPinyin.compareTo(o2.labelPinyin));
                     mAdapter.notifyItemInserted(resultList.indexOf(appInfo));
-                });
+                    mBinding.recycler.smoothScrollToPosition(0);
+                }, Throwable::printStackTrace);
     }
 
     private void search(String text) {
-        Observable.fromIterable(appInfoList)
+        Observable.fromIterable(allList)
                 .filter(appInfo -> appInfo.label.contains(text)
                         || appInfo.labelPinyin.contains(text.toLowerCase())
                         || appInfo.sPinyin.contains(text.toLowerCase()))
                 .toList()
+                .doOnSubscribe(mCompositeDisposable::add)
                 .subscribe(newList -> {
                     DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallback(resultList, newList));
                     resultList.clear();
@@ -122,4 +125,9 @@ public class ChooseAppDialog extends BottomSheetDialog {
                 });
     }
 
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mCompositeDisposable.dispose();
+    }
 }

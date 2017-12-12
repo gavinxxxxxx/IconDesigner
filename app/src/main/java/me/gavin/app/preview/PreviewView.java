@@ -84,10 +84,10 @@ public class PreviewView extends View {
         mBgLayerPaint.setShadowLayer(mSize * Icon.BG_SL_RATIO, 0,
                 DisplayUtil.dp2px(mSize * Icon.BG_SL_RATIO / 4f), 0x50000000);
         if (mSrcSVG != null && mSize > 0) {
-            mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner, mIcon.effectEar);
+            mBgPath = Utils.getBgPath(mIcon, mSize);
             mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
             mIconBitmap = Utils.getBitmap(mSrcSVG, mSize, mIcon.iconScale, mBgPath);
-            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mIcon.shadowLength, mBgPath, true);
             if (mIcon.bgShape != 1) {
                 mEarPath = Utils.getEarPath(mBgPath, mSize);
                 mEarShadowBitmap = Utils.getEarShadow(mEarPath, mSize, mBgPath, true);
@@ -133,7 +133,7 @@ public class PreviewView extends View {
         this.mSrcSVG = mSvg;
         if (mSvg != null && mSize > 0) {
             mIconBitmap = Utils.getBitmap(mSvg, mSize, mIcon.iconScale, mBgPath);
-            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mIcon.shadowLength, mBgPath, true);
             invalidate();
         }
     }
@@ -143,7 +143,7 @@ public class PreviewView extends View {
         this.mSrcDrawable = drawable;
         mIconBitmap = Utils.getBitmap(drawable, mSize, mIcon.iconScale, mBgPath);
         if (mSize > 0) {
-            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mIcon.shadowLength, mBgPath, true);
             invalidate();
         }
     }
@@ -153,7 +153,7 @@ public class PreviewView extends View {
         this.mSrcBitmap = bitmap;
         mIconBitmap = Utils.getBitmap(mSrcBitmap, mSize, mIcon.iconScale, mBgPath);
         if (mSize > 0) {
-            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mIcon.shadowLength, mBgPath, true);
             invalidate();
         }
     }
@@ -163,14 +163,14 @@ public class PreviewView extends View {
         this.mSrcText = text;
         mIconBitmap = Utils.getBitmap(text, mSize, mIcon.iconScale, mBgPath);
         if (mSize > 0) {
-            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mIcon.shadowLength, mBgPath, true);
             invalidate();
         }
     }
 
     public void setBgShape(int shape) {
         this.mIcon.bgShape = shape;
-        mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner, mIcon.effectEar);
+        mBgPath = Utils.getBgPath(mIcon, mSize);
         mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
         if (mIcon.bgShape != 1) {
             mEarPath = Utils.getEarPath(mBgPath, mSize);
@@ -181,7 +181,7 @@ public class PreviewView extends View {
             mShadowBitmap.recycle();
         }
         if (mIconBitmap != null && !mIconBitmap.isRecycled() && mSize > 0) {
-            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mIcon.shadowLength, mBgPath, true);
             invalidate();
         }
     }
@@ -220,7 +220,7 @@ public class PreviewView extends View {
             mIconBitmap = Utils.getBitmap(mSrcText, mSize, mIcon.iconScale, mBgPath);
         }
         if (mIconBitmap != null && !mIconBitmap.isRecycled()) {
-            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mBgPath, true);
+            mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, mIcon.shadowLength, mBgPath, true);
             invalidate();
         }
     }
@@ -233,6 +233,15 @@ public class PreviewView extends View {
         this.mIcon.iconColor = color;
         mIconPaint.setColorFilter(this.mIcon.iconColor == null ? null
                 : new PorterDuffColorFilter(this.mIcon.iconColor, PorterDuff.Mode.SRC_IN));
+        invalidate();
+    }
+
+    public void setShadowLength(int progress) {
+        this.mIcon.shadowLength = progress / 100f;
+        mShadowBitmap = Utils.getShadow(mIconBitmap, mSize, this.mIcon.shadowLength, mBgPath, true);
+        if (mIcon.effectEar && mEarPath != null) {
+            mEarShadowBitmap = Utils.getEarShadow(mEarPath, mSize, mBgPath, true);
+        }
         invalidate();
     }
 
@@ -250,7 +259,7 @@ public class PreviewView extends View {
     public void toggleEffectEar() {
         this.mIcon.effectEar = !this.mIcon.effectEar;
         if (mIcon.bgShape != 1) {
-            mBgPath = Utils.getBgPath(mIcon.bgShape, mSize, mIcon.bgCorner, mIcon.effectEar);
+            mBgPath = Utils.getBgPath(mIcon, mSize);
             mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
             mEarPath = Utils.getEarPath(mBgPath, mSize);
             mEarShadowBitmap = Utils.getEarShadow(mEarPath, mSize, mBgPath, true);

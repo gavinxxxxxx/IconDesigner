@@ -28,6 +28,7 @@ class SVGAdapter extends RecyclerAdapter<SVG, ItemIconBinding> {
     @Override
     protected void onBind(RecyclerHolder<ItemIconBinding> holder, SVG svg, int position) {
         holder.binding.svg.set(svg);
+        holder.binding.textView.setText(svg.name);
         holder.binding.item.setOnClickListener(v -> callback.accept(svg));
     }
 

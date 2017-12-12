@@ -117,8 +117,8 @@
                 android:visible="false" />
             <item
                 android:id="@+id/shadow_length"
-                android:title="@string/shadow_length"
-                android:visible="false" />
+                android:icon="@drawable/ic_length_24dp"
+                android:title="@string/shadow_length" />
             <item
                 android:id="@+id/shadow_gradient"
                 android:title="@string/shadow_gradient"

@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class SVG implements Serializable {
 
+    public String name;
     public float width;
     public float height;
     public ViewBox viewBox;
@@ -45,7 +46,8 @@ public class SVG implements Serializable {
     @Override
     public String toString() {
         return "SVG{" +
-                "width=" + width +
+                "name=" + name +
+                ", width=" + width +
                 ", height=" + height +
                 ", viewBox=" + viewBox +
                 ", preserveAspectRatio='" + preserveAspectRatio + '\'' +

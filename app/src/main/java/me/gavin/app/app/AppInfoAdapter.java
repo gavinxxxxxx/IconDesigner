@@ -29,8 +29,7 @@ public class AppInfoAdapter extends RecyclerAdapter<AppInfo, ItemAppBinding> {
 
     @Override
     protected void onBind(RecyclerHolder<ItemAppBinding> holder, AppInfo appInfo, int position) {
-        holder.binding.imageView.setImageDrawable(appInfo.drawable);
-        holder.binding.textView.setText(appInfo.label);
+        holder.binding.setItem(appInfo);
         holder.binding.executePendingBindings();
         holder.binding.item.setOnClickListener(v -> {
             if (callback != null) {

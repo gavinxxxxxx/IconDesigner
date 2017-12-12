@@ -53,4 +53,6 @@
     <string name="view">查看</string>
     <string name="cant_open">你跟我说打不开？？？</string>
 
+    <string name="search_hint">输入点什么</string>
+
 </resources>

@@ -68,29 +68,29 @@ class Utils {
         return matrix;
     }
 
-    static Path getBgPath(int bgShape, int size, float bgCorner, boolean ear) {
+    static Path getBgPath(Icon icon, int size) {
         Path mBgPath = new Path();
         float half = size / 2f;
-        float corner = size * bgCorner;
-        if (bgShape == 0) {
+        float corner = size * icon.bgCorner;
+        if (icon.bgShape == 0) {
             float hs = half * Icon.BG_M_RATIO;
             mBgPath.addRoundRect(half - hs, half - hs, half + hs, half + hs,
                     corner, corner, Path.Direction.CCW);
-        } else if (bgShape == 1) {
+        } else if (icon.bgShape == 1) {
             mBgPath.addCircle(half, half, half * Icon.BG_L_RATIO, Path.Direction.CCW);
-        } else if (bgShape == 2) {
+        } else if (icon.bgShape == 2) {
             float hhs = half * Icon.BG_S_RATIO;
             float hvs = half * Icon.BG_L_RATIO;
             mBgPath.addRoundRect(half - hhs, half - hvs, half + hhs, half + hvs,
                     corner, corner, Path.Direction.CCW);
-        } else if (bgShape == 3) {
+        } else if (icon.bgShape == 3) {
             float hhs = half * Icon.BG_L_RATIO;
             float hvs = half * Icon.BG_S_RATIO;
             mBgPath.addRoundRect(half - hhs, half - hvs, half + hhs, half + hvs,
                     corner, corner, Path.Direction.CCW);
         }
 
-        if (ear && bgShape != 1) {
+        if (icon.effectEar && icon.bgShape != 1) {
             Path path = new Path();
             path.moveTo(size - Icon.BG_E_RATIO * size, 0);
             path.rLineTo(Icon.BG_E_RATIO * size, Icon.BG_E_RATIO * size);
@@ -152,13 +152,14 @@ class Utils {
         return path;
     }
 
-    static Bitmap getShadow(@NonNull Bitmap mIconBitmap, int mSize, @NonNull Path mBgPath, boolean preview) {
+    static Bitmap getShadow(@NonNull Bitmap mIconBitmap, int mSize, float length, @NonNull Path mBgPath, boolean preview) {
         Bitmap mShadowBitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
         Canvas shadowCanvas = new Canvas(mShadowBitmap);
         shadowCanvas.clipPath(mBgPath);
         Paint mIconPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mIconPaint.setStyle(Paint.Style.FILL);
-        for (int i = 1; i <= mSize; i += preview ? 2 : 1) {
+        float a = mSize * length;
+        for (int i = 1; i <= a; i += preview ? 2 : 1) {
             shadowCanvas.drawBitmap(mIconBitmap, i, i, mIconPaint);
         }
         return mShadowBitmap;
@@ -247,7 +248,7 @@ class Utils {
         Canvas canvas = new Canvas(bitmap);
 
         // 背景 Path
-        Path mBgPath = Utils.getBgPath(mIcon.bgShape, size, mIcon.bgCorner, mIcon.effectEar);
+        Path mBgPath = Utils.getBgPath(mIcon, size);
         // 背景阴影 Path
         Path mBgLayerPath = Utils.getBgLayerPath(mBgPath, size);
 
@@ -276,7 +277,7 @@ class Utils {
         }
 
         // 前景阴影
-        Bitmap mShadowBitmap = Utils.getShadow(mIconBitmap, size, mBgPath, false);
+        Bitmap mShadowBitmap = Utils.getShadow(mIconBitmap, size, mIcon.shadowLength, mBgPath, false);
         // 画前景阴影
         canvas.drawBitmap(mShadowBitmap, 0, 0, mShadowPaint);
         // 画前景

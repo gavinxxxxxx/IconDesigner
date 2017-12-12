@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 import me.gavin.app.app.ChooseAppDialog;
 import me.gavin.icon.designer.R;
@@ -50,7 +51,9 @@ public class MainActivity extends AppCompatActivity {
     private final int TYPE_SEEK_SHADOW_GRADIENT = 0x32;
     private final int TYPE_SEEK_SHADOW_ALPHA = 0x33;
 
-    ActivityMainBinding mBinding;
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+
+    private ActivityMainBinding mBinding;
 
     int mSeekBarType;
 
@@ -141,6 +144,8 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.shadow_angle:
                     break;
                 case R.id.shadow_length:
+                    mSeekBarType = TYPE_SEEK_SHADOW_LENGTH;
+                    mBinding.seekBar.setVisibility(View.VISIBLE);
                     break;
                 case R.id.shadow_gradient:
                     mSeekBarType = TYPE_SEEK_SHADOW_GRADIENT;
@@ -170,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.save:
                     new RxPermissions(this)
                             .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            .doOnSubscribe(mCompositeDisposable::add)
                             .subscribe(granted -> {
                                 if (granted) {
                                     showSaveDialog();
@@ -186,6 +192,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.send:
                     new RxPermissions(this)
                             .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            .doOnSubscribe(mCompositeDisposable::add)
                             .subscribe(granted -> {
                                 if (granted) {
                                     save(null, true);
@@ -225,6 +232,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mCompositeDisposable.dispose();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && data != null && data.getData() != null) {
@@ -241,6 +254,7 @@ public class MainActivity extends AppCompatActivity {
         Observable.just("design/notification/ic_adb_24px.svg")
                 .map(getAssets()::open)
                 .map(SVGParser::parse)
+                .doOnSubscribe(mCompositeDisposable::add)
                 .subscribe(mBinding.pre::setSVG);
 
         mBinding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -256,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
                     case TYPE_SEEK_SHADOW_ANGLE:
                         break;
                     case TYPE_SEEK_SHADOW_LENGTH:
+                        mBinding.pre.setShadowLength(progress);
                         break;
                     case TYPE_SEEK_SHADOW_GRADIENT:
                         // mBinding.pre.setShadowGradient(progress);
@@ -328,6 +343,7 @@ public class MainActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(uri -> CacheHelper.updateAlbum(this, uri))
                 .toList()
+                .doOnSubscribe(mCompositeDisposable::add)
                 .subscribe(uri -> {
                     if (isSend) {
                         ShareCompat.IntentBuilder builder = ShareCompat.IntentBuilder

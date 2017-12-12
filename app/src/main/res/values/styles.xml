@@ -9,11 +9,23 @@
         <item name="alertDialogTheme">@style/Theme.AppCompat.Dialog.Alert.Custom</item>
         <!-- for android.app.AlertDialog -->
         <item name="android:alertDialogTheme">@style/Theme.AppCompat.Dialog.Alert.Custom</item>
+        <!-- for android.support.design.widget.BottomSheetDialog -->
+        <item name="bottomSheetDialogTheme">@style/Theme.Design.Light.BottomSheetDialog.Custom
+        </item>
     </style>
 
     <!--<style name="ThemeOverlay.AppCompat.Dialog.Alert.Custom">-->
     <style name="Theme.AppCompat.Dialog.Alert.Custom">
         <item name="android:background">@color/colorPrimary</item>
+    </style>
+
+    <style name="Theme.Design.Light.BottomSheetDialog.Custom">
+        <item name="bottomSheetStyle">@style/Widget.Design.BottomSheet.Modal.Custom</item>
+    </style>
+
+    <style name="Widget.Design.BottomSheet.Modal.Custom">
+        <item name="android:windowFullscreen">true</item>
+        <!--<item name="behavior_peekHeight">2000dp</item>-->
     </style>
 
 </resources>

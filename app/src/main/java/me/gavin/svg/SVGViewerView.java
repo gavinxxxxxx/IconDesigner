@@ -24,6 +24,9 @@ public class SVGViewerView extends View {
 
     private final Paint mBackgroundPaint;
 
+    private Paint mTempPaint;
+    private int mTempColor;
+
     public SVGViewerView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setLayerType(LAYER_TYPE_SOFTWARE, null);
@@ -52,7 +55,7 @@ public class SVGViewerView extends View {
 
         canvas.setMatrix(mMatrix);
 
-        drawBackground(canvas);
+        // drawBackground(canvas);
 
         if (mSvg.width / mSvg.height != mSvg.viewBox.width / mSvg.viewBox.height) {
             canvas.translate(
@@ -63,8 +66,16 @@ public class SVGViewerView extends View {
         }
 
         for (int i = 0; i < mSvg.paths.size(); i++) {
-            canvas.drawPath(mSvg.paths.get(i), mSvg.drawables.get(i).getFillPaint());
-            canvas.drawPath(mSvg.paths.get(i), mSvg.drawables.get(i).getStrokePaint());
+            Paint paint = mSvg.drawables.get(i).getFillPaint();
+            if (paint.getColor() != 0) {
+                mTempColor = paint.getColor();
+                paint.setColor(mTempColor & 0xFF000000 | 0x00FBFBFBF);
+                canvas.drawPath(mSvg.paths.get(i), paint);
+                paint.setColor(mTempColor);
+            } else {
+                canvas.drawPath(mSvg.paths.get(i), paint);
+            }
+            // canvas.drawPath(mSvg.paths.get(i), mSvg.drawables.get(i).getStrokePaint());
         }
     }
 

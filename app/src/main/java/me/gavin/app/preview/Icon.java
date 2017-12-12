@@ -26,7 +26,8 @@ class Icon {
     Integer iconColor;
     float iconScale;
 
-    int shadowAlpha; // 0x00 ~ 0xFF;
+    float shadowLength; // [0, 1]
+    int shadowAlpha; // [0x00, 0xFF]
 
     boolean effectScore;
     boolean effectEar;
@@ -40,6 +41,7 @@ class Icon {
         this.iconColor = SPUtil.getInt("iconColor");
         this.iconScale = SPUtil.getFloat("iconScale", 0.5f);
 
+        this.shadowLength = SPUtil.getFloat("shadowLength", 1f);
         this.shadowAlpha = SPUtil.getInt("shadowAlpha", 30);
 
         this.effectScore = SPUtil.getBoolean("effectScore", false);
@@ -55,6 +57,7 @@ class Icon {
         SPUtil.putInt("iconColor", this.iconColor);
         SPUtil.putFloat("iconScale", this.iconScale);
 
+        SPUtil.putFloat("shadowLength", this.shadowLength);
         SPUtil.putInt("shadowAlpha", this.shadowAlpha);
 
         SPUtil.putBoolean("effectScore", this.effectScore);
