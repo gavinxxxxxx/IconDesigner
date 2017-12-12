@@ -3,10 +3,6 @@ package me.gavin.widget.color.picker;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.text.InputFilter;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 
 /**
@@ -60,46 +56,6 @@ public class ColorPickerDialogBuilder {
         return this;
     }
 
-    public ColorPickerDialogBuilder setInputButton(int text, final OnColorInputListener listener) {
-        return setInputButton(mContext.getString(text), listener);
-    }
-
-    public ColorPickerDialogBuilder setInputButton(CharSequence text, final OnColorInputListener listener) {
-        builder.setNeutralButton(text, (dialog, which) -> {
-            FrameLayout parent = new FrameLayout(mContext);
-            int padding = DisplayUtil.dp2px(24);
-            parent.setPadding(padding, padding, padding, padding);
-            final EditText editText = new EditText(mContext);
-            editText.setTextColor(0xFFFFFFFF);
-            editText.setHintTextColor(0xFF8899AA);
-            editText.setHint("#26A69A  |  #80000000");
-            editText.setFilters(new InputFilter[]{new ColorInputFilter()});
-            parent.addView(editText);
-            final AlertDialog alertDialog = new AlertDialog.Builder(mContext)
-                    .setTitle(text)
-                    .setView(parent)
-                    .setPositiveButton(android.R.string.ok, (dialog1, which1)
-                            -> listener.onColorSelected(dialog, editText.getText().toString()))
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .show();
-            editText.postDelayed(() -> {
-                InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (imm != null) {
-                    editText.requestFocus();
-                    imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
-                }
-            }, 100);
-            editText.setOnEditorActionListener((v, actionId, event) -> {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    alertDialog.dismiss();
-                    listener.onColorSelected(alertDialog, editText.getText().toString());
-                }
-                return true;
-            });
-        });
-        return this;
-    }
-
     public ColorPickerDialogBuilder setPositiveButton(CharSequence text, final OnColorSelectedListener listener) {
         builder.setPositiveButton(text, (dialog, which) -> listener.onColorSelected(dialog, picker.getColor()));
         return this;
@@ -121,6 +77,10 @@ public class ColorPickerDialogBuilder {
     public ColorPickerDialogBuilder setNeutralButton(CharSequence text, DialogInterface.OnClickListener listener) {
         builder.setNeutralButton(text, listener);
         return this;
+    }
+
+    public ColorPickerDialogBuilder setNeutralButton(int text, DialogInterface.OnClickListener listener) {
+        return setNeutralButton(mContext.getString(text), listener);
     }
 
     public AlertDialog show() {

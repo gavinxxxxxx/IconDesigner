@@ -3,6 +3,7 @@ package me.gavin.app;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
@@ -15,9 +16,13 @@ import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.SeekBar;
 
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -40,7 +45,9 @@ import me.gavin.util.AlipayUtil;
 import me.gavin.util.CacheHelper;
 import me.gavin.util.InputUtil;
 import me.gavin.util.ShortcutUtil;
+import me.gavin.widget.color.picker.ColorInputFilter;
 import me.gavin.widget.color.picker.ColorPickerDialogBuilder;
+import me.gavin.widget.color.picker.DisplayUtil;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -102,11 +109,11 @@ public class MainActivity extends AppCompatActivity {
                             .setTitle(R.string.choose_color)
                             .withAlpha(true)
                             .setColor(mBinding.pre.getIconColor())
-                            .setInputButton(R.string.input, (dialog, color)
-                                    -> setIconColor(color))
                             .setPositiveButton(android.R.string.ok, (dialog, color)
                                     -> mBinding.pre.setIconColor(color))
                             .setNegativeButton(android.R.string.cancel, null)
+                            .setNeutralButton(R.string.input, (dialog, which)
+                                    -> showInputDialog(false))
                             .show();
                     break;
                 case R.id.icon_size:
@@ -134,11 +141,11 @@ public class MainActivity extends AppCompatActivity {
                             .setTitle(R.string.choose_color)
                             .withAlpha(true)
                             .setColor(mBinding.pre.getBgColor())
-                            .setInputButton(R.string.input, (dialog, color)
-                                    -> setBgColor(color))
                             .setPositiveButton(android.R.string.ok, (dialog, color)
                                     -> mBinding.pre.setBgColor(color))
                             .setNegativeButton(android.R.string.cancel, null)
+                            .setNeutralButton(R.string.input, (dialog, which)
+                                    -> showInputDialog(true))
                             .show();
                     break;
                 case R.id.shadow_angle:
@@ -290,6 +297,55 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
 
             }
+        });
+    }
+
+    private void showInputDialog(boolean isBg) {
+        FrameLayout parent = new FrameLayout(this);
+        int padding = DisplayUtil.dp2px(24);
+        parent.setPadding(padding, padding, padding, padding);
+        final EditText editText = new EditText(this);
+        editText.setTextColor(0xFFFFFFFF);
+        editText.setHintTextColor(0xFF8899AA);
+        editText.setHint("#26A69A  |  #80000000");
+        editText.setFilters(new InputFilter[]{new ColorInputFilter()});
+        parent.addView(editText);
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.input)
+                .setView(parent)
+                .setPositiveButton(android.R.string.ok, (dialog1, which1) -> {
+                    if (isBg) {
+                        setBgColor(editText.getText().toString());
+                    } else {
+                        setIconColor(editText.getText().toString());
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .setNeutralButton(R.string.reset, (dialog1, which1) -> {
+                    if (isBg) {
+                        setBgColor(null);
+                    } else {
+                        setIconColor(null);
+                    }
+                })
+                .show();
+        editText.postDelayed(() -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                editText.requestFocus();
+                imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+            }
+        }, 100);
+        editText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                if (isBg) {
+                    setBgColor(editText.getText().toString());
+                } else {
+                    setIconColor(editText.getText().toString());
+                }
+                alertDialog.dismiss();
+            }
+            return true;
         });
     }
 

@@ -44,6 +44,7 @@
     <string name="input">输入</string>
 
     <string name="choose_color">选择颜色</string>
+    <string name="reset">重置</string>
     <string name="attach_success">图标已添加到主屏幕</string>
     <string name="attach_not_support">Launcher 不支持</string>
     <string name="permission_denied">保存图片需要 SDCard 写入权限</string>
