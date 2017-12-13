@@ -46,12 +46,12 @@
             app:mlm_originPadding="16dp"
             app:mlm_originRadius="28dp" />
 
-        <!--<me.gavin.widget.ElevationView-->
-        <!--android:id="@+id/elevation"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_gravity="bottom"-->
-        <!--android:layout_margin="16dp" />-->
+        <FrameLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:gravity="center_horizontal" />
 
     </android.support.design.widget.CoordinatorLayout>
 

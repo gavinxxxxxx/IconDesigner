@@ -59,7 +59,7 @@ public class ChooseIconDialog extends BottomSheetDialog {
         mBehavior.setPeekHeight(DisplayUtil.getScreenHeight());
         mBinding.recycler.setMinimumHeight(DisplayUtil.getScreenHeight());
 
-        AdHelper.init(mBinding.adView);
+        AdHelper.loadGoogle(mBinding.container, AdHelper.UNIT_ID);
 
         Observable.just("design")
                 .flatMap(dir -> Observable.just(dir)
@@ -119,7 +119,6 @@ public class ChooseIconDialog extends BottomSheetDialog {
                     mAdapter.notifyItemInserted(resultList.size());
                 }, Throwable::printStackTrace);
     }
-
 
     private void search(String text) {
         Observable.fromIterable(allList)

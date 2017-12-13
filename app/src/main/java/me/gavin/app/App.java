@@ -2,11 +2,7 @@ package me.gavin.app;
 
 import android.app.Application;
 
-import com.google.android.gms.ads.MobileAds;
-
-import net.youmi.android.AdManager;
-import net.youmi.android.nm.sp.SpotManager;
-import net.youmi.android.nm.sp.SpotRequestListener;
+import me.gavin.util.AdHelper;
 
 /**
  * Application
@@ -21,7 +17,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         mApp = this;
-        MobileAds.initialize(this, "ca-app-pub-9410365151312505~8319846562");
+        AdHelper.initGoogle(this);
     }
 
     public static App get() {

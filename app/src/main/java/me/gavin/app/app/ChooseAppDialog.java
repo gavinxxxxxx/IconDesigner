@@ -1,6 +1,6 @@
 package me.gavin.app.app;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -12,10 +12,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
-
-import net.youmi.android.AdManager;
-import net.youmi.android.nm.bn.BannerManager;
-import net.youmi.android.nm.bn.BannerViewListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +25,6 @@ import me.gavin.base.function.Consumer;
 import me.gavin.icon.designer.databinding.DialogChooseAppBinding;
 import me.gavin.util.AdHelper;
 import me.gavin.util.DisplayUtil;
-import me.gavin.util.L;
 
 /**
  * ChooseAppDialog
@@ -46,12 +41,10 @@ public class ChooseAppDialog extends BottomSheetDialog {
     private List<AppInfo> allList;
     private List<AppInfo> resultList;
 
-    private Activity mActivity;
     private Consumer<AppInfo> callback;
 
-    public ChooseAppDialog(@NonNull Activity context, Consumer<AppInfo> callback) {
+    public ChooseAppDialog(@NonNull Context context, Consumer<AppInfo> callback) {
         super(context);
-        this.mActivity = context;
         this.callback = callback;
     }
 
@@ -68,28 +61,7 @@ public class ChooseAppDialog extends BottomSheetDialog {
         mBehavior.setPeekHeight(DisplayUtil.getScreenHeight());
         mBinding.recycler.setMinimumHeight(DisplayUtil.getScreenHeight());
 
-        AdHelper.init(mBinding.adView);
-        AdHelper.init(mActivity, mBinding.container);
-
-        AdManager.getInstance(getContext()).init("62358a24a8ceb2f3", "62358a24a8ceb2f3", true);
-        View bannerView = BannerManager.getInstance(getContext())
-                .getBannerView(getContext(), new BannerViewListener() {
-                    @Override
-                    public void onRequestSuccess() {
-                        L.e("onRequestSuccess");
-                    }
-
-                    @Override
-                    public void onSwitchBanner() {
-                        L.e("onSwitchBanner");
-                    }
-
-                    @Override
-                    public void onRequestFailed() {
-                        L.e("onRequestFailed");
-                    }
-                });
-        mBinding.container2.addView(bannerView);
+        AdHelper.loadGoogle(mBinding.container, AdHelper.UNIT_ID);
 
         PackageManager pm = getContext().getPackageManager();
         Observable.fromIterable(pm.queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0))

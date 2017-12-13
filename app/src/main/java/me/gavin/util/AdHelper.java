@@ -1,12 +1,13 @@
 package me.gavin.util;
 
 import android.app.Activity;
-import android.view.View;
+import android.content.Context;
 import android.view.ViewGroup;
 
-import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.qq.e.ads.banner.ADSize;
 import com.qq.e.ads.banner.AbstractBannerADListener;
 import com.qq.e.ads.banner.BannerView;
@@ -21,21 +22,27 @@ import me.gavin.icon.designer.BuildConfig;
  */
 public final class AdHelper {
 
-    public static void init(AdView adView) {
-        adView.setAdListener(new AdListener() {
-            @Override
-            public void onAdLoaded() {
-                adView.setVisibility(View.VISIBLE);
-            }
-        });
+    private static final String NEXUS5X = "860DDD0506EDD9F91C359F8DF11080CF";
+    private static final String APP_ID = "ca-app-pub-9410365151312505~8319846562";
+    public static final String UNIT_ID = "ca-app-pub-9410365151312505/4544253089";
+
+    public static void initGoogle(Context context) {
+        MobileAds.initialize(context, APP_ID);
+    }
+
+    public static void loadGoogle(ViewGroup container, String unitId) {
+        AdView adView = new AdView(container.getContext());
+        adView.setAdSize(AdSize.SMART_BANNER);
+        adView.setAdUnitId(unitId);
+        container.addView(adView);
         AdRequest.Builder builder = new AdRequest.Builder();
         if (BuildConfig.DEBUG) {
-            builder.addTestDevice("860DDD0506EDD9F91C359F8DF11080CF");
+            builder.addTestDevice(NEXUS5X);
         }
         adView.loadAd(builder.build());
     }
 
-    public static BannerView init(Activity activity, ViewGroup container) {
+    public static BannerView loadQQ(Activity activity, ViewGroup container) {
         BannerView adBanner = new BannerView(activity, ADSize.BANNER, "1106530223", "3020823804797474");
         adBanner.setRefresh(30);
         adBanner.setADListener(new AbstractBannerADListener() {
@@ -54,4 +61,33 @@ public final class AdHelper {
         adBanner.loadAD();
         return adBanner;
     }
+
+//    public static void initYM(Context context) {
+//        AdManager.getInstance(context).init("62358a24a8ceb2f3", "c75752e67808bd0e", true);
+//    }
+//
+//    public static void loadYM(Context context, ViewGroup container) {
+//        View bannerView = BannerManager.getInstance(context)
+//                .getBannerView(context, new BannerViewListener() {
+//                    @Override
+//                    public void onRequestSuccess() {
+//                        L.e("onRequestSuccess");
+//                    }
+//
+//                    @Override
+//                    public void onSwitchBanner() {
+//                        L.e("onSwitchBanner");
+//                    }
+//
+//                    @Override
+//                    public void onRequestFailed() {
+//                        L.e("onRequestFailed");
+//                    }
+//                });
+//        container.addView(bannerView);
+//    }
+//
+//    public static void disposeYM(Context context) {
+//        BannerManager.getInstance(context).onDestroy();
+//    }
 }
