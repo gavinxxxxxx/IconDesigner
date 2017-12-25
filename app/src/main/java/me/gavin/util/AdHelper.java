@@ -1,17 +1,14 @@
 package me.gavin.util;
 
-import android.app.Activity;
 import android.content.Context;
+import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.qq.e.ads.banner.ADSize;
-import com.qq.e.ads.banner.AbstractBannerADListener;
-import com.qq.e.ads.banner.BannerView;
-import com.qq.e.comm.util.AdError;
 
 import me.gavin.icon.designer.BuildConfig;
 
@@ -34,33 +31,40 @@ public final class AdHelper {
         AdView adView = new AdView(container.getContext());
         adView.setAdSize(AdSize.SMART_BANNER);
         adView.setAdUnitId(unitId);
+        adView.setVisibility(View.GONE);
         container.addView(adView);
         AdRequest.Builder builder = new AdRequest.Builder();
         if (BuildConfig.DEBUG) {
             builder.addTestDevice(NEXUS5X);
         }
+        adView.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                adView.setVisibility(View.VISIBLE);
+            }
+        });
         adView.loadAd(builder.build());
     }
 
-    public static BannerView loadQQ(Activity activity, ViewGroup container) {
-        BannerView adBanner = new BannerView(activity, ADSize.BANNER, "1106530223", "3020823804797474");
-        adBanner.setRefresh(30);
-        adBanner.setADListener(new AbstractBannerADListener() {
-            @Override
-            public void onNoAD(AdError error) {
-                // onNoAD - Banner onNoAD，eCode = 6000, eMsg = 未知错误，详细码：100135
-                L.e("onNoAD - " + String.format("Banner onNoAD，eCode = %s, eMsg = %s", error.getErrorCode(), error.getErrorMsg()));
-            }
-
-            @Override
-            public void onADReceiv() {
-                L.e("onADReceiv - ");
-            }
-        });
-        container.addView(adBanner);
-        adBanner.loadAD();
-        return adBanner;
-    }
+//    public static BannerView loadQQ(Activity activity, ViewGroup container) {
+//        BannerView adBanner = new BannerView(activity, ADSize.BANNER, "1106530223", "3020823804797474");
+//        adBanner.setRefresh(30);
+//        adBanner.setADListener(new AbstractBannerADListener() {
+//            @Override
+//            public void onNoAD(AdError error) {
+//                // onNoAD - Banner onNoAD，eCode = 6000, eMsg = 未知错误，详细码：100135
+//                L.e("onNoAD - " + String.format("Banner onNoAD，eCode = %s, eMsg = %s", error.getErrorCode(), error.getErrorMsg()));
+//            }
+//
+//            @Override
+//            public void onADReceiv() {
+//                L.e("onADReceiv - ");
+//            }
+//        });
+//        container.addView(adBanner);
+//        adBanner.loadAD();
+//        return adBanner;
+//    }
 
 //    public static void initYM(Context context) {
 //        AdManager.getInstance(context).init("62358a24a8ceb2f3", "c75752e67808bd0e", true);

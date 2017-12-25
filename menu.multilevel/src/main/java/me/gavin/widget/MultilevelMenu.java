@@ -38,7 +38,14 @@ import me.gavin.widget.menu.multilevel.R;
  */
 public class MultilevelMenu extends ViewGroup {
 
+    public static final int MODE_A = 0;
+    public static final int MODE_B = 1;
+
     private int mWidth, mHeight;
+
+    private int mMode;
+    private boolean isMenuShow;
+    private boolean menuCloseFlag;
 
     // 原点
     private int mOriginMargin;
@@ -89,6 +96,9 @@ public class MultilevelMenu extends ViewGroup {
 
     private void init(Context context, AttributeSet attrs) {
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.MultilevelMenu);
+
+        mMode = ta.getInt(R.styleable.MultilevelMenu_mlm_mode, MODE_A);
+
         mOriginMargin = ta.getDimensionPixelOffset(R.styleable.MultilevelMenu_mlm_originMargin,
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics()));
         mOriginRadius = ta.getDimensionPixelOffset(R.styleable.MultilevelMenu_mlm_originRadius,
@@ -232,12 +242,15 @@ public class MultilevelMenu extends ViewGroup {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             double distance = Math.sqrt(Math.pow(mWidth - mOriginMargin - mOriginRadius - event.getX(), 2)
                     + Math.pow(mHeight - mOriginMargin - mOriginRadius - event.getY(), 2));
-            if (distance <= mOriginRadius) {
+            if (mMode == MODE_A && distance <= mOriginRadius
+                    || mMode == MODE_B && (distance <= mOriginRadius || isMenuShow)) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     startDragAndDrop(DragUtils.getClipData(), new DragShadowBuilder(), null, 0);
                 } else {
                     startDrag(DragUtils.getClipData(), new DragShadowBuilder(), null, 0);
                 }
+                menuCloseFlag = isMenuShow && distance <= mOriginRadius;
+                isMenuShow = true;
                 return true;
             }
         }
@@ -246,22 +259,45 @@ public class MultilevelMenu extends ViewGroup {
 
     @Override
     public boolean onDragEvent(DragEvent event) {
-        // L.e("MultilevelMenu: onDragEvent - " + event);
+        L.e("MultilevelMenu: onDragEvent - " + event);
         switch (event.getAction()) {
             case DragEvent.ACTION_DRAG_STARTED:
                 if (DragUtils.isDragForMe(event.getClipDescription().getLabel())) {
-                    // 忽略系统设置 强制震动反馈
-                    performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                     showMenuItem(mVerticalMenu);
                     showMenuItem(mHorizontalMenu);
                     return true;
                 } else {
                     return false;
                 }
+            case DragEvent.ACTION_DRAG_ENTERED:
+                // 忽略系统设置 强制震动反馈
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                break;
+            case DragEvent.ACTION_DROP:
+                if (mMode == MODE_B && menuCloseFlag) {
+                    for (int i = 0; i < getChildCount(); i++) {
+                        getChildAt(i).setVisibility(GONE);
+                    }
+                    isMenuShow = false;
+                }
+                break;
             case DragEvent.ACTION_DRAG_ENDED:
                 mCurrTitle = "";
-                for (int i = 0; i < getChildCount(); i++) {
-                    getChildAt(i).setVisibility(GONE);
+                menuCloseFlag = false;
+                if (mMode == MODE_A) {
+                    for (int i = 0; i < getChildCount(); i++) {
+                        getChildAt(i).setVisibility(GONE);
+                    }
+                    isMenuShow = false;
+                }
+                return true;
+            case DragEvent.ACTION_DRAG_LOCATION:
+                if (mMode == MODE_B && menuCloseFlag) {
+                    double distance = Math.sqrt(Math.pow(mWidth - mOriginMargin - mOriginRadius - event.getX(), 2)
+                            + Math.pow(mHeight - mOriginMargin - mOriginRadius - event.getY(), 2));
+                    if (distance > mOriginRadius) {
+                        menuCloseFlag = false;
+                    }
                 }
                 return true;
         }
@@ -287,6 +323,7 @@ public class MultilevelMenu extends ViewGroup {
             MenuItem menuItem = menu.getItem(i);
             if (menuItem.isVisible()) {
                 ItemView itemView = new ItemView(getContext());
+                itemView.setMode(mMode);
                 itemView.setId(menuItem.getItemId());
                 itemView.setBackground(buildMenuItemBackground());
                 itemView.setElevation(mMenuItemElevation);

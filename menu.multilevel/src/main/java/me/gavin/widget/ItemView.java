@@ -1,9 +1,11 @@
 package me.gavin.widget;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.DragEvent;
 import android.view.HapticFeedbackConstants;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.widget.ImageView;
 
 import me.gavin.util.DragUtils;
@@ -21,6 +23,7 @@ public class ItemView extends ImageView {
     private MenuItem mMenuItem;
     private int mLevel;
     private int mOrientation;
+    private int mMode;
     private Callback mCallback;
 
     public ItemView(Context context) {
@@ -48,8 +51,25 @@ public class ItemView extends ImageView {
         return mLevel;
     }
 
+    public void setMode(int mode) {
+        this.mMode = mode;
+    }
+
     public void setCallback(Callback mCallback) {
         this.mCallback = mCallback;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN && mMode == MultilevelMenu.MODE_B) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                startDragAndDrop(DragUtils.getClipData(), new DragShadowBuilder(), null, 0);
+            } else {
+                startDrag(DragUtils.getClipData(), new DragShadowBuilder(), null, 0);
+            }
+            return true;
+        }
+        return super.onTouchEvent(event);
     }
 
     @Override
