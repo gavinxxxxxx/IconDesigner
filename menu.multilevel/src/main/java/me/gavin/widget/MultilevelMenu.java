@@ -242,14 +242,13 @@ public class MultilevelMenu extends ViewGroup {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             double distance = Math.sqrt(Math.pow(mWidth - mOriginMargin - mOriginRadius - event.getX(), 2)
                     + Math.pow(mHeight - mOriginMargin - mOriginRadius - event.getY(), 2));
-            if (mMode == MODE_A && distance <= mOriginRadius
-                    || mMode == MODE_B && (distance <= mOriginRadius || isMenuShow)) {
+            if (distance <= mOriginRadius) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     startDragAndDrop(DragUtils.getClipData(), new DragShadowBuilder(), null, 0);
                 } else {
                     startDrag(DragUtils.getClipData(), new DragShadowBuilder(), null, 0);
                 }
-                menuCloseFlag = isMenuShow && distance <= mOriginRadius;
+                menuCloseFlag = isMenuShow;
                 isMenuShow = true;
                 return true;
             }
@@ -259,7 +258,6 @@ public class MultilevelMenu extends ViewGroup {
 
     @Override
     public boolean onDragEvent(DragEvent event) {
-        L.e("MultilevelMenu: onDragEvent - " + event);
         switch (event.getAction()) {
             case DragEvent.ACTION_DRAG_STARTED:
                 if (DragUtils.isDragForMe(event.getClipDescription().getLabel())) {
