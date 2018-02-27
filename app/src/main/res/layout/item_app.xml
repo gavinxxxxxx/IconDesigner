@@ -24,7 +24,7 @@
             android:layout_height="48dp"
             android:src="@{item.drawable}"
             tools:ignore="contentDescription"
-            tools:src="@mipmap/a" />
+            tools:src="@mipmap/c" />
 
         <TextView
             android:id="@+id/textView"
