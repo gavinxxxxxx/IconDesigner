@@ -152,6 +152,12 @@ class Utils {
         return path;
     }
 
+    static void setBgShadowLayer(Paint bgLayerPaint, int size, int bgColor) {
+        bgLayerPaint.setShadowLayer(size * Icon.BG_SL_RATIO, 0,
+                DisplayUtil.dp2px(size * Icon.BG_SL_RATIO / 4f),
+                (bgColor >>> 24) * 0x50 / 0xFF << 24);
+    }
+
     static Bitmap getShadow(@NonNull Bitmap mIconBitmap, int mSize, float length, @NonNull Path mBgPath, boolean preview) {
         Bitmap mShadowBitmap = Bitmap.createBitmap(mSize, mSize, Bitmap.Config.ARGB_8888);
         Canvas shadowCanvas = new Canvas(mShadowBitmap);
@@ -254,8 +260,7 @@ class Utils {
 
         // 背景阴影画笔
         Paint mBgLayerPaint2 = new Paint(mBgLayerPaint);
-        mBgLayerPaint2.setShadowLayer(size * Icon.BG_SL_RATIO, 0,
-                DisplayUtil.dp2px(size * Icon.BG_SL_RATIO / 4f), 0x50000000);
+        Utils.setBgShadowLayer(mBgLayerPaint2, size, mIcon.bgColor);
         // 画背景阴影
         canvas.drawPath(mBgLayerPath, mBgLayerPaint2);
         // 画背景

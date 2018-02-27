@@ -16,7 +16,6 @@ import java.io.IOException;
 
 import me.gavin.svg.model.SVG;
 import me.gavin.util.CacheHelper;
-import me.gavin.util.DisplayUtil;
 
 /**
  * PreviewView
@@ -81,8 +80,7 @@ public class PreviewView extends View {
         // 取最大正方形
         mSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
         setMeasuredDimension(mSize, mSize);
-        mBgLayerPaint.setShadowLayer(mSize * Icon.BG_SL_RATIO, 0,
-                DisplayUtil.dp2px(mSize * Icon.BG_SL_RATIO / 4f), 0x50000000);
+        Utils.setBgShadowLayer(mBgLayerPaint, mSize, mIcon.bgColor);
         if (mSrcSVG != null && mSize > 0) {
             mBgPath = Utils.getBgPath(mIcon, mSize);
             mBgLayerPath = Utils.getBgLayerPath(mBgPath, mSize);
@@ -199,6 +197,7 @@ public class PreviewView extends View {
         this.mIcon.bgColor = color;
         mBgPaint.setColor(color == null ? 0 : color);
         mEarPaint.setColor(Utils.getEarColor(mIcon.bgColor));
+        Utils.setBgShadowLayer(mBgLayerPaint, mSize, mIcon.bgColor);
         invalidate();
     }
 
