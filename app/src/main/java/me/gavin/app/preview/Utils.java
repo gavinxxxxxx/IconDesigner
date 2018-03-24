@@ -291,7 +291,7 @@ class Utils {
         mShadowBitmap.recycle();
 
         // 狗耳
-        if (mIcon.effectEar) {
+        if (mIcon.bgShape != 1 && mIcon.effectEar) {
             Path mEarPath = Utils.getEarPath(mBgPath, size);
             Bitmap mEarShadow = Utils.getEarShadow(mEarPath, size, mBgPath, false);
             canvas.drawBitmap(mEarShadow, 0, 0, mShadowPaint);

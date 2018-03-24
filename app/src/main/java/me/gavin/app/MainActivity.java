@@ -402,7 +402,8 @@ public class MainActivity extends AppCompatActivity {
                 .doOnSubscribe(mCompositeDisposable::add)
                 .subscribe(uri -> {
                     if (isSend) {
-                        ShareCompat.IntentBuilder builder = ShareCompat.IntentBuilder
+                        ShareCompat.IntentBuilder builder = ShareCompat
+                                .IntentBuilder
                                 .from(this)
                                 .setChooserTitle(R.string.send)
                                 .setType("image/*");
