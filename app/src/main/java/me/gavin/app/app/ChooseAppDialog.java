@@ -64,7 +64,8 @@ public class ChooseAppDialog extends BottomSheetDialog {
         AdHelper.loadGoogle(mBinding.container, AdHelper.UNIT_ID);
 
         PackageManager pm = getContext().getPackageManager();
-        Observable.fromIterable(pm.queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0))
+        Observable.fromIterable(pm.queryIntentActivities(new Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_LAUNCHER), 0))
                 .map(resolve -> AppInfo.from(pm, resolve.activityInfo))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
