@@ -3,6 +3,7 @@ package me.gavin.app;
 import android.app.Application;
 
 import me.gavin.util.AdHelper;
+import me.gavin.util.CrashHandler;
 
 /**
  * Application
@@ -16,7 +17,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        // CrashHandler.getInstance().init(this);
+        CrashHandler.get().init();
         mApp = this;
         AdHelper.initGoogle(this);
     }
@@ -24,5 +25,4 @@ public class App extends Application {
     public static App get() {
         return mApp;
     }
-
 }

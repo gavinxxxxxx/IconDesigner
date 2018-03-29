@@ -6,124 +6,82 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Process;
-import android.os.SystemClock;
+import android.text.TextUtils;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
-public class CrashHandler implements Thread.UncaughtExceptionHandler {
+import me.gavin.app.App;
 
-    //文件夹目录
-    private static final String PATH = Environment.getExternalStorageDirectory().getPath() + "/gavin/log/";
-    //文件名
-    private static final String FILE_NAME = "crash";
-    //文件名后缀
-    private static final String FILE_NAME_SUFFIX = ".trace";
-    //上下文
-    private Context mContext;
+/**
+ * 全局异常捕获工具
+ *
+ * @author gavin.xiong 2018/3/29
+ */
+public final class CrashHandler implements Thread.UncaughtExceptionHandler {
 
-    //单例模式
-    private static CrashHandler sInstance = new CrashHandler();
-
-    private CrashHandler() {
+    public static CrashHandler get() {
+        return Holder.INSTANCE;
     }
 
-    public static CrashHandler getInstance() {
-        return sInstance;
+    private static final class Holder {
+        private static CrashHandler INSTANCE = new CrashHandler();
     }
 
-    /**
-     * 初始化方法
-     *
-     * @param context
-     */
-    public void init(Context context) {
-        //将当前实例设为系统默认的异常处理器
+    public void init() {
         Thread.setDefaultUncaughtExceptionHandler(this);
-        //获取Context，方便内部使用
-        mContext = context.getApplicationContext();
     }
 
-    /**
-     * 捕获异常回掉
-     *
-     * @param thread 当前线程
-     * @param ex     异常信息
-     */
     @Override
-    public void uncaughtException(Thread thread, Throwable ex) {
-        //导出异常信息到SD卡
-        dumpExceptionToSDCard(ex);
-        //上传异常信息到服务器
-        uploadExceptionToServer(ex);
-        //延时1秒杀死进程
-        SystemClock.sleep(2000);
+    public void uncaughtException(Thread thread, Throwable t) {
+        printException2SDCard(t);
+        // TODO: 2018/3/29  上传异常信息到服务器 & 延时杀死进程
+        // SystemClock.sleep(2000);
         Process.killProcess(Process.myPid());
+        System.exit(1);
     }
 
-    /**
-     * 导出异常信息到SD卡
-     *
-     * @param ex
-     */
-    private void dumpExceptionToSDCard(Throwable ex) {
-        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+    private void printException2SDCard(Throwable t) {
+        String parent = getLogDir(App.get());
+        if (TextUtils.isEmpty(parent)) {
             return;
         }
-        //创建文件夹
-        File dir = new File(PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        //获取当前时间
-        long current = System.currentTimeMillis();
-        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(current));
-        //以当前时间创建log文件
-        File file = new File(PATH + FILE_NAME + time + FILE_NAME_SUFFIX);
-        try {
-            //输出流操作
-            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
-            //导出手机信息和异常信息
-            PackageManager pm = mContext.getPackageManager();
-            PackageInfo pi = pm.getPackageInfo(mContext.getPackageName(), PackageManager.GET_ACTIVITIES);
-            pw.println("异常时间：" + time);
-            pw.println("应用版本：" + pi.versionName);
-            pw.println("应用版本号：" + pi.versionCode);
-            pw.println("android版本号：" + Build.VERSION.RELEASE);
-            pw.println("android版本号API：" + Build.VERSION.SDK_INT);
-            pw.println("手机制造商:" + Build.MANUFACTURER);
+        Date curr = new Date();
+        String path = String.format(Locale.getDefault(), "%1$s/CRASH_%2$tY.%2$tm.%2$td_%2$tH.%2$tM.%2$tS.trace", parent, curr);
+        File file = new File(path);
+        try (PrintWriter pw = new PrintWriter(new FileWriter(file))) {
+            PackageManager pm = App.get().getPackageManager();
+            PackageInfo info = pm.getPackageInfo(App.get().getPackageName(), PackageManager.GET_ACTIVITIES);
+            pw.println(String.format(Locale.getDefault(), "异常时间：%1$tF %1$tT", curr));
+            pw.println("应用版本：" + info.versionName);
+            pw.println("应用版本号：" + info.versionCode);
+            pw.println("Android版本：" + Build.VERSION.RELEASE);
+            pw.println("Android版本号：" + Build.VERSION.SDK_INT);
+            pw.println("手机制造商：" + Build.MANUFACTURER);
             pw.println("手机型号：" + Build.MODEL);
-            ex.printStackTrace(pw);
-
-            Throwable cause = ex.getCause();
+            t.printStackTrace(pw);
+            Throwable cause = t.getCause();
             while (cause != null) {
                 cause.printStackTrace(pw);
                 cause = cause.getCause();
             }
-
-            //关闭输出流
-            pw.close();
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 
     /**
-     * 上传异常信息到服务器
-     *
-     * @param ex
+     * 获取日志文件夹 - /storage/sdcard0/Android/data/com.example.dir/files/log
      */
-    private void uploadExceptionToServer(Throwable ex) {
-//        Error error = new Error(ex.getMessage());
-//        error.save(new SaveListener<String>() {
-//            @Override
-//            public void done(String objectId, BmobException e) {
-//
-//            }
-//        });
+    private String getLogDir(Context context) {
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
+                && context.getExternalFilesDir("log") != null) {
+            return context.getExternalFilesDir("log").getPath();
+        } else {
+            return null;
+        }
     }
 }
