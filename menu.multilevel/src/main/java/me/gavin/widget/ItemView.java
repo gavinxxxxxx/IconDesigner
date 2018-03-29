@@ -84,7 +84,7 @@ public class ItemView extends ImageView {
             case DragEvent.ACTION_DRAG_ENTERED:
                 // selected
                 if (getVisibility() == VISIBLE) {
-                    performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                    performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                     if (mCallback != null) {
                         mCallback.onEntered(this, mMenuItem);
                     }

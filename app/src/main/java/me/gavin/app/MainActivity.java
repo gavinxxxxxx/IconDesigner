@@ -425,5 +425,4 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }, throwable -> Snackbar.make(mBinding.pre, throwable.getMessage(), Snackbar.LENGTH_LONG).show());
     }
-
 }

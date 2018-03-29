@@ -190,6 +190,7 @@ public class MultilevelMenu extends ViewGroup {
                 mOriginOutlineRect.right - mOriginPadding,
                 mOriginOutlineRect.bottom - mOriginPadding);
 
+        removeAllViews();
         layoutMenu(mVerticalMenu, mOriginOutlineRect.centerX(), mOriginOutlineRect.centerY() - mOriginRadius + mMenuItemRadius, ItemView.VERTICAL, 0);
         layoutMenu(mHorizontalMenu, mOriginOutlineRect.centerX() - mOriginRadius + mMenuItemRadius, mOriginOutlineRect.centerY(), ItemView.HORIZONTAL, 0);
 
@@ -269,7 +270,7 @@ public class MultilevelMenu extends ViewGroup {
                 }
             case DragEvent.ACTION_DRAG_ENTERED:
                 // 忽略系统设置 强制震动反馈
-                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                 break;
             case DragEvent.ACTION_DROP:
                 if (mMode == MODE_B && menuCloseFlag) {

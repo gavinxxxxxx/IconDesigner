@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">质感图标生成器</string>
+    <string name="app_name">Icon Designer</string>
 
     <string name="icon">图标</string>
     <string name="icon_shape">图标形状</string>
