@@ -31,6 +31,9 @@ public class AppInfoAdapter extends RecyclerAdapter<AppInfo, ItemAppBinding> {
     protected void onBind(RecyclerHolder<ItemAppBinding> holder, AppInfo appInfo, int position) {
         holder.binding.setItem(appInfo);
         holder.binding.executePendingBindings();
+
+        holder.binding.imageView.setImageDrawable(appInfo.getDrawable(mContext));
+
         holder.binding.item.setOnClickListener(v -> {
             if (callback != null) {
                 callback.accept(appInfo);

@@ -22,7 +22,6 @@
             android:id="@+id/imageView"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@{item.drawable}"
             tools:ignore="contentDescription"
             tools:src="@mipmap/c" />
 

@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.icon_shape_app:
                     new ChooseAppDialog(this, appInfo
-                            -> mBinding.pre.setDrawable(appInfo.drawable)).show();
+                            -> mBinding.pre.setDrawable(appInfo.getDrawable(this))).show();
                     break;
                 case R.id.icon_shape_image:
                     startActivityForResult(new Intent(Intent.ACTION_PICK,

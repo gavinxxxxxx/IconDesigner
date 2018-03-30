@@ -1,6 +1,7 @@
 package me.gavin.app.app;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -11,6 +12,7 @@ import com.github.stuxuhai.jpinyin.PinyinException;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
 
+import java.lang.ref.WeakReference;
 import java.util.UUID;
 
 /**
@@ -28,7 +30,7 @@ public class AppInfo {
     public String labelPinyin;
     public String sPinyin;
 
-    public Drawable drawable;
+    private WeakReference<Drawable> drawable;
 
     @Nullable
     public static AppInfo from(PackageManager packageManager, ActivityInfo activityInfo) {
@@ -54,9 +56,24 @@ public class AppInfo {
             e.printStackTrace();
         }
 
-        drawable = activityInfo.loadIcon(pm);
+        drawable = new WeakReference<>(activityInfo.loadIcon(pm));
 
         return true;
+    }
+
+    public Drawable getDrawable(Context context) {
+        if (drawable.get() != null) {
+            return drawable.get();
+        } else {
+            try {
+                Drawable icon = context.getPackageManager()
+                        .getActivityIcon(new ComponentName(packageName, className));
+                drawable = new WeakReference<>(icon);
+                return drawable.get();
+            } catch (PackageManager.NameNotFoundException e) {
+                return null;
+            }
+        }
     }
 
     public Intent getIntent() {
